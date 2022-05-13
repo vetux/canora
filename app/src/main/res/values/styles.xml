@@ -1,0 +1,248 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Application Themes -->
+    <style name="Default" parent="MarineBlue"/>
+
+    <style name="Base" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Main Styling Attributes -->
+        <item name="colorPrimary">?colorDebugUnset</item>
+        <item name="colorPrimaryAlt">?colorDebugUnset</item>
+        <item name="colorSecondary">?colorDebugUnset</item>
+        <item name="colorSecondary_20">?colorDebugUnset</item>
+        <item name="colorSecondary_60">?colorDebugUnset</item>
+        <item name="colorSecondaryAlt">?colorDebugUnset</item>
+
+        <item name="onColorPrimary">?colorDebugUnset</item>
+        <item name="onColorPrimary_20">?colorDebugUnset</item>
+        <item name="onColorPrimary_60">?colorDebugUnset</item>
+        <item name="onColorPrimaryAlt">?colorDebugUnset</item>
+        <item name="onColorSecondary">?colorDebugUnset</item>
+        <item name="onColorSecondaryAlt">?colorDebugUnset</item>
+
+        <item name="texToolbar">?colorDebugUnset</item>
+        <item name="texBackground">?colorDebugUnset</item>
+        <item name="texBackgroundContent">?colorDebugUnset</item>
+        <item name="texControl">?colorDebugUnset</item>
+        <item name="texControlFull">?colorDebugUnset</item>
+        <item name="texNotification">?colorDebugUnset</item>
+        <item name="texWindow">?colorDebugUnset</item>
+        <item name="texSurface">?colorDebugUnset</item>
+        <item name="texNavHeader">?colorDebugUnset</item>
+
+        <item name="onTexToolbar">?colorDebugUnset</item>
+        <item name="onTexBackground">?colorDebugUnset</item>
+        <item name="onTexBackgroundContent">?colorDebugUnset</item>
+        <item name="onTexBackgroundContent_20">?colorDebugUnset</item>
+        <item name="onTexBackgroundContent_60">?colorDebugUnset</item>
+        <item name="onTexControl">?colorDebugUnset</item>
+        <item name="onTexControlFull">?colorDebugUnset</item>
+        <item name="onTexNotification">?colorDebugUnset</item>
+        <item name="onTexSurface">?colorDebugUnset</item>
+        <item name="onTexNavHeader">?colorDebugUnset</item>
+
+        <!-- These tinting values affect the corresponding textures when a dynamic bitmap is applied. Such as album artwork etc. -->
+        <item name="tintTexControl">?colorDebugUnset</item>
+        <item name="tintTexControlFull">?colorDebugUnset</item>
+
+        <item name="scaleTexToolbar">@integer/ImageView_scaleType_fitXY</item>
+        <item name="scaleTexBackground">@integer/ImageView_scaleType_fitXY</item>
+        <item name="scaleTexBackgroundContent">@integer/ImageView_scaleType_fitXY</item>
+        <item name="scaleTexControl">@integer/ImageView_scaleType_fitXY</item>
+        <item name="scaleTexControlFull">@integer/ImageView_scaleType_fitXY</item>
+        <item name="scaleTexNotification">@integer/ImageView_scaleType_fitXY</item>
+        <item name="scaleTexWindow">@integer/ImageView_scaleType_fitXY</item>
+        <item name="scaleTexSurface">@integer/ImageView_scaleType_fitXY</item>
+        <item name="scaleTexNavHeader">@integer/ImageView_scaleType_fitXY</item>
+
+        <!-- Debug -->
+        <item name="colorDebugUnset">#ff00ff</item>
+
+        <item name="motionSceneMain">@xml/motionscene_main</item>
+
+        <!-- Android Attributes -->
+        <!-- ListView Overscroll -->
+        <item name="android:colorEdgeEffect">?colorDebugUnset</item>
+        <!-- Scrollbars -->
+        <item name="android:textColorSecondary">?colorDebugUnset</item>
+        <!-- Fast Scroll Thumb -->
+        <item name="colorAccent">?colorSecondary_60</item>
+
+        <!-- Override this to true for dark icons on status bar, only works on API 23+ -->
+        <item name="android:windowLightStatusBar" tools:targetApi="m">false</item>
+    </style>
+
+    <style name="MarineBlue" parent="Base">
+        <item name="colorPrimary">#0b243b</item>
+        <item name="colorPrimaryAlt">#001428</item>
+        <item name="colorSecondary">#00FFD9</item>
+        <item name="colorSecondary_20">#3300FFD9</item>
+        <item name="colorSecondary_60">#9900FFD9</item>
+        <item name="colorSecondaryAlt">#00D9FF</item>
+
+        <item name="onColorPrimary">#fff</item>
+        <item name="onColorPrimary_20">#33FFFFFF</item>
+        <item name="onColorPrimary_60">#99FFFFFF</item>
+        <item name="onColorPrimaryAlt">#fff</item>
+        <item name="onColorSecondary">#000</item>
+        <item name="onColorSecondaryAlt">#000</item>
+
+        <item name="texToolbar">?colorPrimaryAlt</item>
+        <item name="texBackground">?colorPrimary</item>
+        <item name="texBackgroundContent">@android:color/transparent</item>
+        <item name="texControl">?colorPrimaryAlt</item>
+        <item name="texControlFull">?colorPrimaryAlt</item>
+        <item name="texNotification">?colorDebugUnset</item>
+        <item name="texWindow">?colorPrimaryAlt</item>
+        <item name="texSurface">?colorPrimaryAlt</item>
+        <item name="texNavHeader">?colorPrimaryAlt</item>
+
+        <item name="onTexToolbar">#fff</item>
+        <item name="onTexBackground">#fff</item>
+        <item name="onTexBackgroundContent">#fff</item>
+        <item name="onTexBackgroundContent_20">#33FFFFFF</item>
+        <item name="onTexBackgroundContent_60">#99FFFFFF</item>
+        <item name="onTexControl">#fff</item>
+        <item name="onTexControlFull">#fff</item>
+        <item name="onTexNotification">?colorDebugUnset</item>
+        <item name="onTexSurface">#fff</item>
+        <item name="onTexNavHeader">#fff</item>
+
+        <item name="tintTexControl">#4D000000</item>
+        <item name="tintTexControlFull">#4D000000</item>
+
+        <item name="android:colorEdgeEffect">#fff</item>
+        <item name="android:textColorSecondary">#fff</item>
+    </style>
+
+    <style name="Camo" parent="Base">
+        <item name="colorPrimary">#2E2E2E</item>
+        <item name="colorPrimaryAlt">#1F1F1F</item>
+        <item name="colorSecondary">#00FFD9</item>
+        <item name="colorSecondary_20">#3300FFD9</item>
+        <item name="colorSecondary_60">#9900FFD9</item>
+        <item name="colorSecondaryAlt">#00D9FF</item>
+
+        <item name="onColorPrimary">#fff</item>
+        <item name="onColorPrimary_20">#33FFFFFF</item>
+        <item name="onColorPrimary_60">#99FFFFFF</item>
+        <item name="onColorPrimaryAlt">#fff</item>
+        <item name="onColorSecondary">#000</item>
+        <item name="onColorSecondaryAlt">#000</item>
+
+        <item name="texToolbar">@drawable/line_bottom</item>
+        <item name="texBackground">@drawable/texture_camo_1</item>
+        <item name="texBackgroundContent">@android:color/transparent</item>
+        <item name="texControl">@android:color/transparent</item>
+        <item name="texControlFull">@android:color/transparent</item>
+        <item name="texNotification">?colorDebugUnset</item>
+        <item name="texWindow">?colorPrimaryAlt</item>
+        <item name="texSurface">@drawable/texture_camo_2</item>
+        <item name="texNavHeader">@drawable/texture_camo_navheader</item>
+
+        <item name="scaleTexSurface">@integer/ImageView_scaleType_centerCrop</item>
+        <item name="scaleTexControlFull">@integer/ImageView_scaleType_fitStart</item>
+        <item name="scaleTexControl">@integer/ImageView_scaleType_fitEnd</item>
+
+        <item name="onTexToolbar">#fff</item>
+        <item name="onTexBackground">#fff</item>
+        <item name="onTexBackgroundContent">#fff</item>
+        <item name="onTexBackgroundContent_20">#33FFFFFF</item>
+        <item name="onTexBackgroundContent_60">#99FFFFFF</item>
+        <item name="onTexControl">#fff</item>
+        <item name="onTexControlFull">#fff</item>
+        <item name="onTexNotification">?colorDebugUnset</item>
+        <item name="onTexSurface">#fff</item>
+        <item name="onTexNavHeader">#fff</item>
+
+        <item name="tintTexControl">#4D000000</item>
+        <item name="tintTexControlFull">#4D000000</item>
+
+        <item name="android:colorEdgeEffect">#fff</item>
+        <item name="android:textColorSecondary">#fff</item>
+    </style>
+
+    <style name="Dark" parent="Base">
+        <item name="colorPrimary">#303030</item>
+        <item name="colorPrimaryAlt">#191919</item>
+        <item name="colorSecondary">#1beaea</item>
+        <item name="colorSecondary_20">#331BEAEA</item>
+        <item name="colorSecondary_60">#991BEAEA</item>
+        <item name="colorSecondaryAlt">#00A3A3</item>
+
+        <item name="onColorPrimary">#fff</item>
+        <item name="onColorPrimary_20">#33FFFFFF</item>
+        <item name="onColorPrimary_60">#99FFFFFF</item>
+        <item name="onColorPrimaryAlt">#fff</item>
+        <item name="onColorSecondary">#000</item>
+        <item name="onColorSecondaryAlt">#000</item>
+
+        <item name="texToolbar">?colorPrimaryAlt</item>
+        <item name="texBackground">?colorPrimary</item>
+        <item name="texBackgroundContent">@android:color/transparent</item>
+        <item name="texControl">?colorPrimaryAlt</item>
+        <item name="texControlFull">?colorPrimaryAlt</item>
+        <item name="texNotification">?colorDebugUnset</item>
+        <item name="texWindow">?colorPrimaryAlt</item>
+        <item name="texSurface">?colorPrimaryAlt</item>
+        <item name="texNavHeader">?colorPrimaryAlt</item>
+
+        <item name="onTexToolbar">#fff</item>
+        <item name="onTexBackground">#fff</item>
+        <item name="onTexBackgroundContent">#fff</item>
+        <item name="onTexBackgroundContent_20">#33FFFFFF</item>
+        <item name="onTexBackgroundContent_60">#99FFFFFF</item>
+        <item name="onTexControl">#fff</item>
+        <item name="onTexControlFull">#fff</item>
+        <item name="onTexNotification">#fff</item>
+        <item name="onTexSurface">#fff</item>
+        <item name="onTexNavHeader">#fff</item>
+
+        <item name="tintTexControl">#4D000000</item>
+        <item name="tintTexControlFull">#4D000000</item>
+
+        <item name="android:colorEdgeEffect">#fff</item>
+        <item name="android:textColorSecondary">#fff</item>
+    </style>
+
+    <style name="Light" parent="Base">
+        <item name="colorPrimary">#FFFFFF</item>
+        <item name="colorPrimaryAlt">#949494</item>
+        <item name="colorSecondary">#FFDF46</item>
+        <item name="colorSecondary_20">#33FFDF46</item>
+        <item name="colorSecondary_60">#99FFDF46</item>
+        <item name="colorSecondaryAlt">#FFDD00</item>
+
+        <item name="onColorPrimary">#000</item>
+        <item name="onColorPrimary_20">#33000000</item>
+        <item name="onColorPrimary_60">#99000000</item>
+        <item name="onColorPrimaryAlt">#000</item>
+        <item name="onColorSecondary">#000</item>
+        <item name="onColorSecondaryAlt">#000</item>
+
+        <item name="texToolbar">?colorPrimaryAlt</item>
+        <item name="texBackground">?colorPrimary</item>
+        <item name="texBackgroundContent">@android:color/transparent</item>
+        <item name="texControl">?colorPrimaryAlt</item>
+        <item name="texControlFull">?colorPrimaryAlt</item>
+        <item name="texNotification">?colorDebugUnset</item>
+        <item name="texWindow">?colorPrimaryAlt</item>
+        <item name="texSurface">#B9B9B9</item>
+        <item name="texNavHeader">?colorPrimaryAlt</item>
+
+        <item name="onTexToolbar">?onColorPrimary</item>
+        <item name="onTexBackground">?onColorPrimary</item>
+        <item name="onTexBackgroundContent">?onColorPrimary</item>
+        <item name="onTexBackgroundContent_20">?onColorPrimary_20</item>
+        <item name="onTexBackgroundContent_60">?onColorPrimary_60</item>
+        <item name="onTexControl">?onColorPrimaryAlt</item>
+        <item name="onTexControlFull">?onColorPrimary</item>
+        <item name="onTexNotification">?colorDebugUnset</item>
+        <item name="onTexSurface">?onColorPrimaryAlt</item>
+        <item name="onTexNavHeader">?onColorPrimaryAlt</item>
+
+        <item name="tintTexControl">#33FFFFFF</item>
+        <item name="tintTexControlFull">#33FFFFFF</item>
+
+        <item name="android:colorEdgeEffect">#696969</item>
+        <item name="android:textColorSecondary">#696969</item>
+    </style>
+</resources>

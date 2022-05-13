@@ -1,0 +1,193 @@
+<resources>
+    <!-- Naming convention: WHERE 0 WHAT-->
+    <string name="special0themename_marineblue" translatable="false">MarineBlue</string>
+    <string name="special0themename_camo" translatable="false">Camo</string>
+    <string name="special0themename_dark" translatable="false">Dark</string>
+    <string name="special0themename_light" translatable="false">Light</string>
+
+    <string name="special0app_name" translatable="false">Canora</string>
+
+    <string name="main_placeholder0search">Search…</string>
+    <string name="main_text0controlsBy">%1$s by %2$s</string>
+
+    <string name="main_notfound0noPlaylists">No Playlists found</string>
+    <string name="main_notfound0noTracks">No Tracks found</string>
+    <string name="main_notfound0noAlbums">No Albums found</string>
+    <string name="main_notfound0noArtists">No Artists found</string>
+    <string name="main_notfound0noGenres">No Genres found</string>
+    <string name="main_notfound0stringNotFound">%1$s not found</string>
+
+    <string name="main_toolbar_title0tracks">Tracks</string>
+    <string name="main_toolbar_title0playlists">Playlists</string>
+    <string name="main_toolbar_title0albums">Albums</string>
+    <string name="main_toolbar_title0artists">Artists</string>
+    <string name="main_toolbar_title0genres">Genres</string>
+
+    <string name="main_toolbar_title0subplaylist">Playlists / %1$s</string>
+    <string name="main_toolbar_title0subalbum">Albums / %1$s</string>
+    <string name="main_toolbar_title0subartist">Artists / %1$s</string>
+    <string name="main_toolbar_title0subgenre">Genres / %1$s</string>
+
+    <string name="main_toast_text0addedItems">Added %1$d items to %2$s</string>
+    <string name="main_toast_text0deletedItemsFrom">Deleted %1$d items from %2$s</string>
+    <string name="main_toast_text0deletedItems">Deleted %1$d items</string>
+    <string name="main_toast_text0deletedPlaylists">Deleted %1$d playlists</string>
+    <string name="main_toast_text0deletedPlaylist">Deleted %1$s</string>
+    <string name="main_toast_text0createdPlaylist">Created playlist %1$s with %2$d items</string>
+    <string name="main_toast_text0successWritingFile">Successfully wrote file:\n %1$s</string>
+    <string name="main_toast_text0errorWritingFile">Failed writing file:\n %1$s</string>
+    <string name="main_toast_text0editedPlaylist">Successfully edited Playlist</string>
+    <string name="main_toast_text0editPlaylistFailed">Failed to edit Playlist</string>
+    <string name="main_toast_text0failedPlayingFile">Error playing file:\n%1$s</string>
+
+    <string name="main_dialog_delfpl_title0deleteFilesFromPlaylist">Delete files from Playlist</string>
+    <string name="main_dialog_delfpl_text0deleteFilesFromPlaylistConfirmation">Do you really want to delete %1$d files
+        from the Playlist?
+    </string>
+
+    <string name="main_dialog_createpl_title0createPlaylist">Create Playlist</string>
+    <string name="main_dialog_createpl_placeholder0name">Name</string>
+    <string name="main_dialog_createpl_button0back">Back</string>
+
+    <string name="main_dialog_deletepl_title0deletePlaylists">Delete Playlists</string>
+    <string name="main_dialog_deletepl_text0deleteConfirmation">Do you really want to delete %1$d Playlists?</string>
+
+    <string name="main_dialog_sortopt_title0sortingOptions">Sorting Options</string>
+    <string name="main_dialog_sortopt_header0sortBy">Sort by</string>
+    <string name="main_dialog_sortopt_header0sortDirection">Sort direction</string>
+    <string name="main_dialog_sortopt_header0sortingTechnique">Sorting technique</string>
+    <string name="main_dialog_sortopt_spinner_item0title">Title</string>
+    <string name="main_dialog_sortopt_spinner_item0artist">Artist</string>
+    <string name="main_dialog_sortopt_spinner_item0upwards">Upwards</string>
+    <string name="main_dialog_sortopt_spinner_item0downwards">Downwards</string>
+    <string name="main_dialog_sortopt_spinner_item0alphabetic">Alphabetic</string>
+    <string name="main_dialog_sortopt_spinner_item0numeric">Numeric</string>
+
+    <string name="main_dialog_filteropt_title0searchOptions">Search Options</string>
+    <string name="main_dialog_filteropt_header0searchBy">Search by</string>
+    <string name="main_dialog_filteropt_spinner_item0title">Title</string>
+    <string name="main_dialog_filteropt_spinner_item0artist">Artist</string>
+    <string name="main_dialog_filteropt_spinner_item0titleArtist">Title / Artist</string>
+    <string name="main_dialog_filteropt_spinner_item0any">Any</string>
+
+    <string name="main_dialog_exit_title0closeCanora">Close Canora</string>
+    <string name="main_dialog_exit_text0exitConfirmation">Do you really want to quit Canora?</string>
+    <string name="main_dialog_exit_button0yes">Yes</string>
+    <string name="main_dialog_exit_button0no">No</string>
+    <string name="main_dialog_exit_button0minimize">Minimize</string>
+
+    <string name="main_dialog_yn_button0yes">Yes</string>
+    <string name="main_dialog_yn_button0no">No</string>
+
+    <string name="main_dialog_volume_header0volume">Volume</string>
+
+    <string name="main_dialog_error_title0error">Error</string>
+    <string name="main_dialog_error_text0permissionDenied">You denied permission to read external storage, thus Canora
+        cannot find your awesome songs.\n\nTo use the app please grant the requested permission.
+    </string>
+    <string name="main_dialog_error_text0screenSize">Your device does not meet the minimum requirements for the Screen
+        Size ( %1$d x %2$d ). Some of the apps functionality might not be working correctly.
+    </string>
+
+    <string name="main_dialog_warning_pl_title0warning">Warning</string>
+    <string name="main_dialog_warning_pl_text0playlistsWillChange">Playlists are still an experimental feature of
+        Canora, therefore you may experience issues.\n\nWith version 1.0 playlists will always be backwards compatible.
+        Before version 1.0 backwards compatibility may break with new features.
+    </string>
+
+    <string name="main_popup_context_item0select">Select</string>
+    <string name="main_popup_context_item0edit">Edit</string>
+    <string name="main_popup_context_item0delete">Delete</string>
+    <string name="main_popup_context_item0info">Info</string>
+
+    <string name="main_popup_options_item0settings">Settings</string>
+    <string name="main_popup_options_item0sort">Sort Options</string>
+    <string name="main_popup_options_item0filteroptions">Search Options</string>
+    <string name="main_popup_options_item0addTo">Add to…</string>
+    <string name="main_popup_options_item0select">Select</string>
+    <string name="main_popup_options_item0editplaylist">Edit Playlist</string>
+    <string name="main_popup_options_item0selectAll">Select all</string>
+    <string name="main_popup_options_item0deselectAll">Deselect all</string>
+    <string name="main_popup_options_item0cancelSelect">Cancel selection</string>
+    <string name="main_popup_options_item0delete">Delete</string>
+
+    <string name="main_popup_addto_prompt0addTo">Add to…</string>
+    <string name="main_popup_addto_item0newPlaylist">New Playlist</string>
+
+    <string name="main_navigation_header0audio">Audio</string>
+    <string name="main_navigation_item_title0comingSoon">Coming soon…</string>
+    <string name="main_navigation_item_title0tracks">Tracks</string>
+    <string name="main_navigation_item_title0playlists">Playlists</string>
+    <string name="main_navigation_item_title0albums">Albums</string>
+    <string name="main_navigation_item_title0artists">Artists</string>
+    <string name="main_navigation_item_title0genres">Genres</string>
+    <string name="main_navigation_item_title0settings">Settings</string>
+    <string name="main_navigation_item_title0store">Store</string>
+    <string name="main_navigation_item_title0rate">Rate this App</string>
+    <string name="main_navigation_item_title0appInfo">App info</string>
+
+    <string name="editor_audio_toolbar_title0edit">Edit %1$s</string>
+    <string name="editor_audio_header0title">Title</string>
+    <string name="editor_audio_header0artist">Artist</string>
+    <string name="editor_audio_header0album">Album</string>
+    <string name="editor_audio_header0genre">Genre</string>
+    <string name="editor_audio_header0filepath">Filepath</string>
+    <string name="editor_audio_menu_item0apply">Apply</string>
+    <string name="editor_audio_menu_item0delete">Delete</string>
+
+    <string name="editor_playlist_toolbar_title0editPlaylist">Edit %1$s</string>
+    <string name="editor_playlist_header0title">Title</string>
+    <string name="editor_playlist_menu_item0apply">Apply</string>
+    <string name="editor_playlist_menu_item0delete">Delete</string>
+    <string name="editor_playlist_toast_text0selectedImageTooLarge">Selected image is too large.\nMaximum size allowed:
+        %1$d MB
+    </string>
+    <string name="editor_playlist_dialog0processingimage">Processing image …</string>
+
+    <string name="loadingscreen_text0loadingData">Loading data</string>
+
+    <string name="iap_dialog_storeph_title0store">Store</string>
+    <string name="iap_dialog_storeph_text0comingSoon">Coming Soon!</string>
+    <string name="iap_dialog_requestPurchase_button0yes">Yes</string>
+    <string name="iap_dialog_requestPurchase_button0no">No</string>
+
+    <string name="settings_list_item_title0audioSettings">Audio Settings</string>
+    <string name="settings_list_item_subTitle0audioSettings">Volume, Equalizer, etc.</string>
+    <string name="settings_list_item_title0displaySettings">Display Settings</string>
+    <string name="settings_list_item_subTitle0displaySettings">Themes, Brightness, Animations, etc.</string>
+    <string name="settings_list_item_title0systemSettings">System Settings</string>
+    <string name="settings_list_item_subTitle0systemSettings">Developer Mode, etc.</string>
+
+    <string name="settings_toolbar_title0settings">Settings</string>
+    <string name="settings_toolbar_title0audioSettings">Audio Settings</string>
+    <string name="settings_toolbar_title0displaySettings">Display Settings</string>
+    <string name="settings_toolbar_title0systemSettings">System Settings</string>
+
+    <string name="settings_tab_title0themeSelection">Theme Selection</string>
+    <string name="settings_tab_title0other">Other</string>
+    <string name="settings_tab_title0general">General</string>
+    <string name="settings_tab_title0logs">Logs</string>
+
+    <string name="settings_header0volume">Volume</string>
+    <string name="settings_header0equalizer">Equalizer</string>
+    <string name="settings_header0equalizerPresets">Equalizer presets</string>
+    <string name="settings_header0customAnimations">Custom Animations</string>
+    <string name="settings_header0showAnimation">Show animations</string>
+    <string name="settings_header0glideAnimations">Glide Animations</string>
+    <string name="settings_header0developerMode">Developer Mode</string>
+    <string name="settings_text0equalizerNotSupported">Equalizer presets are not supported by your device.</string>
+    <string name="settings_text0playlistLog">%1$d Playlist/s using %2$.3f mb</string>
+    <string name="settings_text0settingsLog">%1$d modified settings</string>
+    <string name="settings_button0resetSettings">Reset Settings</string>
+
+    <string name="settings_dialog_settingsreset_title0warning">Warning</string>
+    <string name="settings_dialog_settingsreset_text0confirmReset">Do you really want to reset all app settings?
+    </string>
+
+    <string name="settings_dialog_warning_devmode0title">Warning</string>
+    <string name="settings_dialog_warning_devmode0text">The developer mode adds overlays and other functionality
+        intended for debugging.\n\nDo you really want to enable developer mode?
+    </string>
+
+    <string name="arrayadapter_audioplaylist_header0numberOfTracks">%1$d Tracks</string>
+</resources>

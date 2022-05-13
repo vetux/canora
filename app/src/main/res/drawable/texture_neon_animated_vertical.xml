@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animation-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:duration="3000"
+          android:drawable="@drawable/neon_gradient_start_vertical"/>
+
+    <item android:duration="3000"
+          android:drawable="@drawable/neon_gradient_center_vertical"/>
+
+    <item android:duration="3000"
+          android:drawable="@drawable/neon_gradient_end_vertical"/>
+</animation-list>

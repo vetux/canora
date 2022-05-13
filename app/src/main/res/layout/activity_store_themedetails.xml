@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+    <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            app:contentInsetEnd="0dp"
+            app:contentInsetStart="0dp"
+            android:background="?colorDebugUnset">
+    </androidx.appcompat.widget.Toolbar>
+    <RelativeLayout android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_below="@id/toolbar"
+                    android:background="?colorDebugUnset">
+        <ImageView android:id="@+id/themePreview"
+                   android:layout_width="300dp"
+                   android:layout_height="300dp"
+                   android:layout_centerHorizontal="true"
+                   android:background="?colorDebugUnset"
+                   android:scaleType="fitXY"
+                   android:layout_marginTop="20dp"/>
+        <TextView android:id="@+id/themeTitle"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:minWidth="100dp"
+                  android:text="TITLE"
+                  android:gravity="center"
+                  android:layout_alignStart="@id/themePreview"
+                  android:layout_alignBottom="@id/themePreview"
+                  android:padding="10dp"
+                  android:background="?colorDebugUnset"/>
+        <Button android:id="@+id/buyButton"
+                android:layout_width="250dp"
+                android:layout_height="80dp"
+                android:layout_centerHorizontal="true"
+                android:layout_below="@id/themePreview"
+                android:background="@drawable/background_buybutton"
+                android:text="TEXT"
+                android:textSize="18sp"
+                android:layout_marginTop="20dp"/>
+    </RelativeLayout>
+</RelativeLayout>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+    <attr name="colorPrimary" format="color"/>
+    <attr name="colorPrimaryAlt" format="color"/>
+    <attr name="colorSecondary" format="color"/>
+    <attr name="colorSecondary_20" format="color"/>
+    <attr name="colorSecondary_60" format="color"/>
+    <attr name="colorSecondaryAlt" format="color"/>
+
+    <attr name="onColorPrimary" format="color"/>
+    <attr name="onColorPrimary_20" format="color"/>
+    <attr name="onColorPrimary_60" format="color"/>
+    <attr name="onColorPrimaryAlt" format="color"/>
+    <attr name="onColorSecondary" format="color"/>
+    <attr name="onColorSecondaryAlt" format="color"/>
+
+    <attr name="texToolbar" format="reference|color"/>
+    <attr name="texBackground" format="reference|color"/>
+    <attr name="texBackgroundContent" format="reference|color"/>
+    <attr name="texControl" format="reference|color"/>
+    <attr name="texControlFull" format="reference|color"/>
+    <attr name="texNotification" format="reference|color"/>
+    <attr name="texWindow" format="reference|color"/>
+    <attr name="texSurface" format="reference|color"/>
+    <attr name="texNavHeader" format="reference|color"/>
+
+    <attr name="onTexToolbar" format="color"/>
+    <attr name="onTexBackground" format="color"/>
+    <attr name="onTexBackgroundContent" format="color"/>
+    <attr name="onTexBackgroundContent_20" format="color"/>
+    <attr name="onTexBackgroundContent_60" format="color"/>
+    <attr name="onTexControl" format="color"/>
+    <attr name="onTexControlFull" format="color"/>
+    <attr name="onTexNotification" format="color"/>
+    <attr name="onTexSurface" format="color"/>
+    <attr name="onTexNavHeader" format="color"/>
+
+    <attr name="tintTexControl" format="color"/>
+    <attr name="tintTexControlFull" format="color"/>
+
+    <attr name="scaleTexToolbar" format="integer"/>
+    <attr name="scaleTexBackground" format="integer"/>
+    <attr name="scaleTexBackgroundContent" format="integer"/>
+    <attr name="scaleTexControl" format="integer"/>
+    <attr name="scaleTexControlFull" format="integer"/>
+    <attr name="scaleTexNotification" format="integer"/>
+    <attr name="scaleTexWindow" format="integer"/>
+    <attr name="scaleTexSurface" format="integer"/>
+    <attr name="scaleTexNavHeader" format="integer"/>
+
+    <attr name="colorDebugUnset" format="color"/>
+
+    <attr name="motionSceneMain" format="reference"/>
+
+    <!-- Custom Widget Attributes -->
+    <declare-styleable name="CustomImageView">
+        <attr name="corners" format="float"/>
+        <attr name="ratioLock" format="boolean"/>
+        <attr name="automaticAnimation" format="boolean"/>
+    </declare-styleable>
+</resources>

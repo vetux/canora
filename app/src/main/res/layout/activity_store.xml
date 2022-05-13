@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/root"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="?colorDebugUnset">
+    <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            app:contentInsetEnd="0dp"
+            app:contentInsetStart="0dp"
+            android:background="?colorDebugUnset">
+    </androidx.appcompat.widget.Toolbar>
+    <RelativeLayout android:id="@+id/storeContent"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_below="@id/toolbar">
+        <com.google.android.material.tabs.TabLayout android:id="@+id/tabLayout"
+                                                    android:layout_width="match_parent"
+                                                    android:layout_height="wrap_content"
+                                                    android:background="?colorDebugUnset"
+                                                    app:tabTextColor="@color/tablayout_titlecolor"
+                                                    app:tabIndicatorColor="?colorDebugUnset"/>
+        <LinearLayout android:id="@+id/tabStore"
+                      android:layout_width="match_parent"
+                      android:layout_height="match_parent"
+                      android:orientation="vertical"
+                      android:layout_below="@id/tabLayout">
+            <View android:layout_width="match_parent"
+                  android:layout_height="2dp"
+                  android:background="?colorDebugUnset"/>
+            <RelativeLayout android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="?colorDebugUnset">
+                <ImageButton android:id="@+id/reloadButton"
+                             android:layout_width="match_parent"
+                             android:layout_height="match_parent"
+                             android:visibility="gone"
+                             android:layout_centerInParent="true"
+                             android:background="@null"
+                             android:src="@drawable/baseline_refresh_white_48dp"
+                             android:tint="?colorDebugUnset"/>
+                <GridView android:id="@+id/themeGridViewStore"
+                          android:layout_width="match_parent"
+                          android:layout_height="match_parent"
+                          android:numColumns="2"
+                          android:horizontalSpacing="2dp"
+                          android:verticalSpacing="2dp"
+                          android:paddingLeft="2dp"
+                          android:paddingRight="2dp"
+                          android:layout_margin="4dp"
+                          android:visibility="visible"
+                          android:listSelector="?colorDebugUnset"/>
+            </RelativeLayout>
+        </LinearLayout>
+        <LinearLayout android:id="@+id/tabPurchases"
+                      android:layout_width="match_parent"
+                      android:layout_height="match_parent"
+                      android:orientation="vertical"
+                      android:layout_below="@id/tabLayout"
+                      android:visibility="gone">
+            <View android:layout_width="match_parent"
+                  android:layout_height="2dp"
+                  android:background="?colorDebugUnset"/>
+            <RelativeLayout android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="?colorDebugUnset">
+                <GridView android:id="@+id/themeGridViewPurchases"
+                          android:layout_width="match_parent"
+                          android:layout_height="match_parent"
+                          android:numColumns="2"
+                          android:horizontalSpacing="2dp"
+                          android:verticalSpacing="2dp"
+                          android:paddingLeft="2dp"
+                          android:paddingRight="2dp"
+                          android:layout_margin="4dp"
+                          android:visibility="visible"
+                          android:listSelector="?colorDebugUnset"/>
+            </RelativeLayout>
+        </LinearLayout>
+    </RelativeLayout>
+    <RelativeLayout android:id="@+id/storeLoadingBar"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_below="@id/toolbar"
+                    android:visibility="gone">
+        <ProgressBar android:layout_width="50dp"
+                     android:layout_height="50dp"
+                     android:indeterminateTint="?colorDebugUnset"
+                     android:layout_centerInParent="true"/>
+    </RelativeLayout>
+</RelativeLayout>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:id="@+id/settings_tab_system_general"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical"
+              android:background="?colorPrimary"
+              android:visibility="visible">
+    <View android:layout_width="match_parent"
+          android:layout_height="2dp"
+          android:background="?onColorPrimary_20"/>
+    <RelativeLayout android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+        <Button android:id="@+id/buttonSettingsReset"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="@string/settings_button0resetSettings"
+                android:textColor="?onColorSecondary"
+                android:background="@drawable/button_background"
+                android:layout_margin="10dp"
+                android:maxLines="1"/>
+    </RelativeLayout>
+    <View android:layout_width="match_parent"
+          android:layout_height="2dp"
+          android:background="?onColorPrimary_20"/>
+    <RelativeLayout android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+        <TextView android:id="@+id/devModeTitle"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:text="@string/settings_header0developerMode"
+                  android:textColor="?onColorPrimary"
+                  android:layout_centerHorizontal="true"
+                  android:padding="10dp"
+                  android:maxLines="1"/>
+        <Switch android:id="@+id/devModeSwitch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/devModeTitle"
+                android:layout_centerHorizontal="true"
+                android:thumb="@drawable/switch_thumb"
+                android:track="@drawable/switch_track"
+                android:background="@null"/>
+    </RelativeLayout>
+</LinearLayout>

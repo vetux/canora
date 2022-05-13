@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:id="@+id/settings_tab_system_mediastore"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical"
+              android:background="?colorPrimary">
+    <View android:layout_width="match_parent"
+          android:layout_height="2dp"
+          android:background="?colorDebugUnset"/>
+    <RelativeLayout android:layout_width="match_parent"
+                    android:layout_height="100dp">
+        <Button android:id="@+id/mediastoreRefreshButton"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:text="Refresh Mediastore"
+                android:textColor="?onColorPrimaryAlt"
+                android:backgroundTint="?colorPrimaryAlt"/>
+        <ProgressBar android:id="@+id/mediastoreRefreshPB"
+                     android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+                     android:translationZ="100dp"
+                     android:layout_centerInParent="true"
+                     android:indeterminateTint="?colorSecondary"
+                     android:indeterminate="true"
+                     android:visibility="gone"/>
+    </RelativeLayout>
+</LinearLayout>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--Android SDK ImageView ScaleType values, which can be referenced in the styles to modify drawable scaling.-->
+    <integer name="ImageView_scaleType_matrix">0</integer>
+    <integer name="ImageView_scaleType_fitXY">1</integer>
+    <integer name="ImageView_scaleType_fitStart">2</integer>
+    <integer name="ImageView_scaleType_fitCenter">3</integer>
+    <integer name="ImageView_scaleType_fitEnd">4</integer>
+    <integer name="ImageView_scaleType_center">5</integer>
+    <integer name="ImageView_scaleType_centerCrop">6</integer>
+    <integer name="ImageView_scaleType_centerInside">7</integer>
+</resources>

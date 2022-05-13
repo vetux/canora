@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:tools="http://schemas.android.com/tools"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent">
+    <androidx.drawerlayout.widget.DrawerLayout android:id="@+id/drawerLayout"
+                                               android:layout_width="match_parent"
+                                               android:layout_height="match_parent"
+                                               android:fitsSystemWindows="false"
+                                               tools:openDrawer="start">
+        <include layout="@layout/activity_main_content"
+                 android:fitsSystemWindows="true"/>
+        <LinearLayout android:layout_width="280dp"
+                      android:layout_height="match_parent"
+                      android:layout_gravity="start"
+                      android:orientation="vertical"
+                      android:fitsSystemWindows="true">
+            <include layout="@layout/nav_header_main"/>
+            <ScrollView android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+                <include layout="@layout/nav_content_main"/>
+            </ScrollView>
+        </LinearLayout>
+    </androidx.drawerlayout.widget.DrawerLayout>
+    <RelativeLayout android:id="@+id/debugViews"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone">
+        <TextView android:id="@+id/debugTextFPS"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:text="FPS"
+                  android:textColor="#ff00ff"
+                  android:textSize="20sp"
+                  android:maxLines="1"
+                  android:layout_alignParentTop="true"
+                  android:layout_alignParentEnd="true"/>
+        <TextView android:id="@+id/debugTextMemory"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_below="@id/debugTextFPS"
+                  android:text="MEM"
+                  android:textColor="#ff00ff"
+                  android:textSize="20sp"
+                  android:maxLines="1"
+                  android:layout_alignParentTop="true"
+                  android:layout_alignParentStart="true"/>
+    </RelativeLayout>
+</FrameLayout>

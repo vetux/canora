@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:id="@+id/settings_tab_display_misc"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical"
+              android:background="?colorPrimary">
+    <View android:layout_width="match_parent"
+          android:layout_height="2dp"
+          android:background="?onColorPrimary_20"/>
+    <RelativeLayout android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp">
+        <TextView android:id="@+id/customAnimationTitle"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:text="@string/settings_header0customAnimations"
+                  android:textColor="?onColorPrimary"
+                  android:layout_centerHorizontal="true"
+                  android:maxLines="1"/>
+        <RelativeLayout android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/customAnimationTitle"
+                        android:layout_centerHorizontal="true"
+                        android:layout_margin="5dp">
+            <View android:id="@+id/centerCustomAnimation"
+                  android:layout_width="0dp"
+                  android:layout_height="0dp"
+                  android:layout_centerHorizontal="true"/>
+            <TextView android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:text="@string/settings_header0showAnimation"
+                      android:textColor="?onColorPrimary"
+                      android:layout_toStartOf="@id/centerCustomAnimation"
+                      android:layout_centerVertical="true"
+                      android:maxLines="1"/>
+            <CheckBox android:id="@+id/animationsCheckbox"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_toEndOf="@id/centerCustomAnimation"
+                      android:layout_centerVertical="true"
+                      android:layout_marginStart="40dp"
+                      android:buttonTint="?colorSecondary"/>
+        </RelativeLayout>
+    </RelativeLayout>
+    <View android:layout_width="match_parent"
+          android:layout_height="2dp"
+          android:background="?onColorPrimary_20"/>
+</LinearLayout>
