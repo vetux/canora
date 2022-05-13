@@ -858,10 +858,6 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
                 view.setNavigationMax(false);
                 view.startSettings();
                 break;
-            case STORE:
-                view.setNavigationMax(false);
-                view.startStore();
-                break;
             case RATE:
                 view.setNavigationMax(false);
                 view.startRate();

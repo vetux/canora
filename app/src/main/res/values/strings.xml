@@ -114,7 +114,7 @@
     <string name="main_popup_addto_prompt0addTo">Add to…</string>
     <string name="main_popup_addto_item0newPlaylist">New Playlist</string>
 
-    <string name="main_navigation_header0audio">Audio</string>
+    <string name="main_navigation_header0device">Device</string>
     <string name="main_navigation_item_title0comingSoon">Coming soon…</string>
     <string name="main_navigation_item_title0tracks">Tracks</string>
     <string name="main_navigation_item_title0playlists">Playlists</string>

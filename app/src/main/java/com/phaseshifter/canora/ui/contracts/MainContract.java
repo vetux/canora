@@ -107,8 +107,6 @@ public interface MainContract {
 
         void startSettings();
 
-        void startStore();
-
         void startInfo();
 
         void startRate();

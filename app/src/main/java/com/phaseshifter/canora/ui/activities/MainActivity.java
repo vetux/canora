@@ -440,9 +440,6 @@ public class MainActivity extends Activity implements MainContract.View,
             case R.id.nav_button_settings:
                 presenter.onNavigationClick(NavigationItem.SETTINGS);
                 break;
-            case R.id.nav_button_store:
-                presenter.onNavigationClick(NavigationItem.STORE);
-                break;
             case R.id.nav_button_rate:
                 presenter.onNavigationClick(NavigationItem.RATE);
                 break;
@@ -517,9 +514,9 @@ public class MainActivity extends Activity implements MainContract.View,
             DrawerLayout view = findViewById(R.id.drawerLayout);
             if (view != null) {
                 if (navigationMax) {
-                    view.openDrawer(Gravity.START);
+                    view.openDrawer(GravityCompat.START);
                 } else {
-                    view.closeDrawer(Gravity.START);
+                    view.closeDrawer(GravityCompat.START);
                 }
             }
         });
@@ -895,18 +892,6 @@ public class MainActivity extends Activity implements MainContract.View,
     public void startSettings() {
         runOnUiThread(() -> {
             startActivity(new Intent(this, SettingsActivity.class));
-        });
-    }
-
-    @Override
-    public void startStore() {
-        runOnUiThread(() -> {
-            new AlertDialog.Builder(this)
-                    .setTitle(R.string.iap_dialog_storeph_title0store)
-                    .setMessage(R.string.iap_dialog_storeph_text0comingSoon)
-                    .setPositiveButton(android.R.string.ok, null)
-                    .create()
-                    .show();
         });
     }
 

@@ -8,7 +8,6 @@ public enum NavigationItem {
     GENRES,
 
     SETTINGS,
-    STORE,
     RATE,
     INFO
 }
