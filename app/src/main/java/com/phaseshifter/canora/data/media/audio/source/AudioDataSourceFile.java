@@ -2,6 +2,8 @@ package com.phaseshifter.canora.data.media.audio.source;
 
 import android.content.Context;
 import android.net.Uri;
+
+import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.upstream.DataSource;
@@ -38,7 +40,7 @@ public class AudioDataSourceFile implements AudioDataSource, Serializable {
                     return new FileDataSource();
                 }
             };
-            return new ProgressiveMediaSource.Factory(factory).createMediaSource(Uri.fromFile(targetFile));
+            return new ProgressiveMediaSource.Factory(factory).createMediaSource(MediaItem.fromUri(Uri.fromFile(targetFile)));
         }
     }
 

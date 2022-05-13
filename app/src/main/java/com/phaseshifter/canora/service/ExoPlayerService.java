@@ -15,6 +15,10 @@ import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.os.*;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
+
+import com.google.android.exoplayer2.PlaybackException;
 import com.phaseshifter.canora.R;
 import com.phaseshifter.canora.data.media.audio.AudioData;
 import com.phaseshifter.canora.service.mediasession.MediaSessionCallback;
@@ -65,7 +69,7 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
 
     private Handler mainThread;
 
-    private SimpleExoPlayer exoPlayer;
+    private ExoPlayer exoPlayer;
 
     private BroadcastReceiver brcv;
     private MediaSession mediaSession;
@@ -114,8 +118,8 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
         mediaSession.setCallback(new MediaSessionCallback(this));
         mediaSession.setActive(true);
         mainThread = new Handler(Looper.getMainLooper());
-        exoPlayer = new SimpleExoPlayer.Builder(this).build();
-        exoPlayer.addListener(new Player.EventListener() {
+        exoPlayer = new ExoPlayer.Builder(getApplicationContext()).build();
+        exoPlayer.addListener(new Player.Listener() {
             @Override
             public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
                 Log.v(LOG_TAG, "onPlayerStateChanged " + playWhenReady + " " + playbackState);
@@ -138,7 +142,7 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
             }
 
             @Override
-            public void onPlayerError(ExoPlaybackException error) {
+            public void onPlayerError(@NonNull PlaybackException error) {
                 Log.v(LOG_TAG, "onPlayerError " + error);
                 error.printStackTrace();
                 broadcastError();
@@ -395,32 +399,32 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
             notificationBuilder = new Notification.Builder(this, NOTIFICATION_CHANNEL_ID)
                     .addAction(new Notification.Action.Builder(
                             Icon.createWithResource(this, R.drawable.main_btnprev),
-                            "prev", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_PREV), 0)
+                            "prev", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_PREV), PendingIntent.FLAG_IMMUTABLE)
                     ).build());
             if (playing) {
                 notificationBuilder.addAction(new Notification.Action.Builder(
                         Icon.createWithResource(this, R.drawable.main_btnpause),
-                        "pause", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_PLAYBACK_PAUSE), 0))
+                        "pause", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_PLAYBACK_PAUSE), PendingIntent.FLAG_IMMUTABLE))
                         .build());
             } else {
                 notificationBuilder.addAction(new Notification.Action.Builder(
                         Icon.createWithResource(this, R.drawable.main_btnplay),
-                        "play", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_PLAYBACK_RESUME), 0))
+                        "play", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_PLAYBACK_RESUME), PendingIntent.FLAG_IMMUTABLE))
                         .build());
             }
             notificationBuilder.addAction(new Notification.Action.Builder(
                     Icon.createWithResource(this, R.drawable.main_btnnext),
-                    "next", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_NEXT), 0))
+                    "next", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_NEXT), PendingIntent.FLAG_IMMUTABLE))
                     .build());
         } else {
             notificationBuilder = new Notification.Builder(this)
-                    .addAction(R.drawable.main_btnprev, "prev", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_PREV), 0));
+                    .addAction(R.drawable.main_btnprev, "prev", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_PREV), PendingIntent.FLAG_IMMUTABLE));
             if (playing) {
-                notificationBuilder.addAction(R.drawable.main_btnpause, "pause", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_PLAYBACK_PAUSE), 0));
+                notificationBuilder.addAction(R.drawable.main_btnpause, "pause", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_PLAYBACK_PAUSE), PendingIntent.FLAG_IMMUTABLE));
             } else {
-                notificationBuilder.addAction(R.drawable.main_btnplay, "play", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_PLAYBACK_RESUME), 0));
+                notificationBuilder.addAction(R.drawable.main_btnplay, "play", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_PLAYBACK_RESUME), PendingIntent.FLAG_IMMUTABLE));
             }
-            notificationBuilder.addAction(R.drawable.main_btnnext, "next", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_NEXT), 0));
+            notificationBuilder.addAction(R.drawable.main_btnnext, "next", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_NEXT), PendingIntent.FLAG_IMMUTABLE));
         }
 
         boolean isHuaweiLollipop = (android.os.Build.VERSION.SDK_INT == Build.VERSION_CODES.LOLLIPOP_MR1 || android.os.Build.VERSION.SDK_INT == Build.VERSION_CODES.LOLLIPOP)
@@ -471,8 +475,8 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
         Intent resultIntent = new Intent(this, MainActivity.class);
         resultIntent.setAction("android.intent.action.MAIN");
         resultIntent.addCategory("android.intent.category.LAUNCHER");
-        notificationBuilder.setContentIntent(PendingIntent.getActivity(this, 0, resultIntent, PendingIntent.FLAG_CANCEL_CURRENT));
-        notificationBuilder.setDeleteIntent(PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_QUIT), PendingIntent.FLAG_CANCEL_CURRENT));
+        notificationBuilder.setContentIntent(PendingIntent.getActivity(this, 0, resultIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE));
+        notificationBuilder.setDeleteIntent(PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_QUIT), PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE));
 
         Notification notification = notificationBuilder.build();
 
