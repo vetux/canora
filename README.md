@@ -8,7 +8,7 @@
 <br>
 
 <div align="center">
-  <img src="https://github.com/xenotux/canora/blob/master/.github/Promo/mainIcon.png" alt="MainIcon" width="300" height="300"/>
+  <img src="https://github.com/xenotux/canora/blob/master/docs/mainIcon.png" alt="MainIcon" width="300" height="300"/>
   <h1>Canora Music Player</h1>
 </div>
 
