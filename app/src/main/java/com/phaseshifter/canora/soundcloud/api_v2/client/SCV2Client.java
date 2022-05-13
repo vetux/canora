@@ -10,6 +10,8 @@ import com.phaseshifter.canora.soundcloud.net.http.*;
 import com.phaseshifter.canora.soundcloud.util.LogKeeper;
 import com.phaseshifter.canora.soundcloud.util.Pair;
 
+import org.json.JSONException;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -157,7 +159,7 @@ public class SCV2Client {
      * @throws SCConnectionException Thrown when the request was rejected by the server. Indicates an invalid clientID or change in api.
      * @throws SCParsingException    Reports a fatal error in the parsing of the returned html / json. Indicates a change in the api.
      */
-    public SCV2TrackStreamData getTemporaryStreamUrl(SCV2Track track) throws SCParsingException, IOException, SCConnectionException {
+    public SCV2TrackStreamData getTemporaryStreamUrl(SCV2Track track) throws SCParsingException, IOException, SCConnectionException, JSONException {
         logger.log(LOG_TAG, "Get temporary stream url: " + track);
         if (track.getCodings() == null)
             return null;
@@ -199,7 +201,7 @@ public class SCV2Client {
      * @throws SCConnectionException Thrown when the request was rejected by the server. Indicates an invalid clientID or change in api.
      * @throws SCParsingException    Reports a fatal error in the parsing of the returned html / json. Indicates a change in the api.
      */
-    public SCV2TrackStreamData getTemporaryStreamUrl(SCV2Track track, SCV2StreamProtocol protocol) throws IOException, SCConnectionException, SCParsingException {
+    public SCV2TrackStreamData getTemporaryStreamUrl(SCV2Track track, SCV2StreamProtocol protocol) throws IOException, SCConnectionException, SCParsingException, JSONException {
         logger.log(LOG_TAG, "Get temporary stream url: " + track + " " + protocol);
         if (track.getCodings() == null)
             return null;

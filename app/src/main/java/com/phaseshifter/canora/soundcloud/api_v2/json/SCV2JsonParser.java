@@ -6,6 +6,7 @@ import com.phaseshifter.canora.soundcloud.api.data.SCUserMutable;
 import com.phaseshifter.canora.soundcloud.api.exceptions.SCParsingException;
 import com.phaseshifter.canora.soundcloud.api_v2.data.*;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -145,7 +146,7 @@ public class SCV2JsonParser {
         }
     }
 
-    public String getStreamUrlFromStager(String json) throws SCParsingException {
+    public String getStreamUrlFromStager(String json) throws SCParsingException, JSONException {
         JSONObject root = new JSONObject(json);
         try {
             return root.getString("url");
@@ -155,7 +156,7 @@ public class SCV2JsonParser {
         }
     }
 
-    public SCUser getUser(String json) {
+    public SCUser getUser(String json) throws JSONException {
         SCUserMutable ret = new SCUserMutable();
         JSONObject root = new JSONObject(json);
         ret.setId(root.optString("id"));
