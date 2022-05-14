@@ -155,7 +155,7 @@
               app:layout_constraintTop_toTopOf="@id/display_imageview_background"
               app:layout_constraintBottom_toBottomOf="@id/display_imageview_background"/>
     <com.phaseshifter.canora.ui.widgets.CustomImageView android:id="@+id/control_imageview_background"
-                                                           android:layout_width="0dp"
+                                                           android:layout_width="match_parent"
                                                            android:layout_height="75dp"
                                                            android:src="?texControl"
                                                            android:scaleType="?scaleTexControl"
