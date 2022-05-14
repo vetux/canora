@@ -153,7 +153,10 @@ public class AudioPlaylistArrayAdapter extends ArrayAdapter<AudioPlaylist> imple
         sectionChars.clear();
         if (contentRef.size() > 0) {
             AudioPlaylist playlist = contentRef.get(0);
-            String c = ("" + playlist.getMetadata().getTitle().charAt(0)).toUpperCase();
+            String title = playlist.getMetadata().getTitle();
+            String c = "";
+            if (title != null)
+                c = ("" + title.charAt(0)).toUpperCase();
             positionToSection.add(new Pair<>(c, 0));
             sectionToPosition.add(0);
             sectionChars.add(c);
