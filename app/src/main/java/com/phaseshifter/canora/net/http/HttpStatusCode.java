@@ -1,4 +1,4 @@
-package com.phaseshifter.canora.soundcloud.net.http;
+package com.phaseshifter.canora.net.http;
 
 public enum HttpStatusCode {
     OK(200),

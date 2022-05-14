@@ -6,7 +6,7 @@ import com.phaseshifter.canora.soundcloud.api.exceptions.SCConnectionException;
 import com.phaseshifter.canora.soundcloud.api.exceptions.SCParsingException;
 import com.phaseshifter.canora.soundcloud.api_v2.data.*;
 import com.phaseshifter.canora.soundcloud.api_v2.json.SCV2JsonParser;
-import com.phaseshifter.canora.soundcloud.net.http.*;
+import com.phaseshifter.canora.net.http.*;
 import com.phaseshifter.canora.soundcloud.util.LogKeeper;
 import com.phaseshifter.canora.soundcloud.util.Pair;
 

@@ -4,7 +4,7 @@ import com.phaseshifter.canora.soundcloud.api.data.SCConstants;
 import com.phaseshifter.canora.soundcloud.api.data.SCTrack;
 import com.phaseshifter.canora.soundcloud.api.exceptions.SCException;
 import com.phaseshifter.canora.soundcloud.api.json.SCJsonParser;
-import com.phaseshifter.canora.soundcloud.net.http.*;
+import com.phaseshifter.canora.net.http.*;
 import com.phaseshifter.canora.soundcloud.util.LogKeeper;
 import com.phaseshifter.canora.soundcloud.util.Pair;
 
