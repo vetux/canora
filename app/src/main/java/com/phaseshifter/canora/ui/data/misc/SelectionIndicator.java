@@ -30,8 +30,11 @@ public class SelectionIndicator implements Serializable {
         return uuid;
     }
 
-    public boolean isSubMenu() {
-        return selector != AudioContentSelector.TRACKS && uuid == null;
+    public boolean isPlaylistView() {
+        return selector != AudioContentSelector.TRACKS
+                && selector != AudioContentSelector.SOUNDCLOUD_SEARCH
+                && selector != AudioContentSelector.YOUTUBE_SEARCH
+                && uuid == null;
     }
 
     @Override

@@ -153,19 +153,19 @@ public class SCV2Client {
      * <p>
      * Eg. if there is a PROGRESSIVE and a HLS url available the function will choose PROGRESSIVE.
      *
-     * @param track The track to obtain the streamable url of.
+     * @param codings The track to obtain the streamable url of.
      * @return The SCV2TrackStreamData object containing the url, or null if not available.
      * @throws IOException           Thrown when the HTTP connection could not be made. Indicates a fatal local error.
      * @throws SCConnectionException Thrown when the request was rejected by the server. Indicates an invalid clientID or change in api.
      * @throws SCParsingException    Reports a fatal error in the parsing of the returned html / json. Indicates a change in the api.
      */
-    public SCV2TrackStreamData getTemporaryStreamUrl(SCV2Track track) throws SCParsingException, IOException, SCConnectionException, JSONException {
-        logger.log(LOG_TAG, "Get temporary stream url: " + track);
-        if (track.getCodings() == null)
+    public SCV2TrackStreamData getTemporaryStreamUrl(List<SCV2Track.MediaTranscoding> codings) throws SCParsingException, IOException, SCConnectionException, JSONException {
+        logger.log(LOG_TAG, "Get temporary stream url: " + codings);
+        if (codings == null)
             return null;
         String stagerUrl = null;
         SCV2StreamProtocol protocol = null;
-        for (SCV2Track.MediaTranscoding coding : track.getCodings()) {
+        for (SCV2Track.MediaTranscoding coding : codings) {
             if (coding.getProtocol().equals("progressive")) {
                 stagerUrl = coding.getUrl();
                 protocol = SCV2StreamProtocol.PROGRESSIVE;

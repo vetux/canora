@@ -1,11 +1,13 @@
 package com.phaseshifter.canora.ui.viewmodels;
 
 import android.content.Context;
+
 import com.phaseshifter.canora.R;
 import com.phaseshifter.canora.data.media.audio.AudioData;
 import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
 import com.phaseshifter.canora.model.repo.AudioDataRepository;
 import com.phaseshifter.canora.model.repo.AudioPlaylistRepository;
+import com.phaseshifter.canora.model.repo.SCAudioDataRepo;
 import com.phaseshifter.canora.ui.data.AudioContentSelector;
 import com.phaseshifter.canora.ui.data.misc.SelectionIndicator;
 import com.phaseshifter.canora.ui.redux.core.StateListener;
@@ -40,13 +42,15 @@ public class ContentViewModel implements StateListener<MainStateImmutable> {
     private final Context context;
     private final AudioDataRepository audioDataRepository;
     private final AudioPlaylistRepository audioPlaylistRepository;
+    private final SCAudioDataRepo scAudioDataRepo;
 
     private MainStateImmutable previousState;
 
-    public ContentViewModel(Context context, AudioDataRepository audioDataRepository, AudioPlaylistRepository audioPlaylistRepository) {
+    public ContentViewModel(Context context, AudioDataRepository audioDataRepository, AudioPlaylistRepository audioPlaylistRepository, SCAudioDataRepo scAudioDataRepo) {
         this.context = context;
         this.audioDataRepository = audioDataRepository;
         this.audioPlaylistRepository = audioPlaylistRepository;
+        this.scAudioDataRepo = scAudioDataRepo;
     }
 
     @Override
@@ -96,7 +100,7 @@ public class ContentViewModel implements StateListener<MainStateImmutable> {
 
         //Calculate and set selection
         if (updatedState.isSelecting()) {
-            if (uiIndicator.isSubMenu()) {
+            if (uiIndicator.isPlaylistView()) {
                 contentTracksSelection.set(null);
                 HashSet<Integer> indices = new HashSet<>();
                 for (int i = 0; i < processedPlaylists.size(); i++) {
@@ -119,7 +123,7 @@ public class ContentViewModel implements StateListener<MainStateImmutable> {
         }
 
         //Calculate and set highlight
-        if (uiIndicator.isSubMenu()) {
+        if (uiIndicator.isPlaylistView()) {
             if (contentIndicator != null
                     && uiIndicator.getSelector() == contentIndicator.getSelector()) {
                 boolean found = false;
@@ -157,7 +161,7 @@ public class ContentViewModel implements StateListener<MainStateImmutable> {
 
     private String getContentName(MainStateImmutable state) {
         SelectionIndicator uiIndicator = state.getUiIndicator();
-        if (uiIndicator.isSubMenu()) {
+        if (uiIndicator.isPlaylistView()) {
             return getSelectorName(uiIndicator.getSelector());
         } else {
             return getIndicatorName(uiIndicator);
@@ -176,12 +180,15 @@ public class ContentViewModel implements StateListener<MainStateImmutable> {
                 return context.getString(R.string.main_toolbar_title0albums);
             case GENRES:
                 return context.getString(R.string.main_toolbar_title0genres);
+            case SOUNDCLOUD_SEARCH:
+            case SOUNDCLOUD_CHARTS:
+                return context.getString(R.string.main_toolbar_title0sc);
         }
         return "Error";
     }
 
     private String getIndicatorName(SelectionIndicator indicator) {
-        String text = getPlaylistTitle(indicator, audioDataRepository, audioPlaylistRepository);
+        String text = getPlaylistTitle(indicator, audioDataRepository, audioPlaylistRepository, scAudioDataRepo);
         switch (indicator.getSelector()) {
             case TRACKS:
                 return context.getString(R.string.main_toolbar_title0tracks);
@@ -193,6 +200,10 @@ public class ContentViewModel implements StateListener<MainStateImmutable> {
                 return context.getString(R.string.main_toolbar_title0subalbum, text);
             case GENRES:
                 return context.getString(R.string.main_toolbar_title0subgenre, text);
+            case SOUNDCLOUD_SEARCH:
+                return context.getString(R.string.main_toolbar_title0sc);
+            case SOUNDCLOUD_CHARTS:
+                return context.getString(R.string.main_toolbar_title0subchart, text);
         }
         return "Error";
     }

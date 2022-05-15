@@ -7,6 +7,9 @@ public enum NavigationItem {
     ARTISTS,
     GENRES,
 
+    SOUNDCLOUD_SEARCH,
+    SOUNDCLOUD_CHARTS,
+
     SETTINGS,
     RATE,
     INFO

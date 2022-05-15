@@ -1,7 +1,17 @@
 package com.phaseshifter.canora.ui.redux.actions.main;
 
+import android.net.Uri;
+import android.os.Handler;
+import android.os.Looper;
+
 import com.phaseshifter.canora.data.media.audio.AudioData;
+import com.phaseshifter.canora.data.media.audio.metadata.AudioMetadataSimple;
+import com.phaseshifter.canora.data.media.audio.source.AudioDataSourceSC;
+import com.phaseshifter.canora.data.media.image.ImageData;
+import com.phaseshifter.canora.data.media.image.metadata.ImageMetadataSimple;
+import com.phaseshifter.canora.data.media.image.source.ImageDataSourceUri;
 import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
+import com.phaseshifter.canora.data.media.playlist.metadata.PlaylistMetadataSimple;
 import com.phaseshifter.canora.data.settings.BooleanSetting;
 import com.phaseshifter.canora.data.settings.FloatSetting;
 import com.phaseshifter.canora.data.settings.IntegerSetting;
@@ -9,10 +19,19 @@ import com.phaseshifter.canora.model.formatting.ListFilter;
 import com.phaseshifter.canora.model.formatting.ListSorter;
 import com.phaseshifter.canora.model.repo.AudioDataRepository;
 import com.phaseshifter.canora.model.repo.AudioPlaylistRepository;
+import com.phaseshifter.canora.model.repo.SCAudioDataRepo;
 import com.phaseshifter.canora.model.repo.SettingsRepository;
 import com.phaseshifter.canora.model.repo.ThemeRepository;
 import com.phaseshifter.canora.service.MediaPlayerService;
 import com.phaseshifter.canora.service.state.PlayerState;
+import com.phaseshifter.canora.soundcloud.api.data.SCGenre;
+import com.phaseshifter.canora.soundcloud.api.exceptions.SCConnectionException;
+import com.phaseshifter.canora.soundcloud.api.exceptions.SCParsingException;
+import com.phaseshifter.canora.soundcloud.api_v2.client.SCV2Client;
+import com.phaseshifter.canora.soundcloud.api_v2.data.SCV2ChartTrack;
+import com.phaseshifter.canora.soundcloud.api_v2.data.SCV2Charts;
+import com.phaseshifter.canora.soundcloud.api_v2.data.SCV2Track;
+import com.phaseshifter.canora.ui.data.AudioContentSelector;
 import com.phaseshifter.canora.ui.data.formatting.FilterDef;
 import com.phaseshifter.canora.ui.data.formatting.SortDef;
 import com.phaseshifter.canora.ui.data.misc.SelectionIndicator;
@@ -24,20 +43,30 @@ import com.phaseshifter.canora.ui.redux.state.MainState;
 import com.phaseshifter.canora.ui.redux.state.MainStateImmutable;
 import com.phaseshifter.canora.ui.utils.selectors.MainSelector;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReference;
 
 public abstract class MainActionCreator {
     private static final String LOG_TAG = "MainActionCreator";
+
+    private static ExecutorService pool = Executors.newSingleThreadExecutor();
 
     public static Action refreshAndFetchRepoData(Store<MainStateImmutable> store,
                                                  AudioDataRepository audioDataRepository,
                                                  AudioPlaylistRepository audioPlaylistRepository,
                                                  SettingsRepository settingsRepository,
                                                  ThemeRepository themeRepository,
+                                                 SCAudioDataRepo scAudioDataRepo,
                                                  MediaPlayerService service,
                                                  Executor presExec,
                                                  Executor mainExec) {
@@ -47,8 +76,14 @@ public abstract class MainActionCreator {
                 store.dispatch(new MainAction(MainActionType.CONTENT_LOAD_START));
                 presExec.execute(() -> {
                     audioDataRepository.refresh();
+
+                    if (store.getState().getUiIndicator().getSelector() == AudioContentSelector.SOUNDCLOUD_SEARCH)
+                        scAudioDataRepo.refreshSearchResults(store.getState().getFilterDefinition().filterFor, 10, 0);
+                    else if (store.getState().getUiIndicator().getSelector() == AudioContentSelector.SOUNDCLOUD_CHARTS)
+                        scAudioDataRepo.refreshCharts(10);
+
                     mainExec.execute(() -> {
-                        store.dispatch(fetchRepoData(store, audioDataRepository, audioPlaylistRepository, settingsRepository, themeRepository, service));
+                        store.dispatch(fetchRepoData(store, audioDataRepository, audioPlaylistRepository, settingsRepository, themeRepository, scAudioDataRepo, service));
                         store.dispatch(new MainAction(MainActionType.CONTENT_LOAD_STOP));
                     });
                 });
@@ -62,6 +97,7 @@ public abstract class MainActionCreator {
                                        AudioPlaylistRepository audioPlaylistRepository,
                                        SettingsRepository settingsRepository,
                                        ThemeRepository themeRepository,
+                                       SCAudioDataRepo scAudioDataRepo,
                                        MediaPlayerService service) {
         return new Thunk.ThunkAction() {
             @Override
@@ -113,7 +149,7 @@ public abstract class MainActionCreator {
                 service.setRepeat(currentState.isRepeating());
                 service.setShuffle(currentState.isShuffling());
 
-                store.dispatch(fetchAudioData(store, audioDataRepository, audioPlaylistRepository, service));
+                store.dispatch(fetchAudioData(store, audioDataRepository, audioPlaylistRepository, scAudioDataRepo, service));
                 return new MainAction(MainActionType.CONTENT_LOAD_STOP);
             }
         };
@@ -122,6 +158,7 @@ public abstract class MainActionCreator {
     public static Action fetchAudioData(Store<MainStateImmutable> store,
                                         AudioDataRepository audioDataRepository,
                                         AudioPlaylistRepository audioPlaylistRepository,
+                                        SCAudioDataRepo scAudioDataRepo,
                                         MediaPlayerService service) {
         return new Thunk.ThunkAction() {
             @Override
@@ -143,6 +180,7 @@ public abstract class MainActionCreator {
                 MainState payload = new MainState();
                 payload.setVisibleTracks(currentState.getVisibleTracks());
                 payload.setVisiblePlaylists(currentState.getVisiblePlaylists());
+
                 List<AudioData> trackData;
                 List<AudioPlaylist> playlistData;
                 switch (currentState.getUiIndicator().getSelector()) {
@@ -152,7 +190,7 @@ public abstract class MainActionCreator {
                         payload.setContentPlaylists(currentState.getContentPlaylists());
                         break;
                     case PLAYLISTS:
-                        if (currentState.getUiIndicator().isSubMenu()) {
+                        if (currentState.getUiIndicator().isPlaylistView()) {
                             playlistData = audioPlaylistRepository.getAll();
                             payload.setContentTracks(currentState.getContentTracks());
                             payload.setContentPlaylists(playlistData);
@@ -163,7 +201,7 @@ public abstract class MainActionCreator {
                         }
                         break;
                     case ALBUMS:
-                        if (currentState.getUiIndicator().isSubMenu()) {
+                        if (currentState.getUiIndicator().isPlaylistView()) {
                             playlistData = audioDataRepository.getAlbums();
                             payload.setContentTracks(currentState.getContentTracks());
                             payload.setContentPlaylists(playlistData);
@@ -174,7 +212,7 @@ public abstract class MainActionCreator {
                         }
                         break;
                     case ARTISTS:
-                        if (currentState.getUiIndicator().isSubMenu()) {
+                        if (currentState.getUiIndicator().isPlaylistView()) {
                             playlistData = audioDataRepository.getArtists();
                             payload.setContentTracks(currentState.getContentTracks());
                             payload.setContentPlaylists(playlistData);
@@ -185,7 +223,7 @@ public abstract class MainActionCreator {
                         }
                         break;
                     case GENRES:
-                        if (currentState.getUiIndicator().isSubMenu()) {
+                        if (currentState.getUiIndicator().isPlaylistView()) {
                             playlistData = audioDataRepository.getGenres();
                             payload.setContentTracks(currentState.getContentTracks());
                             payload.setContentPlaylists(playlistData);
@@ -195,9 +233,39 @@ public abstract class MainActionCreator {
                             payload.setContentPlaylists(currentState.getContentPlaylists());
                         }
                         break;
+                    case SOUNDCLOUD_SEARCH:
+                        List<AudioData> t = scAudioDataRepo.getSearchResults();
+                        payload.setContentTracks(t);
+                        payload.setContentPlaylists(currentState.getContentPlaylists());
+                        break;
+                    case SOUNDCLOUD_CHARTS:
+                        if (currentState.getUiIndicator().isPlaylistView()) {
+                            ArrayList<AudioPlaylist> l = new ArrayList<>();
+
+                            Enumeration<AudioPlaylist> pl = scAudioDataRepo.getCharts().elements();
+                            payload.setContentTracks(currentState.getContentTracks());
+                            while(pl.hasMoreElements())
+                                l.add(pl.nextElement());
+
+                            payload.setContentPlaylists(l);
+                        } else {
+                            for (AudioPlaylist playlist : currentState.getContentPlaylists()) {
+                                if (playlist.getMetadata().getId() == currentState.getUiIndicator().getUuid()) {
+                                    List<AudioData> tr = playlist.getData();
+                                    payload.setContentTracks(tr);
+                                    payload.setContentPlaylists(currentState.getContentPlaylists());
+                                    break;
+                                }
+                            }
+                        }
+                        break;
+                    case YOUTUBE_SEARCH:
+                        break;
                 }
+
                 if (currentState.getContentIndicator() != null)
-                    service.setContent(MainSelector.getTracksForIndicator(currentState.getContentIndicator(), currentState, audioDataRepository, audioPlaylistRepository));
+                    service.setContent(MainSelector.getTracksForIndicator(currentState.getContentIndicator(), currentState, audioDataRepository, audioPlaylistRepository, scAudioDataRepo));
+
                 store.dispatch(new MainAction(MainActionType.SET_CONTENT, payload));
                 store.dispatch(getReformatContent(store));
 
@@ -252,6 +320,7 @@ public abstract class MainActionCreator {
                                                SortDef def,
                                                AudioDataRepository audioDataRepository,
                                                AudioPlaylistRepository audioPlaylistRepository,
+                                               SCAudioDataRepo scAudioDataRepo,
                                                MediaPlayerService service) {
         return new Thunk.ThunkAction() {
             @Override
@@ -259,7 +328,7 @@ public abstract class MainActionCreator {
                 MainState payload = new MainState();
                 payload.setSortingDefinition(def);
                 store.dispatch(new MainAction(MainActionType.SET_SORTDEF, payload));
-                return fetchAudioData(store, audioDataRepository, audioPlaylistRepository, service);
+                return fetchAudioData(store, audioDataRepository, audioPlaylistRepository, scAudioDataRepo, service);
             }
         };
     }
@@ -267,12 +336,13 @@ public abstract class MainActionCreator {
     public static Action getChangeFilterState(Store<MainStateImmutable> store,
                                               AudioDataRepository audioDataRepository,
                                               AudioPlaylistRepository audioPlaylistRepository,
+                                              SCAudioDataRepo scAudioDataRepo,
                                               MediaPlayerService service,
                                               boolean filtering) {
         return new Thunk.ThunkAction() {
             @Override
             public Action run() {
-                return getChangeFilterState(store, audioDataRepository, audioPlaylistRepository, service, filtering, store.getState().getFilterDefinition());
+                return getChangeFilterState(store, audioDataRepository, audioPlaylistRepository, scAudioDataRepo, service, filtering, store.getState().getFilterDefinition());
             }
         };
     }
@@ -280,6 +350,7 @@ public abstract class MainActionCreator {
     public static Action getChangeFilterState(Store<MainStateImmutable> store,
                                               AudioDataRepository audioDataRepository,
                                               AudioPlaylistRepository audioPlaylistRepository,
+                                              SCAudioDataRepo scAudioDataRepo,
                                               MediaPlayerService service,
                                               boolean filtering,
                                               FilterDef def) {
@@ -290,7 +361,7 @@ public abstract class MainActionCreator {
                 state.setFiltering(filtering);
                 state.setFilterDefinition(def);
                 store.dispatch(new MainAction(MainActionType.SET_FILTERSTATE, state));
-                return fetchAudioData(store, audioDataRepository, audioPlaylistRepository, service);
+                return fetchAudioData(store, audioDataRepository, audioPlaylistRepository, scAudioDataRepo, service);
             }
         };
     }
@@ -298,6 +369,7 @@ public abstract class MainActionCreator {
     public static Action getChangeIndicators(Store<MainStateImmutable> store,
                                              AudioDataRepository audioDataRepository,
                                              AudioPlaylistRepository audioPlaylistRepository,
+                                             SCAudioDataRepo scAudioDataRepo,
                                              MediaPlayerService service,
                                              SelectionIndicator contentIndicator,
                                              SelectionIndicator uiIndicator) {
@@ -309,7 +381,7 @@ public abstract class MainActionCreator {
                 state.setContentIndicator(contentIndicator);
                 state.setUiIndicator(uiIndicator);
                 store.dispatch(new MainAction(MainActionType.SET_INDICATORS, state));
-                return fetchAudioData(store, audioDataRepository, audioPlaylistRepository, service);
+                return fetchAudioData(store, audioDataRepository, audioPlaylistRepository, scAudioDataRepo, service);
             }
         };
     }
@@ -403,7 +475,7 @@ public abstract class MainActionCreator {
                 List<AudioPlaylist> processedPlaylists = currentState.getVisiblePlaylists();
 
                 MainState payload = new MainState();
-                if (currentState.getUiIndicator().isSubMenu()) {
+                if (currentState.getUiIndicator().isPlaylistView()) {
                     processedPlaylists = ListSorter.sortAudioPlaylist(currentState.getContentPlaylists(), currentState.getSortingDefinition());
                     payload.setSortedPlaylists(processedPlaylists);
                     if (currentState.isFiltering())
@@ -411,7 +483,7 @@ public abstract class MainActionCreator {
                 } else {
                     processedTracks = ListSorter.sortAudioData(currentState.getContentTracks(), currentState.getSortingDefinition());
                     payload.setSortedTracks(processedTracks);
-                    if (currentState.isFiltering())
+                    if (currentState.isFiltering() && currentState.getUiIndicator().getSelector() != AudioContentSelector.SOUNDCLOUD_SEARCH)
                         processedTracks = ListFilter.filterAudioData(processedTracks, currentState.getFilterDefinition());
                 }
                 payload.setContentTracks(currentState.getContentTracks());
@@ -436,7 +508,7 @@ public abstract class MainActionCreator {
                 payload.setVisibleTracks(currentState.getVisibleTracks());
                 payload.setVisiblePlaylists(currentState.getVisiblePlaylists());
 
-                if (currentState.getUiIndicator().isSubMenu()) {
+                if (currentState.getUiIndicator().isPlaylistView()) {
                     if (currentState.isFiltering()) {
                         payload.setVisiblePlaylists(ListFilter.filterAudioPlaylist(payload.getSortedPlaylists(), currentState.getFilterDefinition()));
                     } else {
@@ -470,21 +542,21 @@ public abstract class MainActionCreator {
                 //No change
                 break;
             case ARTISTS:
-                if (!indicator.isSubMenu()) {
+                if (!indicator.isPlaylistView()) {
                     if (audioDataRepository.getArtist(indicator.getUuid()) == null) {
                         return new SelectionIndicator(indicator.getSelector(), null);
                     }
                 }
                 break;
             case ALBUMS:
-                if (!indicator.isSubMenu()) {
+                if (!indicator.isPlaylistView()) {
                     if (audioDataRepository.getAlbum(indicator.getUuid()) == null) {
                         return new SelectionIndicator(indicator.getSelector(), null);
                     }
                 }
                 break;
             case GENRES:
-                if (!indicator.isSubMenu()) {
+                if (!indicator.isPlaylistView()) {
                     if (audioDataRepository.getGenre(indicator.getUuid()) == null) {
                         return new SelectionIndicator(indicator.getSelector(), null);
                     }

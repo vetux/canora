@@ -1,6 +1,7 @@
 package com.phaseshifter.canora.ui.presenters;
 
 import android.util.Log;
+
 import com.phaseshifter.canora.data.media.audio.AudioData;
 import com.phaseshifter.canora.data.media.audio.source.AudioDataSourceUri;
 import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
@@ -13,6 +14,7 @@ import com.phaseshifter.canora.model.formatting.ListFilter;
 import com.phaseshifter.canora.model.formatting.ListSorter;
 import com.phaseshifter.canora.model.repo.AudioDataRepository;
 import com.phaseshifter.canora.model.repo.AudioPlaylistRepository;
+import com.phaseshifter.canora.model.repo.SCAudioDataRepo;
 import com.phaseshifter.canora.model.repo.SettingsRepository;
 import com.phaseshifter.canora.model.repo.ThemeRepository;
 import com.phaseshifter.canora.service.MediaPlayerService;
@@ -58,6 +60,7 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
     private final AudioPlaylistRepository audioPlaylistRepository;
     private final SettingsRepository settingsRepository;
     private final ThemeRepository themeRepository;
+    private final SCAudioDataRepo scAudioDataRepo;
 
     private final MediaPlayerService service;
 
@@ -83,6 +86,7 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
                          AudioPlaylistRepository audioPlaylistRepository,
                          SettingsRepository settingsRepository,
                          ThemeRepository themeRepository,
+                         SCAudioDataRepo scAudioDataRepo,
                          AudioMetadataEditor metadataEditor,
                          Executor mainThread,
                          List<StateListener<MainStateImmutable>> viewmodels
@@ -93,6 +97,7 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
         this.audioPlaylistRepository = audioPlaylistRepository;
         this.settingsRepository = settingsRepository;
         this.themeRepository = themeRepository;
+        this.scAudioDataRepo = scAudioDataRepo;
         this.metadataEditor = metadataEditor;
         this.mainThread = mainThread;
         presExec = new ThreadPoolExecutor(1, 1, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
@@ -137,13 +142,13 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
                 || !Objects.equals(updatedState.isControlsMaximized(), lastState.isControlsMaximized()))
             view.setControlMax(updatedState.isControlsMaximized());
 
-        if (updatedState.getUiIndicator().isSubMenu()) {
+        if (updatedState.getUiIndicator().isPlaylistView()) {
             if (updatedState.getVisiblePlaylists() == null
                     || updatedState.getVisiblePlaylists().size() == 0) {
                 if (updatedState.isFiltering()) {
-                    view.showNotFound(updatedState.getUiIndicator().getSelector(), getPlaylistTitle(updatedState.getUiIndicator(), audioDataRepository, audioPlaylistRepository), updatedState.getFilterDefinition().filterFor);
+                    view.showNotFound(updatedState.getUiIndicator().getSelector(), getPlaylistTitle(updatedState.getUiIndicator(), audioDataRepository, audioPlaylistRepository, scAudioDataRepo), updatedState.getFilterDefinition().filterFor);
                 } else {
-                    view.showNotFound(updatedState.getUiIndicator().getSelector(), getPlaylistTitle(updatedState.getUiIndicator(), audioDataRepository, audioPlaylistRepository));
+                    view.showNotFound(updatedState.getUiIndicator().getSelector(), getPlaylistTitle(updatedState.getUiIndicator(), audioDataRepository, audioPlaylistRepository, scAudioDataRepo));
                 }
             } else {
                 view.showPlaylistContent();
@@ -152,9 +157,9 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
             if (updatedState.getVisibleTracks() == null
                     || updatedState.getVisibleTracks().size() == 0) {
                 if (updatedState.isFiltering()) {
-                    view.showNotFound(updatedState.getUiIndicator().getSelector(), getPlaylistTitle(updatedState.getUiIndicator(), audioDataRepository, audioPlaylistRepository), updatedState.getFilterDefinition().filterFor);
+                    view.showNotFound(updatedState.getUiIndicator().getSelector(), getPlaylistTitle(updatedState.getUiIndicator(), audioDataRepository, audioPlaylistRepository, scAudioDataRepo), updatedState.getFilterDefinition().filterFor);
                 } else {
-                    view.showNotFound(updatedState.getUiIndicator().getSelector(), getPlaylistTitle(updatedState.getUiIndicator(), audioDataRepository, audioPlaylistRepository));
+                    view.showNotFound(updatedState.getUiIndicator().getSelector(), getPlaylistTitle(updatedState.getUiIndicator(), audioDataRepository, audioPlaylistRepository, scAudioDataRepo));
                 }
             } else {
                 view.showTrackContent();
@@ -241,6 +246,9 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
     @Override
     public void onSearchTextChange(String text) {
         store.dispatch(MainActionCreator.searchTextChange(store, text));
+        if (store.getState().getUiIndicator().getSelector() == AudioContentSelector.SOUNDCLOUD_SEARCH) {
+            store.dispatch(MainActionCreator.refreshAndFetchRepoData(store, audioDataRepository, audioPlaylistRepository, settingsRepository, themeRepository, scAudioDataRepo, service, presExec, mainThread));
+        }
     }
 
     @Override
@@ -264,10 +272,10 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
             actions.add(OptionsMenu.Action.SELECT_START);
         }
         if (currentState.getUiIndicator().getSelector() == AudioContentSelector.PLAYLISTS) {
-            if (currentState.getUiIndicator().isSubMenu()
+            if (currentState.getUiIndicator().isPlaylistView()
                     && currentState.isSelecting()) {
                 actions.add(OptionsMenu.Action.DELETE);
-            } else if (!currentState.getUiIndicator().isSubMenu()) {
+            } else if (!currentState.getUiIndicator().isPlaylistView()) {
                 actions.add(OptionsMenu.Action.EDIT_PLAYLIST);
                 actions.add(OptionsMenu.Action.DELETE);
             }
@@ -293,15 +301,16 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
         if (currentState.isControlsMaximized()) {
             store.dispatch(MainActionCreator.getChangeControlMax(false));
         } else if (currentState.isFiltering()) {
-            store.dispatch(MainActionCreator.getChangeFilterState(store, audioDataRepository, audioPlaylistRepository, service, false, currentState.getFilterDefinition()));
+            store.dispatch(MainActionCreator.getChangeFilterState(store, audioDataRepository, audioPlaylistRepository, scAudioDataRepo, service, false, currentState.getFilterDefinition()));
         } else if (currentState.isSelecting()) {
             store.dispatch(MainActionCreator.getChangeSelectionMode(store, false));
         } else if (!currentState.getUiIndicator().equals(currentState.getContentIndicator())
-                && !currentState.getUiIndicator().isSubMenu()
+                && !currentState.getUiIndicator().isPlaylistView()
                 && currentState.getUiIndicator().getSelector() != AudioContentSelector.TRACKS) {
             store.dispatch(MainActionCreator.getChangeIndicators(store,
                     audioDataRepository,
                     audioPlaylistRepository,
+                    scAudioDataRepo,
                     service,
                     currentState.getContentIndicator(),
                     new SelectionIndicator(currentState.getUiIndicator().getSelector(), null)));
@@ -310,6 +319,7 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
             store.dispatch(MainActionCreator.getChangeIndicators(store,
                     audioDataRepository,
                     audioPlaylistRepository,
+                    scAudioDataRepo,
                     service,
                     currentState.getContentIndicator(),
                     currentState.getContentIndicator()));
@@ -322,7 +332,7 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
     @Override
     public void onPermissionCheckResult(boolean permissionsGranted) {
         if (permissionsGranted) {
-            store.dispatch(MainActionCreator.refreshAndFetchRepoData(store, audioDataRepository, audioPlaylistRepository, settingsRepository, themeRepository, service, presExec, mainThread));
+            store.dispatch(MainActionCreator.refreshAndFetchRepoData(store, audioDataRepository, audioPlaylistRepository, settingsRepository, themeRepository, scAudioDataRepo, service, presExec, mainThread));
         } else {
             view.requestPermissions();
         }
@@ -331,7 +341,7 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
     @Override
     public void onPermissionRequestResult(boolean permissionsGranted) {
         if (permissionsGranted) {
-            store.dispatch(MainActionCreator.refreshAndFetchRepoData(store, audioDataRepository, audioPlaylistRepository, settingsRepository, themeRepository, service, presExec, mainThread));
+            store.dispatch(MainActionCreator.refreshAndFetchRepoData(store, audioDataRepository, audioPlaylistRepository, settingsRepository, themeRepository, scAudioDataRepo, service, presExec, mainThread));
         } else {
             view.showDialog_error_permissions();
         }
@@ -358,7 +368,7 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
             store.dispatch(MainActionCreator.getChangeSelection(copy));
         } else {
             if (!currentState.getUiIndicator().equals(currentState.getContentIndicator())) {
-                store.dispatch(MainActionCreator.getChangeIndicators(store, audioDataRepository, audioPlaylistRepository, service, currentState.getUiIndicator(), currentState.getUiIndicator()));
+                store.dispatch(MainActionCreator.getChangeIndicators(store, audioDataRepository, audioPlaylistRepository, scAudioDataRepo, service, currentState.getUiIndicator(), currentState.getUiIndicator()));
             }
             service.play(processedData.get(index).getMetadata().getId());
         }
@@ -400,6 +410,7 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
             store.dispatch(MainActionCreator.getChangeIndicators(store,
                     audioDataRepository,
                     audioPlaylistRepository,
+                    scAudioDataRepo,
                     service,
                     currentState.getContentIndicator(),
                     new SelectionIndicator(currentState.getUiIndicator().getSelector(), processedData.get(index).getMetadata().getId()))
@@ -434,7 +445,7 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
                         settingsRepository.putInt(IntegerSetting.SORT_BY, updatedData.sortby);
                         settingsRepository.putInt(IntegerSetting.SORT_DIR, updatedData.sortdir);
                         settingsRepository.putInt(IntegerSetting.SORT_TECH, updatedData.sorttech);
-                        store.dispatch(MainActionCreator.getChangeSortingState(store, updatedData, audioDataRepository, audioPlaylistRepository, service));
+                        store.dispatch(MainActionCreator.getChangeSortingState(store, updatedData, audioDataRepository, audioPlaylistRepository, scAudioDataRepo, service));
                     }
                 });
                 break;
@@ -444,7 +455,7 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
                     public void onApply(FilterDef updatedData) {
                         MainStateImmutable currentState = store.getState();
                         settingsRepository.putInt(IntegerSetting.FILTER_BY, updatedData.filterBy);
-                        store.dispatch(MainActionCreator.getChangeFilterState(store, audioDataRepository, audioPlaylistRepository, service, currentState.isFiltering(), updatedData));
+                        store.dispatch(MainActionCreator.getChangeFilterState(store, audioDataRepository, audioPlaylistRepository, scAudioDataRepo, service, currentState.isFiltering(), updatedData));
                     }
                 });
                 break;
@@ -456,7 +467,7 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
                             public void onAddToNew() {
                                 MainStateImmutable currentState = store.getState();
                                 List<AudioData> selectedData = new ArrayList<>();
-                                if (currentState.getUiIndicator().isSubMenu()) {
+                                if (currentState.getUiIndicator().isPlaylistView()) {
                                     for (AudioPlaylist playlist : currentState.getContentPlaylists()) {
                                         if (currentState.getSelection().contains(playlist.getMetadata().getId()))
                                             selectedData.addAll(playlist.getData());
@@ -477,7 +488,7 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
                                         AudioPlaylist playlist = new AudioPlaylist(metadata, data);
                                         audioPlaylistRepository.add(playlist);
                                         store.dispatch(MainActionCreator.getChangeSelectionMode(store, false));
-                                        store.dispatch(MainActionCreator.fetchAudioData(store, audioDataRepository, audioPlaylistRepository, service));
+                                        store.dispatch(MainActionCreator.fetchAudioData(store, audioDataRepository, audioPlaylistRepository, scAudioDataRepo, service));
                                         view.showMessage_createdPlaylist(playlist.getMetadata().getTitle(), data.size());
                                     }
 
@@ -491,7 +502,7 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
                             public void onAddToExisting(int index) {
                                 MainStateImmutable currentState = store.getState();
                                 List<AudioData> selectedData = new ArrayList<>();
-                                if (currentState.getUiIndicator().isSubMenu()) {
+                                if (currentState.getUiIndicator().isPlaylistView()) {
                                     for (AudioPlaylist playlist : currentState.getContentPlaylists()) {
                                         if (currentState.getSelection().contains(playlist.getMetadata().getId()))
                                             selectedData.addAll(playlist.getData());
@@ -511,7 +522,7 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
                                 audioPlaylistRepository.replace(target.getMetadata().getId(), targetCopy);
 
                                 store.dispatch(MainActionCreator.getChangeSelectionMode(store, false));
-                                store.dispatch(MainActionCreator.fetchAudioData(store, audioDataRepository, audioPlaylistRepository, service));
+                                store.dispatch(MainActionCreator.fetchAudioData(store, audioDataRepository, audioPlaylistRepository, scAudioDataRepo, service));
 
                                 view.showMessage_addedTracks(target.getMetadata().getTitle(), selectedData.size());
                             }
@@ -525,7 +536,7 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
                 break;
             case SELECT_ALL:
                 HashSet<UUID> selection = new HashSet<>();
-                if (currentState.getUiIndicator().isSubMenu()) {
+                if (currentState.getUiIndicator().isPlaylistView()) {
                     for (AudioPlaylist playlist : currentState.getContentPlaylists()) {
                         selection.add(playlist.getMetadata().getId());
                     }
@@ -545,7 +556,7 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
                 break;
             case DELETE:
                 if (currentState.isSelecting()) {
-                    if (currentState.getUiIndicator().isSubMenu()) {
+                    if (currentState.getUiIndicator().isPlaylistView()) {
                         List<AudioPlaylist> playlistsToDelete = new ArrayList<>();
                         for (AudioPlaylist pl : currentState.getContentPlaylists()) {
                             if (currentState.getSelection().contains(pl.getMetadata().getId()))
@@ -563,9 +574,9 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
                                     audioPlaylistRepository.remove(playlist.getMetadata().getId());
                                 }
                                 if (resetUiIndicator)
-                                    store.dispatch(MainActionCreator.getChangeIndicators(store, audioDataRepository, audioPlaylistRepository, service, null, currentState.getUiIndicator()));
+                                    store.dispatch(MainActionCreator.getChangeIndicators(store, audioDataRepository, audioPlaylistRepository, scAudioDataRepo, service, null, currentState.getUiIndicator()));
                                 else
-                                    store.dispatch(MainActionCreator.fetchAudioData(store, audioDataRepository, audioPlaylistRepository, service));
+                                    store.dispatch(MainActionCreator.fetchAudioData(store, audioDataRepository, audioPlaylistRepository, scAudioDataRepo, service));
                                 view.showMessage_deletedPlaylists(playlistsToDelete.size());
                             }
 
@@ -591,7 +602,7 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
                                         cleanTracks.remove(delTrack);
                                     AudioPlaylist clean = new AudioPlaylist(currentPlaylist.getMetadata(), cleanTracks);
                                     audioPlaylistRepository.replace(currentPlaylist.getMetadata().getId(), clean);
-                                    store.dispatch(MainActionCreator.fetchAudioData(store, audioDataRepository, audioPlaylistRepository, service));
+                                    store.dispatch(MainActionCreator.fetchAudioData(store, audioDataRepository, audioPlaylistRepository, scAudioDataRepo, service));
                                     view.showMessage_deletedTracksFrom(clean.getMetadata().getTitle(), tracksToDelete.size());
                                 }
 
@@ -615,7 +626,7 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
                                 store.dispatch(MainActionCreator.getChangeIndicators(
                                         store,
                                         audioDataRepository,
-                                        audioPlaylistRepository,
+                                        audioPlaylistRepository, scAudioDataRepo,
                                         service,
                                         null,
                                         new SelectionIndicator(currentState.getUiIndicator().getSelector(), null))
@@ -625,7 +636,7 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
                                 store.dispatch(MainActionCreator.getChangeIndicators(
                                         store,
                                         audioDataRepository,
-                                        audioPlaylistRepository,
+                                        audioPlaylistRepository, scAudioDataRepo,
                                         service,
                                         currentState.getContentIndicator(),
                                         new SelectionIndicator(currentState.getUiIndicator().getSelector(), null))
@@ -650,7 +661,7 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
         switch (action) {
             case SELECT:
                 HashSet<UUID> selection = new HashSet<>(currentState.getSelection());
-                if (currentState.getUiIndicator().isSubMenu()) {
+                if (currentState.getUiIndicator().isPlaylistView()) {
                     AudioPlaylist clickedPlaylist = currentState.getVisiblePlaylists().get(index);
                     if (selection.contains(clickedPlaylist.getMetadata().getId()))
                         selection.remove(clickedPlaylist.getMetadata().getId());
@@ -667,13 +678,13 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
                 store.dispatch(MainActionCreator.getChangeSelection(selection));
                 break;
             case INFO:
-                if (currentState.getUiIndicator().isSubMenu())
+                if (currentState.getUiIndicator().isPlaylistView())
                     view.showPlaylistContentDetails(index);
                 else
                     view.showTrackContentDetails(index);
                 break;
             case EDIT:
-                if (currentState.getUiIndicator().isSubMenu()) {
+                if (currentState.getUiIndicator().isPlaylistView()) {
                     List<AudioPlaylist> playlists = ListSorter.sortAudioPlaylist(currentState.getContentPlaylists(), currentState.getSortingDefinition());
                     if (currentState.isFiltering())
                         playlists = ListFilter.filterAudioPlaylist(playlists, currentState.getFilterDefinition());
@@ -687,7 +698,7 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
                 }
                 break;
             case DELETE:
-                if (currentState.getUiIndicator().isSubMenu()) {
+                if (currentState.getUiIndicator().isPlaylistView()) {
                     AudioPlaylist playlistToDelete = currentState.getVisiblePlaylists().get(index);
                     List<AudioPlaylist> playlists = new ArrayList<>();
                     playlists.add(playlistToDelete);
@@ -695,7 +706,7 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
                         @Override
                         public void onDelete() {
                             audioPlaylistRepository.remove(playlistToDelete.getMetadata().getId());
-                            store.dispatch(MainActionCreator.fetchAudioData(store, audioDataRepository, audioPlaylistRepository, service));
+                            store.dispatch(MainActionCreator.fetchAudioData(store, audioDataRepository, audioPlaylistRepository, scAudioDataRepo, service));
                             view.showMessage_deletedPlaylist(playlistToDelete.getMetadata().getTitle());
                         }
 
@@ -718,7 +729,7 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
                                 cleanTracks.remove(delTrack);
                             AudioPlaylist clean = new AudioPlaylist(currentPlaylist.getMetadata(), cleanTracks);
                             audioPlaylistRepository.replace(currentPlaylist.getMetadata().getId(), clean);
-                            store.dispatch(MainActionCreator.fetchAudioData(store, audioDataRepository, audioPlaylistRepository, service));
+                            store.dispatch(MainActionCreator.fetchAudioData(store, audioDataRepository, audioPlaylistRepository, scAudioDataRepo, service));
                             view.showMessage_deletedTracksFrom(currentPlaylist.getMetadata().getTitle(), tracksToDelete.size());
                         }
 
@@ -734,7 +745,7 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
     @Override
     public void onMediaStoreDataChange() {
         Log.v(LOG_TAG, "onMediaStoreDataChange");
-        store.dispatch(MainActionCreator.refreshAndFetchRepoData(store, audioDataRepository, audioPlaylistRepository, settingsRepository, themeRepository, service, presExec, mainThread));
+        store.dispatch(MainActionCreator.refreshAndFetchRepoData(store, audioDataRepository, audioPlaylistRepository, settingsRepository, themeRepository, scAudioDataRepo, service, presExec, mainThread));
     }
 
     @Override
@@ -748,7 +759,7 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
                     Log.v(LOG_TAG, "Writing Uri ...");
                     try {
                         metadataEditor.writeMetadata(((AudioDataSourceUri) data.getDataSource()).getUri(), data.getMetadata());
-                        store.dispatch(MainActionCreator.refreshAndFetchRepoData(store, audioDataRepository, audioPlaylistRepository, settingsRepository, themeRepository, service, presExec, mainThread));
+                        store.dispatch(MainActionCreator.refreshAndFetchRepoData(store, audioDataRepository, audioPlaylistRepository, settingsRepository, themeRepository, scAudioDataRepo, service, presExec, mainThread));
                     } catch (IOException e) {
                         e.printStackTrace();
                     } catch (SecurityException se) {
@@ -757,7 +768,7 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
                             Log.v(LOG_TAG, "OnHandledSecurityException: " + se);
                             try {
                                 metadataEditor.writeMetadata(((AudioDataSourceUri) data.getDataSource()).getUri(), data.getMetadata());
-                                store.dispatch(MainActionCreator.refreshAndFetchRepoData(store, audioDataRepository, audioPlaylistRepository, settingsRepository, themeRepository, service, presExec, mainThread));
+                                store.dispatch(MainActionCreator.refreshAndFetchRepoData(store, audioDataRepository, audioPlaylistRepository, settingsRepository, themeRepository, scAudioDataRepo, service, presExec, mainThread));
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
@@ -781,7 +792,7 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
                 Log.v(LOG_TAG, "Replacing Playlist " + data);
                 audioPlaylistRepository.replace(data.getMetadata().getId(), data);
             }
-            store.dispatch(MainActionCreator.refreshAndFetchRepoData(store, audioDataRepository, audioPlaylistRepository, settingsRepository, themeRepository, service, presExec, mainThread));
+            store.dispatch(MainActionCreator.refreshAndFetchRepoData(store, audioDataRepository, audioPlaylistRepository, settingsRepository, themeRepository, scAudioDataRepo, service, presExec, mainThread));
         }
     }
 
@@ -792,7 +803,7 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
 
     @Override
     public void onSearchChange(boolean searching) {
-        store.dispatch(MainActionCreator.getChangeFilterState(store, audioDataRepository, audioPlaylistRepository, service, searching));
+        store.dispatch(MainActionCreator.getChangeFilterState(store, audioDataRepository, audioPlaylistRepository, scAudioDataRepo, service, searching));
     }
 
     @Override
@@ -805,7 +816,7 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
                 store.dispatch(MainActionCreator.getChangeSelectionMode(store, false));
                 store.dispatch(MainActionCreator.getChangeIndicators(store,
                         audioDataRepository,
-                        audioPlaylistRepository,
+                        audioPlaylistRepository, scAudioDataRepo,
                         service,
                         currentState.getContentIndicator(),
                         new SelectionIndicator(AudioContentSelector.TRACKS, null)));
@@ -816,7 +827,7 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
                 store.dispatch(MainActionCreator.getChangeSelectionMode(store, false));
                 store.dispatch(MainActionCreator.getChangeIndicators(store,
                         audioDataRepository,
-                        audioPlaylistRepository,
+                        audioPlaylistRepository, scAudioDataRepo,
                         service,
                         currentState.getContentIndicator(),
                         new SelectionIndicator(AudioContentSelector.PLAYLISTS, null)));
@@ -827,7 +838,7 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
                 store.dispatch(MainActionCreator.getChangeSelectionMode(store, false));
                 store.dispatch(MainActionCreator.getChangeIndicators(store,
                         audioDataRepository,
-                        audioPlaylistRepository,
+                        audioPlaylistRepository, scAudioDataRepo,
                         service,
                         currentState.getContentIndicator(),
                         new SelectionIndicator(AudioContentSelector.ALBUMS, null)));
@@ -838,7 +849,7 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
                 store.dispatch(MainActionCreator.getChangeSelectionMode(store, false));
                 store.dispatch(MainActionCreator.getChangeIndicators(store,
                         audioDataRepository,
-                        audioPlaylistRepository,
+                        audioPlaylistRepository, scAudioDataRepo,
                         service,
                         currentState.getContentIndicator(),
                         new SelectionIndicator(AudioContentSelector.ARTISTS, null)));
@@ -849,10 +860,37 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
                 store.dispatch(MainActionCreator.getChangeSelectionMode(store, false));
                 store.dispatch(MainActionCreator.getChangeIndicators(store,
                         audioDataRepository,
-                        audioPlaylistRepository,
+                        audioPlaylistRepository, scAudioDataRepo,
                         service,
                         currentState.getContentIndicator(),
                         new SelectionIndicator(AudioContentSelector.GENRES, null)));
+                break;
+            case SOUNDCLOUD_SEARCH:
+                view.setNavigationMax(false);
+                view.setSearchMax(true);
+                store.dispatch(MainActionCreator.getChangeControlMax(false));
+                store.dispatch(MainActionCreator.getChangeSelectionMode(store, false));
+                store.dispatch(MainActionCreator.getChangeIndicators(store,
+                        audioDataRepository,
+                        audioPlaylistRepository,
+                        scAudioDataRepo,
+                        service,
+                        currentState.getContentIndicator(),
+                        new SelectionIndicator(AudioContentSelector.SOUNDCLOUD_SEARCH, null)));
+                store.dispatch(MainActionCreator.refreshAndFetchRepoData(store, audioDataRepository, audioPlaylistRepository, settingsRepository, themeRepository, scAudioDataRepo, service, presExec, mainThread));
+                break;
+            case SOUNDCLOUD_CHARTS:
+                view.setNavigationMax(false);
+                store.dispatch(MainActionCreator.getChangeControlMax(false));
+                store.dispatch(MainActionCreator.getChangeSelectionMode(store, false));
+                store.dispatch(MainActionCreator.getChangeIndicators(store,
+                        audioDataRepository,
+                        audioPlaylistRepository,
+                        scAudioDataRepo,
+                        service,
+                        currentState.getContentIndicator(),
+                        new SelectionIndicator(AudioContentSelector.SOUNDCLOUD_CHARTS, null)));
+                store.dispatch(MainActionCreator.refreshAndFetchRepoData(store, audioDataRepository, audioPlaylistRepository, settingsRepository, themeRepository, scAudioDataRepo, service, presExec, mainThread));
                 break;
             case SETTINGS:
                 view.setNavigationMax(false);

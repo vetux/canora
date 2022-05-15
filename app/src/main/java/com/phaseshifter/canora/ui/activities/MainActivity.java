@@ -40,6 +40,7 @@ import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
 import com.phaseshifter.canora.data.theme.AppTheme;
 import com.phaseshifter.canora.model.editor.AudioMetadataMask;
 import com.phaseshifter.canora.model.editor.JaudioTaggerEditor;
+import com.phaseshifter.canora.model.repo.SCAudioDataRepo;
 import com.phaseshifter.canora.model.repo.SettingsRepo;
 import com.phaseshifter.canora.model.repo.ThemeRepo;
 import com.phaseshifter.canora.service.wrapper.AutoBindingServiceWrapper;
@@ -132,7 +133,7 @@ public class MainActivity extends Activity implements MainContract.View,
                 : savedInstanceState.getSerializable(BUNDLE_PRESENTERSTATE);
         serviceWrapper = new AutoBindingServiceWrapper(this);
         MainApplication application = (MainApplication) getApplication();
-        contentViewModel = new ContentViewModel(this, application.getAudioDataRepo(), application.getAudioPlaylistRepository());
+        contentViewModel = new ContentViewModel(this, application.getAudioDataRepo(), application.getAudioPlaylistRepository(), application.getScAudioRepository());
         playerStateViewModel = new PlayerStateViewModel(this);
         setViewModelListeners(contentViewModel, playerStateViewModel);
         List<StateListener<MainStateImmutable>> viewModels = new ArrayList<>();
@@ -145,6 +146,7 @@ public class MainActivity extends Activity implements MainContract.View,
                 application.getAudioPlaylistRepository(),
                 new SettingsRepo(this),
                 new ThemeRepo(),
+                application.getScAudioRepository(),
                 new JaudioTaggerEditor(this),
                 this::runOnUiThread,
                 viewModels
@@ -437,6 +439,12 @@ public class MainActivity extends Activity implements MainContract.View,
             case R.id.nav_button_genres:
                 presenter.onNavigationClick(NavigationItem.GENRES);
                 break;
+            case R.id.nav_button_soundcloud_search:
+                presenter.onNavigationClick(NavigationItem.SOUNDCLOUD_SEARCH);
+                break;
+            case R.id.nav_button_soundcloud_charts:
+                presenter.onNavigationClick(NavigationItem.SOUNDCLOUD_CHARTS);
+                break;
             case R.id.nav_button_settings:
                 presenter.onNavigationClick(NavigationItem.SETTINGS);
                 break;
@@ -599,6 +607,12 @@ public class MainActivity extends Activity implements MainContract.View,
                             notFoundText.setText(getString(R.string.main_notfound0noTracks));
                         else
                             notFoundText.setText(getString(R.string.main_notfound0noGenres));
+                        break;
+                    case SOUNDCLOUD_SEARCH:
+                        notFoundText.setText(getString(R.string.main_notfound0soundcloudSearch));
+                        break;
+                    case SOUNDCLOUD_CHARTS:
+                        notFoundText.setText(getString(R.string.main_notfound0soundcloudCharts));
                         break;
                 }
             }

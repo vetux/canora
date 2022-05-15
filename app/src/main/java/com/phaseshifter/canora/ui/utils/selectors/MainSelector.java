@@ -5,14 +5,17 @@ import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
 import com.phaseshifter.canora.model.formatting.ListSorter;
 import com.phaseshifter.canora.model.repo.AudioDataRepository;
 import com.phaseshifter.canora.model.repo.AudioPlaylistRepository;
+import com.phaseshifter.canora.model.repo.SCAudioDataRepo;
 import com.phaseshifter.canora.ui.data.AudioContentSelector;
 import com.phaseshifter.canora.ui.data.misc.SelectionIndicator;
+import com.phaseshifter.canora.ui.redux.state.MainState;
 import com.phaseshifter.canora.ui.redux.state.MainStateImmutable;
 
+import java.util.Enumeration;
 import java.util.List;
 
 public abstract class MainSelector {
-    public static String getPlaylistTitle(SelectionIndicator indicator, AudioDataRepository audioDataRepository, AudioPlaylistRepository audioPlaylistRepository) {
+    public static String getPlaylistTitle(SelectionIndicator indicator, AudioDataRepository audioDataRepository, AudioPlaylistRepository audioPlaylistRepository, SCAudioDataRepo scAudioDataRepo) {
         AudioPlaylist playlist = null;
         switch (indicator.getSelector()) {
             case PLAYLISTS:
@@ -27,6 +30,18 @@ public abstract class MainSelector {
             case GENRES:
                 playlist = audioDataRepository.getGenre(indicator.getUuid());
                 break;
+            case SOUNDCLOUD_CHARTS:
+                if (scAudioDataRepo.getCharts() != null) {
+                    Enumeration<AudioPlaylist> pls = scAudioDataRepo.getCharts().elements();
+                    while (pls.hasMoreElements()) {
+                        AudioPlaylist pl = pls.nextElement();
+                        if (pl.getMetadata().getId() == indicator.getUuid()) {
+                            playlist = pl;
+                            break;
+                        }
+                    }
+                }
+                break;
         }
         if (playlist != null)
             return playlist.getMetadata().getTitle();
@@ -37,7 +52,8 @@ public abstract class MainSelector {
     public static List<AudioData> getTracksForIndicator(SelectionIndicator indicator,
                                                         MainStateImmutable currentState,
                                                         AudioDataRepository audioDataRepository,
-                                                        AudioPlaylistRepository audioPlaylistRepository) {
+                                                        AudioPlaylistRepository audioPlaylistRepository,
+                                                        SCAudioDataRepo scAudioDataRepo) {
         switch (indicator.getSelector()) {
             case TRACKS:
                 return ListSorter.sortAudioData(audioDataRepository.getTracks(), currentState.getSortingDefinition());
@@ -49,6 +65,10 @@ public abstract class MainSelector {
                 return ListSorter.sortAudioData(audioDataRepository.getAlbum(indicator.getUuid()).getData(), currentState.getSortingDefinition());
             case GENRES:
                 return ListSorter.sortAudioData(audioDataRepository.getGenre(indicator.getUuid()).getData(), currentState.getSortingDefinition());
+            case SOUNDCLOUD_SEARCH:
+                return ListSorter.sortAudioData(scAudioDataRepo.getSearchResults(), currentState.getSortingDefinition());
+            case SOUNDCLOUD_CHARTS:
+                return ListSorter.sortAudioData(scAudioDataRepo.getCharts().get(indicator.getUuid()).getData(), currentState.getSortingDefinition());
             default:
                 throw new RuntimeException("INVALID SELECTOR: " + indicator.getSelector());
         }
@@ -66,6 +86,10 @@ public abstract class MainSelector {
                 return audioDataRepository.getAlbum(indicator.getUuid());
             case GENRES:
                 return audioDataRepository.getGenre(indicator.getUuid());
+            case SOUNDCLOUD_SEARCH:
+                return null;
+            case SOUNDCLOUD_CHARTS:
+                return null;
             default:
                 throw new RuntimeException("INVALID SELECTOR: " + indicator.getSelector());
         }
@@ -91,8 +115,8 @@ public abstract class MainSelector {
         }
     }
 
-    public static int getUnfilteredIndex(MainStateImmutable currentState, AudioDataRepository audioDataRepository, AudioPlaylistRepository audioPlaylistRepository, int indexFiltered) {
-        if (currentState.getUiIndicator().isSubMenu()) {
+    public static int getUnfilteredIndex(MainStateImmutable currentState, AudioDataRepository audioDataRepository, AudioPlaylistRepository audioPlaylistRepository, SCAudioDataRepo scAudioDataRepo, int indexFiltered) {
+        if (currentState.getUiIndicator().isPlaylistView()) {
             AudioPlaylist selectedPlaylist = currentState.getContentPlaylists().get(indexFiltered);
             List<AudioPlaylist> unfilteredContent = getPlaylistsForSelector(currentState.getUiIndicator().getSelector(), currentState, audioDataRepository, audioPlaylistRepository);
             if (unfilteredContent != null)
@@ -101,7 +125,7 @@ public abstract class MainSelector {
                 return -1;
         } else {
             AudioData selectedTrack = currentState.getContentTracks().get(indexFiltered);
-            List<AudioData> unfilteredContent = getTracksForIndicator(currentState.getUiIndicator(), currentState, audioDataRepository, audioPlaylistRepository);
+            List<AudioData> unfilteredContent = getTracksForIndicator(currentState.getUiIndicator(), currentState, audioDataRepository, audioPlaylistRepository, scAudioDataRepo);
             if (unfilteredContent != null)
                 return unfilteredContent.indexOf(selectedTrack);
             else

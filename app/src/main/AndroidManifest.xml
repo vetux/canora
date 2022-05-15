@@ -51,20 +51,6 @@
             android:screenOrientation="portrait"
             android:theme="@style/Default"></activity>
 
-        <activity
-            android:name=".ui.activities.iap.StoreActivity"
-            android:configChanges="orientation"
-            android:launchMode="singleTask"
-            android:screenOrientation="portrait"
-            android:theme="@style/Default"></activity>
-
-        <activity
-            android:name=".ui.activities.iap.ThemeDetailsActivity"
-            android:configChanges="orientation"
-            android:launchMode="singleTask"
-            android:screenOrientation="portrait"
-            android:theme="@style/Default"></activity>
-
         <service
             android:name=".service.ExoPlayerService"
             android:exported="false">
@@ -77,4 +63,5 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.INTERNET" />
 </manifest>

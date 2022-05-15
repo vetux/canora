@@ -5,5 +5,8 @@ public enum AudioContentSelector {
     PLAYLISTS,
     ARTISTS,
     ALBUMS,
-    GENRES
+    GENRES,
+    SOUNDCLOUD_SEARCH,
+    SOUNDCLOUD_CHARTS,
+    YOUTUBE_SEARCH
 }

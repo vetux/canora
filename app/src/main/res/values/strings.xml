@@ -15,18 +15,22 @@
     <string name="main_notfound0noAlbums">No Albums found</string>
     <string name="main_notfound0noArtists">No Artists found</string>
     <string name="main_notfound0noGenres">No Genres found</string>
-    <string name="main_notfound0stringNotFound">%1$s not found</string>
+    <string name="main_notfound0stringNotFound">\"%1$s\" not found</string>
+    <string name="main_notfound0soundcloudSearch">Enter text to begin search…</string>
+    <string name="main_notfound0soundcloudCharts">No Charts found</string>
 
     <string name="main_toolbar_title0tracks">Tracks</string>
     <string name="main_toolbar_title0playlists">Playlists</string>
     <string name="main_toolbar_title0albums">Albums</string>
     <string name="main_toolbar_title0artists">Artists</string>
     <string name="main_toolbar_title0genres">Genres</string>
+    <string name="main_toolbar_title0sc">SoundCloud</string>
 
     <string name="main_toolbar_title0subplaylist">Playlists / %1$s</string>
     <string name="main_toolbar_title0subalbum">Albums / %1$s</string>
     <string name="main_toolbar_title0subartist">Artists / %1$s</string>
     <string name="main_toolbar_title0subgenre">Genres / %1$s</string>
+    <string name="main_toolbar_title0subchart">SoundCloud / %1$s</string>
 
     <string name="main_toast_text0addedItems">Added %1$d items to %2$s</string>
     <string name="main_toast_text0deletedItemsFrom">Deleted %1$d items from %2$s</string>

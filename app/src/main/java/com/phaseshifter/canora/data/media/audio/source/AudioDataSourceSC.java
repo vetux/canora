@@ -8,36 +8,71 @@ import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.upstream.ContentDataSource;
 import com.google.android.exoplayer2.upstream.DataSource;
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.phaseshifter.canora.soundcloud.api_v2.client.SCV2Client;
 import com.phaseshifter.canora.soundcloud.api_v2.data.SCV2Track;
-import com.phaseshifter.canora.soundcloud.api_v2.data.SCV2TrackStreamData;
 
-import java.io.IOException;
 import java.io.Serializable;
+import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class AudioDataSourceSC implements AudioDataSource, Serializable {
     private static final long serialVersionUID = 1;
 
-    private final SCV2Track track;
+    private final List<SCV2Track.MediaTranscoding> codings;
 
-    public AudioDataSourceSC(SCV2Track track) {
-        this.track = track;
+    private static SCV2Client client;
+    private static ExecutorService pool = Executors.newSingleThreadExecutor();
+
+    private SCV2Client getClient() {
+        if (client == null) {
+            client = new SCV2Client();
+            updateClientId();
+        }
+        return client;
+    }
+
+    private void updateClientId() {
+        try {
+            Future<?> f = pool.submit(() -> {
+                try {
+                    client.setClientID(client.getNewClientID());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+            while (!f.isDone()) {
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public AudioDataSourceSC(List<SCV2Track.MediaTranscoding> codings) {
+        this.codings = codings;
     }
 
     @Override
     public MediaSource getExoPlayerSource(Context context) throws Exception {
-        DataSource.Factory factory = new DataSource.Factory() {
-            @Override
-            public DataSource createDataSource() {
-                return new ContentDataSource(context);
-            }
-        };
+        SCV2Client client = getClient();
 
-        SCV2Client client = new SCV2Client();
-        client.setClientID(client.getNewClientID());
-        SCV2TrackStreamData stream = client.getTemporaryStreamUrl(track);
-        return new ProgressiveMediaSource.Factory(factory).createMediaSource(MediaItem.fromUri(stream.url));
+        AtomicReference<String> stream = new AtomicReference<>();
+        Future<?> f = pool.submit(() -> {
+            try {
+                String url = client.getTemporaryStreamUrl(codings).url;
+                stream.set(url);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        while (!f.isDone()) {
+        }
+        DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(context, "clank");
+        return new ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(MediaItem.fromUri(Uri.parse(stream.get())));
     }
 
     @Override
@@ -45,18 +80,18 @@ public class AudioDataSourceSC implements AudioDataSource, Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AudioDataSourceSC that = (AudioDataSourceSC) o;
-        return Objects.equals(track, that.track);
+        return Objects.equals(codings, that.codings);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(track);
+        return Objects.hash(codings);
     }
 
     @Override
     public String toString() {
         return "AudioDataSourceUri{" +
-                "track=" + track +
+                "codings=" + codings +
                 '}';
     }
 }
