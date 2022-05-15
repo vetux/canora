@@ -208,7 +208,7 @@
         </Constraint>
         <Constraint android:id="@id/control_imageview_background">
             <PropertySet android:visibility="visible"/>
-            <Layout android:layout_width="0dp"
+            <Layout android:layout_width="match_parent"
                     android:layout_height="0dp"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -383,7 +383,7 @@
         </Constraint>
         <Constraint android:id="@id/control_imageview_background">
             <PropertySet android:visibility="visible"/>
-            <Layout android:layout_width="0dp"
+            <Layout android:layout_width="match_parent"
                     android:layout_height="0dp"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
