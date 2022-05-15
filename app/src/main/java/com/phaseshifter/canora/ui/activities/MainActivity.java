@@ -26,6 +26,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.LinearInterpolator;
 import android.widget.*;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.motion.widget.MotionLayout;
@@ -33,6 +34,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+
 import com.phaseshifter.canora.R;
 import com.phaseshifter.canora.application.MainApplication;
 import com.phaseshifter.canora.data.media.audio.AudioData;
@@ -572,6 +574,7 @@ public class MainActivity extends Activity implements MainContract.View,
     public void showNotFound(AudioContentSelector selector, String playlistTitle) {
         runOnUiThread(() -> {
             if (selector == AudioContentSelector.TRACKS
+                    || selector == AudioContentSelector.SOUNDCLOUD_SEARCH
                     || playlistTitle != null)
                 showTrackContent();
             else
@@ -623,6 +626,7 @@ public class MainActivity extends Activity implements MainContract.View,
     public void showNotFound(AudioContentSelector selector, String playlistTitle, String searchText) {
         runOnUiThread(() -> {
             if (selector == AudioContentSelector.TRACKS
+                    || selector == AudioContentSelector.SOUNDCLOUD_SEARCH
                     || playlistTitle != null)
                 showTrackContent();
             else

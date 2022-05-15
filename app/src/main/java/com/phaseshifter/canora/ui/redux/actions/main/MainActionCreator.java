@@ -244,7 +244,7 @@ public abstract class MainActionCreator {
 
                             Enumeration<AudioPlaylist> pl = scAudioDataRepo.getCharts().elements();
                             payload.setContentTracks(currentState.getContentTracks());
-                            while(pl.hasMoreElements())
+                            while (pl.hasMoreElements())
                                 l.add(pl.nextElement());
 
                             payload.setContentPlaylists(l);
@@ -499,6 +499,10 @@ public abstract class MainActionCreator {
         return new Thunk.ThunkAction() {
             @Override
             public Action run() {
+                if (store.getState().getUiIndicator().getSelector() == AudioContentSelector.SOUNDCLOUD_SEARCH) {
+                    return null;
+                }
+
                 MainStateImmutable currentState = store.getState();
                 MainState payload = new MainState();
                 payload.setContentTracks(currentState.getContentTracks());
