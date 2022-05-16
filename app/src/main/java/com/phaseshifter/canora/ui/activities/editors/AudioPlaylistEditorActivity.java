@@ -13,10 +13,10 @@ import androidx.annotation.Nullable;
 import com.phaseshifter.canora.R;
 import com.phaseshifter.canora.application.MainApplication;
 import com.phaseshifter.canora.data.media.image.ImageData;
-import com.phaseshifter.canora.data.media.image.metadata.ImageMetadataSimple;
+import com.phaseshifter.canora.data.media.image.metadata.ImageMetadataMemory;
 import com.phaseshifter.canora.data.media.image.source.ImageDataSourceByteArray;
 import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
-import com.phaseshifter.canora.data.media.playlist.metadata.PlaylistMetadataSimple;
+import com.phaseshifter.canora.data.media.playlist.metadata.PlaylistMetadataMemory;
 import com.phaseshifter.canora.data.theme.AppTheme;
 
 import java.io.ByteArrayOutputStream;
@@ -116,11 +116,11 @@ public class AudioPlaylistEditorActivity extends Activity {
 
     public AudioPlaylist getUpdatedPlaylist() {
         EditText tex = findViewById(R.id.titleedit);
-        PlaylistMetadataSimple metadata = new PlaylistMetadataSimple(editingPlaylist.getMetadata());
+        PlaylistMetadataMemory metadata = new PlaylistMetadataMemory(editingPlaylist.getMetadata());
         metadata.setTitle(tex.getText().toString());
         if (selectedArtwork != null) {
             ImageDataSourceByteArray imageSource = new ImageDataSourceByteArray(selectedArtwork);
-            metadata.setArtwork(new ImageData(new ImageMetadataSimple(UUID.randomUUID()), imageSource));
+            metadata.setArtwork(new ImageData(new ImageMetadataMemory(UUID.randomUUID()), imageSource));
         } else {
             metadata.setArtwork(null);
         }

@@ -10,7 +10,7 @@ import android.widget.TextView;
 import com.phaseshifter.canora.R;
 import com.phaseshifter.canora.application.MainApplication;
 import com.phaseshifter.canora.data.media.audio.AudioData;
-import com.phaseshifter.canora.data.media.audio.metadata.AudioMetadataSimple;
+import com.phaseshifter.canora.data.media.audio.metadata.AudioMetadataMemory;
 import com.phaseshifter.canora.data.media.audio.source.AudioDataSourceFile;
 import com.phaseshifter.canora.data.media.audio.source.AudioDataSourceUri;
 import com.phaseshifter.canora.data.theme.AppTheme;
@@ -99,7 +99,7 @@ public class AudioDataEditorActivity extends Activity {
             EditText titleText = findViewById(R.id.title);
             EditText artistText = findViewById(R.id.artist);
             EditText albumText = findViewById(R.id.album);
-            AudioMetadataSimple ret = new AudioMetadataSimple(data.getMetadata());
+            AudioMetadataMemory ret = new AudioMetadataMemory(data.getMetadata());
             ret.setTitle(titleText.getText().toString());
             ret.setArtist(artistText.getText().toString());
             ret.setAlbum(albumText.getText().toString());

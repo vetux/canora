@@ -2,9 +2,9 @@ package com.phaseshifter.canora.model.repo;
 
 import android.util.Log;
 import com.phaseshifter.canora.data.media.audio.AudioData;
-import com.phaseshifter.canora.data.media.audio.metadata.AudioMetadataSimple;
+import com.phaseshifter.canora.data.media.audio.metadata.AudioMetadataMemory;
 import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
-import com.phaseshifter.canora.data.media.playlist.metadata.PlaylistMetadataSimple;
+import com.phaseshifter.canora.data.media.playlist.metadata.PlaylistMetadataMemory;
 import com.phaseshifter.canora.model.comparison.AudioDataComparsion;
 import com.phaseshifter.canora.model.comparison.AudioPlaylistComparison;
 import com.phaseshifter.canora.model.provider.IContentProvider;
@@ -133,7 +133,7 @@ public class AudioDataRepo implements AudioDataRepository {
             boolean foundOld = false;
             for (AudioData oldTrack : oldData) {
                 if (AudioDataComparsion.isEqual_exclude_UUID(track, oldTrack)) {
-                    AudioMetadataSimple patchedMetadata = new AudioMetadataSimple(track.getMetadata());
+                    AudioMetadataMemory patchedMetadata = new AudioMetadataMemory(track.getMetadata());
                     patchedMetadata.setId(oldTrack.getMetadata().getId());
                     ret.add(new AudioData(patchedMetadata, track.getDataSource()));
                     foundOld = true;
@@ -152,7 +152,7 @@ public class AudioDataRepo implements AudioDataRepository {
             boolean foundOld = false;
             for (AudioPlaylist oldPlaylist : oldData) {
                 if (AudioPlaylistComparison.isEqualPermissive(playlist, oldPlaylist)) {
-                    PlaylistMetadataSimple patchedMetadata = new PlaylistMetadataSimple(playlist.getMetadata());
+                    PlaylistMetadataMemory patchedMetadata = new PlaylistMetadataMemory(playlist.getMetadata());
                     patchedMetadata.setId(oldPlaylist.getMetadata().getId());
                     ret.add(new AudioPlaylist(patchedMetadata, smartUpdateAudioData(oldPlaylist.getData(), playlist.getData())));
                     foundOld = true;

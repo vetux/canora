@@ -1,17 +1,7 @@
 package com.phaseshifter.canora.ui.redux.actions.main;
 
-import android.net.Uri;
-import android.os.Handler;
-import android.os.Looper;
-
 import com.phaseshifter.canora.data.media.audio.AudioData;
-import com.phaseshifter.canora.data.media.audio.metadata.AudioMetadataSimple;
-import com.phaseshifter.canora.data.media.audio.source.AudioDataSourceSC;
-import com.phaseshifter.canora.data.media.image.ImageData;
-import com.phaseshifter.canora.data.media.image.metadata.ImageMetadataSimple;
-import com.phaseshifter.canora.data.media.image.source.ImageDataSourceUri;
 import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
-import com.phaseshifter.canora.data.media.playlist.metadata.PlaylistMetadataSimple;
 import com.phaseshifter.canora.data.settings.BooleanSetting;
 import com.phaseshifter.canora.data.settings.FloatSetting;
 import com.phaseshifter.canora.data.settings.IntegerSetting;
@@ -24,13 +14,6 @@ import com.phaseshifter.canora.model.repo.SettingsRepository;
 import com.phaseshifter.canora.model.repo.ThemeRepository;
 import com.phaseshifter.canora.service.MediaPlayerService;
 import com.phaseshifter.canora.service.state.PlayerState;
-import com.phaseshifter.canora.soundcloud.api.data.SCGenre;
-import com.phaseshifter.canora.soundcloud.api.exceptions.SCConnectionException;
-import com.phaseshifter.canora.soundcloud.api.exceptions.SCParsingException;
-import com.phaseshifter.canora.soundcloud.api_v2.client.SCV2Client;
-import com.phaseshifter.canora.soundcloud.api_v2.data.SCV2ChartTrack;
-import com.phaseshifter.canora.soundcloud.api_v2.data.SCV2Charts;
-import com.phaseshifter.canora.soundcloud.api_v2.data.SCV2Track;
 import com.phaseshifter.canora.ui.data.AudioContentSelector;
 import com.phaseshifter.canora.ui.data.formatting.FilterDef;
 import com.phaseshifter.canora.ui.data.formatting.SortDef;
@@ -43,7 +26,6 @@ import com.phaseshifter.canora.ui.redux.state.MainState;
 import com.phaseshifter.canora.ui.redux.state.MainStateImmutable;
 import com.phaseshifter.canora.ui.utils.selectors.MainSelector;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -53,8 +35,6 @@ import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicReference;
 
 public abstract class MainActionCreator {
     private static final String LOG_TAG = "MainActionCreator";

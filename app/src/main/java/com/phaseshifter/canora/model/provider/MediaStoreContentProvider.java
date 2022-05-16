@@ -8,14 +8,14 @@ import android.provider.MediaStore;
 import android.util.Log;
 import androidx.core.util.Pair;
 import com.phaseshifter.canora.data.media.audio.AudioData;
-import com.phaseshifter.canora.data.media.audio.metadata.AudioMetadataSimple;
+import com.phaseshifter.canora.data.media.audio.metadata.AudioMetadataMemory;
 import com.phaseshifter.canora.data.media.audio.source.AudioDataSourceUri;
 import com.phaseshifter.canora.data.media.image.ImageData;
-import com.phaseshifter.canora.data.media.image.metadata.ImageMetadataSimple;
+import com.phaseshifter.canora.data.media.image.metadata.ImageMetadataMemory;
 import com.phaseshifter.canora.data.media.image.source.ImageDataSourceUri;
 import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
 import com.phaseshifter.canora.data.media.playlist.metadata.PlaylistMetadata;
-import com.phaseshifter.canora.data.media.playlist.metadata.PlaylistMetadataSimple;
+import com.phaseshifter.canora.data.media.playlist.metadata.PlaylistMetadataMemory;
 import com.phaseshifter.canora.utils.android.ContentUriFactory;
 
 import java.util.*;
@@ -70,10 +70,10 @@ public class MediaStoreContentProvider implements IContentProvider {
                         throw new RuntimeException("UUID Collision !!!");
                     usedUUIDS.add(genUUID);
                     int audioID = mediaCursor.getInt(indexID);
-                    ImageMetadataSimple imageMetadata = new ImageMetadataSimple(UUID.randomUUID());
+                    ImageMetadataMemory imageMetadata = new ImageMetadataMemory(UUID.randomUUID());
                     ImageDataSourceUri imageSource = new ImageDataSourceUri(uriFactory.getAlbumArtworkUriFromAlbumId(mediaCursor.getInt(indexAlbumID)));
                     ImageData image = new ImageData(imageMetadata, imageSource);
-                    AudioMetadataSimple metadata = new AudioMetadataSimple(
+                    AudioMetadataMemory metadata = new AudioMetadataMemory(
                             genUUID,
                             mediaCursor.getString(indexTitle),
                             mediaCursor.getString(indexArtist),
@@ -164,7 +164,7 @@ public class MediaStoreContentProvider implements IContentProvider {
                     if (usedUUIDS.contains(genUUID))
                         throw new RuntimeException("UUID Collision!!!");
                     usedUUIDS.add(genUUID);
-                    PlaylistMetadata metadata = new PlaylistMetadataSimple(genUUID, genre.second, null);
+                    PlaylistMetadata metadata = new PlaylistMetadataMemory(genUUID, genre.second, null);
                     ret.add(new AudioPlaylist(metadata, getTracksOfGenreID(genre.first)));
                 }
             }
@@ -210,10 +210,10 @@ public class MediaStoreContentProvider implements IContentProvider {
 
                 int audioID = mediaCursor.getInt(indexID);
 
-                ImageMetadataSimple imageMetadata = new ImageMetadataSimple(UUID.randomUUID());
+                ImageMetadataMemory imageMetadata = new ImageMetadataMemory(UUID.randomUUID());
                 ImageDataSourceUri imageSource = new ImageDataSourceUri(uriFactory.getAlbumArtworkUriFromAlbumId(mediaCursor.getInt(indexAlbumID)));
                 ImageData image = new ImageData(imageMetadata, imageSource);
-                AudioMetadataSimple metadata = new AudioMetadataSimple(
+                AudioMetadataMemory metadata = new AudioMetadataMemory(
                         genUUID,
                         mediaCursor.getString(indexTitle),
                         mediaCursor.getString(indexArtist),
@@ -246,12 +246,12 @@ public class MediaStoreContentProvider implements IContentProvider {
                 try {
                     ImageData trackArtwork = playlistTracks.get(0).getMetadata().getArtwork();
                     if (trackArtwork != null) {
-                        playlistArtwork = new ImageData(new ImageMetadataSimple(UUID.randomUUID()), trackArtwork.getDataSource());
+                        playlistArtwork = new ImageData(new ImageMetadataMemory(UUID.randomUUID()), trackArtwork.getDataSource());
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                PlaylistMetadata metadata = new PlaylistMetadataSimple(playlistID, playlistTitle, playlistArtwork);
+                PlaylistMetadata metadata = new PlaylistMetadataMemory(playlistID, playlistTitle, playlistArtwork);
                 ret.add(new AudioPlaylist(metadata, playlistTracks));
             }
         }

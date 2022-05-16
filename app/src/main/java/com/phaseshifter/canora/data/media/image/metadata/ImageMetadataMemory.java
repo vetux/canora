@@ -4,12 +4,12 @@ import java.io.Serializable;
 import java.util.Objects;
 import java.util.UUID;
 
-public class ImageMetadataSimple implements ImageMetadata, Serializable {
+public class ImageMetadataMemory implements ImageMetadata, Serializable {
     private static final long serialVersionUID = 1;
 
     private final UUID id;
 
-    public ImageMetadataSimple(UUID id) {
+    public ImageMetadataMemory(UUID id) {
         this.id = id;
     }
 
@@ -22,7 +22,7 @@ public class ImageMetadataSimple implements ImageMetadata, Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ImageMetadataSimple that = (ImageMetadataSimple) o;
+        ImageMetadataMemory that = (ImageMetadataMemory) o;
         return Objects.equals(id, that.id);
     }
 

@@ -3,13 +3,13 @@ package com.phaseshifter.canora.model.repo;
 import android.net.Uri;
 
 import com.phaseshifter.canora.data.media.audio.AudioData;
-import com.phaseshifter.canora.data.media.audio.metadata.AudioMetadataSimple;
+import com.phaseshifter.canora.data.media.audio.metadata.AudioMetadataMemory;
 import com.phaseshifter.canora.data.media.audio.source.AudioDataSourceSC;
 import com.phaseshifter.canora.data.media.image.ImageData;
-import com.phaseshifter.canora.data.media.image.metadata.ImageMetadataSimple;
+import com.phaseshifter.canora.data.media.image.metadata.ImageMetadataMemory;
 import com.phaseshifter.canora.data.media.image.source.ImageDataSourceUri;
 import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
-import com.phaseshifter.canora.data.media.playlist.metadata.PlaylistMetadataSimple;
+import com.phaseshifter.canora.data.media.playlist.metadata.PlaylistMetadataMemory;
 import com.phaseshifter.canora.soundcloud.api.data.SCGenre;
 import com.phaseshifter.canora.soundcloud.api_v2.client.SCV2Client;
 import com.phaseshifter.canora.soundcloud.api_v2.data.SCV2ChartTrack;
@@ -20,12 +20,7 @@ import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Locale;
 import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class SCAudioDataRepo {
     private SCV2Client client = null;
@@ -83,22 +78,22 @@ public class SCAudioDataRepo {
 
     private AudioData getAudioData(SCV2Track track) {
         if (track.getPublisher_metadata() == null) {
-            return new AudioData(new AudioMetadataSimple(UUID.randomUUID(),
+            return new AudioData(new AudioMetadataMemory(UUID.randomUUID(),
                     track.getTitle(),
                     track.getUser().getId(),
                     "<unknown>",
                     new String[0],
                     Long.parseLong(track.getDuration()),
-                    new ImageData(new ImageMetadataSimple(UUID.randomUUID()), new ImageDataSourceUri(Uri.parse(track.getArtwork_url())))),
+                    new ImageData(new ImageMetadataMemory(UUID.randomUUID()), new ImageDataSourceUri(Uri.parse(track.getArtwork_url())))),
                     new AudioDataSourceSC(track.getCodings()));
         } else {
-            return new AudioData(new AudioMetadataSimple(UUID.randomUUID(),
+            return new AudioData(new AudioMetadataMemory(UUID.randomUUID(),
                     track.getTitle(),
                     track.getPublisher_metadata().getArtist(),
                     track.getPublisher_metadata().getAlbum_title(),
                     new String[0],
                     Long.parseLong(track.getDuration()),
-                    new ImageData(new ImageMetadataSimple(UUID.randomUUID()), new ImageDataSourceUri(Uri.parse(track.getArtwork_url())))),
+                    new ImageData(new ImageMetadataMemory(UUID.randomUUID()), new ImageDataSourceUri(Uri.parse(track.getArtwork_url())))),
                     new AudioDataSourceSC(track.getCodings()));
         }
     }
@@ -162,7 +157,7 @@ public class SCAudioDataRepo {
 
                 UUID uuid = UUID.randomUUID();
 
-                charts.put(uuid, new AudioPlaylist(new PlaylistMetadataSimple(uuid,
+                charts.put(uuid, new AudioPlaylist(new PlaylistMetadataMemory(uuid,
                         genre.parameterValue.substring("soundcloud:genres:".length()),
                         null),
                         t));

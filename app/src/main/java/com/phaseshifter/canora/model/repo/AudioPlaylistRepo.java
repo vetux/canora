@@ -3,10 +3,10 @@ package com.phaseshifter.canora.model.repo;
 import android.util.Log;
 import com.phaseshifter.canora.data.media.audio.AudioData;
 import com.phaseshifter.canora.data.media.audio.metadata.AudioMetadata;
-import com.phaseshifter.canora.data.media.audio.metadata.AudioMetadataSimple;
+import com.phaseshifter.canora.data.media.audio.metadata.AudioMetadataMemory;
 import com.phaseshifter.canora.data.media.image.ImageData;
 import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
-import com.phaseshifter.canora.data.media.playlist.metadata.PlaylistMetadataSimple;
+import com.phaseshifter.canora.data.media.playlist.metadata.PlaylistMetadataMemory;
 import com.phaseshifter.canora.model.compression.Gzip;
 import com.phaseshifter.canora.utils.serialization.IObjectSerializer;
 import com.phaseshifter.canora.utils.serialization.ObjectSerializer;
@@ -54,7 +54,7 @@ public class AudioPlaylistRepo implements AudioPlaylistRepository {
 
         List<AudioData> modifiedTracks = prepareData(playlist.getData(), artwork);
 
-        PlaylistMetadataSimple metadata = new PlaylistMetadataSimple(key, playlist.getMetadata().getTitle(), artwork);
+        PlaylistMetadataMemory metadata = new PlaylistMetadataMemory(key, playlist.getMetadata().getTitle(), artwork);
         AudioPlaylist generatedPlaylist = new AudioPlaylist(metadata, modifiedTracks);
         playlists.put(key, generatedPlaylist);
 
@@ -82,7 +82,7 @@ public class AudioPlaylistRepo implements AudioPlaylistRepository {
         if (playlists.containsKey(uuid))
             throw new RuntimeException("UUID Collision for " + uuid);
 
-        PlaylistMetadataSimple metadata = new PlaylistMetadataSimple(uuid, playlist.getMetadata().getTitle(), image);
+        PlaylistMetadataMemory metadata = new PlaylistMetadataMemory(uuid, playlist.getMetadata().getTitle(), image);
         AudioPlaylist generatedPlaylist = new AudioPlaylist(metadata, modifiedTracks);
         playlists.put(uuid, generatedPlaylist);
 
@@ -105,7 +105,7 @@ public class AudioPlaylistRepo implements AudioPlaylistRepository {
 
         List<AudioData> modifiedData = prepareData(value.getData(), image);
 
-        PlaylistMetadataSimple metadata = new PlaylistMetadataSimple(key, value.getMetadata().getTitle(), image);
+        PlaylistMetadataMemory metadata = new PlaylistMetadataMemory(key, value.getMetadata().getTitle(), image);
         AudioPlaylist generatedPlaylist = new AudioPlaylist(metadata, modifiedData);
         playlists.put(key, generatedPlaylist);
 
@@ -170,7 +170,7 @@ public class AudioPlaylistRepo implements AudioPlaylistRepository {
                 throw new RuntimeException("UUID Collision !!!");
             usedUUIDS.add(genUUID);
             AudioMetadata existingMetadata = track.getMetadata();
-            AudioMetadataSimple modifiedMetadata = new AudioMetadataSimple(
+            AudioMetadataMemory modifiedMetadata = new AudioMetadataMemory(
                     genUUID,
                     existingMetadata.getTitle(),
                     existingMetadata.getArtist(),

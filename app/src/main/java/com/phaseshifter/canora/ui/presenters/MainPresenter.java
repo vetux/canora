@@ -5,7 +5,7 @@ import android.util.Log;
 import com.phaseshifter.canora.data.media.audio.AudioData;
 import com.phaseshifter.canora.data.media.audio.source.AudioDataSourceUri;
 import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
-import com.phaseshifter.canora.data.media.playlist.metadata.PlaylistMetadataSimple;
+import com.phaseshifter.canora.data.media.playlist.metadata.PlaylistMetadataMemory;
 import com.phaseshifter.canora.data.settings.BooleanSetting;
 import com.phaseshifter.canora.data.settings.FloatSetting;
 import com.phaseshifter.canora.data.settings.IntegerSetting;
@@ -481,7 +481,7 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
                                 view.showDialog_CreatePlaylist(selectedData, new MainDialogFactory.PlaylistCreateListener() {
                                     @Override
                                     public void onCreate(String title, List<AudioData> data) {
-                                        PlaylistMetadataSimple metadata = new PlaylistMetadataSimple(null,
+                                        PlaylistMetadataMemory metadata = new PlaylistMetadataMemory(null,
                                                 title,
                                                 null
                                         );

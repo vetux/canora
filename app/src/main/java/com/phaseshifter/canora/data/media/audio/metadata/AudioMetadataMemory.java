@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.UUID;
 
-public class AudioMetadataSimple implements AudioMetadata, Serializable {
+public class AudioMetadataMemory implements AudioMetadata, Serializable {
     private static final long serialVersionUID = 1;
 
     protected UUID id;
@@ -18,7 +18,7 @@ public class AudioMetadataSimple implements AudioMetadata, Serializable {
     protected long length;
     protected ImageData artwork;
 
-    public AudioMetadataSimple(UUID id, String title, String artist, String album, String[] genres, long length, ImageData artwork) {
+    public AudioMetadataMemory(UUID id, String title, String artist, String album, String[] genres, long length, ImageData artwork) {
         this.id = id;
         this.title = title;
         this.artist = artist;
@@ -28,15 +28,15 @@ public class AudioMetadataSimple implements AudioMetadata, Serializable {
         this.artwork = artwork;
     }
 
-    public AudioMetadataSimple(AudioMetadataSimple copy) {
+    public AudioMetadataMemory(AudioMetadataMemory copy) {
         this(copy.id, copy.title, copy.artist, copy.album, copy.genres, copy.length, copy.artwork);
     }
 
-    public AudioMetadataSimple(AudioMetadata copy) {
+    public AudioMetadataMemory(AudioMetadata copy) {
         this(copy.getId(), copy.getTitle(), copy.getArtist(), copy.getAlbum(), copy.getGenres(), copy.getLength(), copy.getArtwork());
     }
 
-    public AudioMetadataSimple() {
+    public AudioMetadataMemory() {
         this(null, null, null, null, null, 0, null);
     }
 
@@ -107,7 +107,7 @@ public class AudioMetadataSimple implements AudioMetadata, Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        AudioMetadataSimple that = (AudioMetadataSimple) o;
+        AudioMetadataMemory that = (AudioMetadataMemory) o;
         return length == that.length &&
                 Objects.equals(id, that.id) &&
                 Objects.equals(title, that.title) &&

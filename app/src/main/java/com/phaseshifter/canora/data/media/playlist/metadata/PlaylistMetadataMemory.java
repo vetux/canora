@@ -6,24 +6,24 @@ import java.io.Serializable;
 import java.util.Objects;
 import java.util.UUID;
 
-public class PlaylistMetadataSimple implements PlaylistMetadata, Serializable {
+public class PlaylistMetadataMemory implements PlaylistMetadata, Serializable {
     private static final long serialVersionUID = 1;
 
     private UUID id;
     private String title;
     private ImageData artwork;
 
-    public PlaylistMetadataSimple(UUID id, String title, ImageData artwork) {
+    public PlaylistMetadataMemory(UUID id, String title, ImageData artwork) {
         this.id = id;
         this.title = title;
         this.artwork = artwork;
     }
 
-    public PlaylistMetadataSimple(PlaylistMetadataSimple copy) {
+    public PlaylistMetadataMemory(PlaylistMetadataMemory copy) {
         this(copy.id, copy.title, copy.artwork);
     }
 
-    public PlaylistMetadataSimple(PlaylistMetadata copy) {
+    public PlaylistMetadataMemory(PlaylistMetadata copy) {
         this(copy.getId(), copy.getTitle(), copy.getArtwork());
     }
 
@@ -58,7 +58,7 @@ public class PlaylistMetadataSimple implements PlaylistMetadata, Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        PlaylistMetadataSimple metadata = (PlaylistMetadataSimple) o;
+        PlaylistMetadataMemory metadata = (PlaylistMetadataMemory) o;
         return Objects.equals(id, metadata.id) &&
                 Objects.equals(title, metadata.title) &&
                 Objects.equals(artwork, metadata.artwork);
