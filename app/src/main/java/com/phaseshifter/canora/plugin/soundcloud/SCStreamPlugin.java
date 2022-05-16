@@ -6,7 +6,6 @@ import android.net.Uri;
 import com.phaseshifter.canora.R;
 import com.phaseshifter.canora.data.media.audio.AudioData;
 import com.phaseshifter.canora.data.media.audio.metadata.AudioMetadataMemory;
-import com.phaseshifter.canora.data.media.audio.source.AudioDataSourceSC;
 import com.phaseshifter.canora.data.media.image.ImageData;
 import com.phaseshifter.canora.data.media.image.metadata.ImageMetadataMemory;
 import com.phaseshifter.canora.data.media.image.source.ImageDataSourceUri;

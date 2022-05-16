@@ -1,4 +1,4 @@
-package com.phaseshifter.canora.data.media.audio.source;
+package com.phaseshifter.canora.plugin.soundcloud;
 
 import android.content.Context;
 import android.net.Uri;
@@ -8,6 +8,7 @@ import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
+import com.phaseshifter.canora.data.media.audio.source.AudioDataSource;
 import com.phaseshifter.canora.plugin.soundcloud.api_v2.client.SCV2Client;
 import com.phaseshifter.canora.plugin.soundcloud.api_v2.data.SCV2Track;
 
