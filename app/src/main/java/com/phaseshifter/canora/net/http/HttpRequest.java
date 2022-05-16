@@ -1,6 +1,6 @@
 package com.phaseshifter.canora.net.http;
 
-import com.phaseshifter.canora.soundcloud.util.Pair;
+import com.phaseshifter.canora.utils.Pair;
 
 import java.util.List;
 

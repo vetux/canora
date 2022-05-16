@@ -10,11 +10,11 @@ import com.phaseshifter.canora.data.media.image.metadata.ImageMetadataMemory;
 import com.phaseshifter.canora.data.media.image.source.ImageDataSourceUri;
 import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
 import com.phaseshifter.canora.data.media.playlist.metadata.PlaylistMetadataMemory;
-import com.phaseshifter.canora.soundcloud.api.data.SCGenre;
-import com.phaseshifter.canora.soundcloud.api_v2.client.SCV2Client;
-import com.phaseshifter.canora.soundcloud.api_v2.data.SCV2ChartTrack;
-import com.phaseshifter.canora.soundcloud.api_v2.data.SCV2Charts;
-import com.phaseshifter.canora.soundcloud.api_v2.data.SCV2Track;
+import com.phaseshifter.canora.plugin.soundcloud.api.data.SCGenre;
+import com.phaseshifter.canora.plugin.soundcloud.api_v2.client.SCV2Client;
+import com.phaseshifter.canora.plugin.soundcloud.api_v2.data.SCV2ChartTrack;
+import com.phaseshifter.canora.plugin.soundcloud.api_v2.data.SCV2Charts;
+import com.phaseshifter.canora.plugin.soundcloud.api_v2.data.SCV2Track;
 
 import java.util.ArrayList;
 import java.util.Dictionary;

@@ -1,7 +1,7 @@
 package com.phaseshifter.canora.net.http;
 
-import com.phaseshifter.canora.soundcloud.util.LogKeeper;
-import com.phaseshifter.canora.soundcloud.util.Pair;
+import com.phaseshifter.canora.utils.LogKeeper;
+import com.phaseshifter.canora.utils.Pair;
 import okhttp3.*;
 
 import java.io.IOException;

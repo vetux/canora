@@ -1,6 +1,6 @@
 package com.phaseshifter.canora.net.http;
 
-import com.phaseshifter.canora.soundcloud.util.LogKeeper;
+import com.phaseshifter.canora.utils.LogKeeper;
 
 import java.util.concurrent.TimeUnit;
 
