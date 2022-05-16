@@ -593,6 +593,8 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
     }
 
     private boolean createPlayer(AudioData file) {
+        file.getDataSource().prepare();
+
         exoPlayer.stop(true);
         exoPlayer.setPlayWhenReady(true);
         MediaSource source;

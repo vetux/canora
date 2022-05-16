@@ -15,18 +15,22 @@ import com.phaseshifter.canora.plugin.soundcloud.api_v2.data.SCV2Track;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class AudioDataSourceSC implements AudioDataSource, Serializable {
     private static final long serialVersionUID = 1;
 
-    private final List<SCV2Track.MediaTranscoding> codings;
-
     private static SCV2Client client;
     private static ExecutorService pool = Executors.newSingleThreadExecutor();
+    private static CountDownLatch latch = new CountDownLatch(0);
+
+    private final List<SCV2Track.MediaTranscoding> codings;
+    private final AtomicReference<String> streamUrl = new AtomicReference<>();
 
     private SCV2Client getClient() {
         if (client == null) {
@@ -38,17 +42,19 @@ public class AudioDataSourceSC implements AudioDataSource, Serializable {
 
     private void updateClientId() {
         try {
-            Future<?> f = pool.submit(() -> {
-                try {
-                    client.setClientID(client.getNewClientID());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            });
-            while (!f.isDone()) {
-            }
+            client.setClientID(client.getNewClientID());
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private void syncWithPool() {
+        while (latch.getCount() != 0) {
+            try {
+                latch.await();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -57,22 +63,36 @@ public class AudioDataSourceSC implements AudioDataSource, Serializable {
     }
 
     @Override
-    public MediaSource getExoPlayerSource(Context context) throws Exception {
-        SCV2Client client = getClient();
+    public void prepare() {
+        syncWithPool();
 
-        AtomicReference<String> stream = new AtomicReference<>();
-        Future<?> f = pool.submit(() -> {
-            try {
-                String url = client.getTemporaryStreamUrl(codings).url;
-                stream.set(url);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-        while (!f.isDone()) {
+        if (streamUrl.get() == null) {
+            latch = new CountDownLatch(1);
+            pool.submit(() -> {
+                try {
+                    SCV2Client client = getClient();
+                    String url = client.getTemporaryStreamUrl(codings).url;
+                    streamUrl.set(url);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                latch.countDown();
+            });
         }
+    }
+
+    @Override
+    public MediaSource getExoPlayerSource(Context context) {
+        prepare();
+
+        syncWithPool();
+
+        if (streamUrl.get() == null) {
+            throw new RuntimeException("Failed to retrieve stream url for track " + codings);
+        }
+
         DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(context, "clank");
-        return new ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(MediaItem.fromUri(Uri.parse(stream.get())));
+        return new ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(MediaItem.fromUri(Uri.parse(streamUrl.get())));
     }
 
     @Override
