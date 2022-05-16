@@ -39,8 +39,6 @@ import java.util.concurrent.Executors;
 public abstract class MainActionCreator {
     private static final String LOG_TAG = "MainActionCreator";
 
-    private static ExecutorService pool = Executors.newSingleThreadExecutor();
-
     public static Action refreshAndFetchRepoData(Store<MainStateImmutable> store,
                                                  AudioDataRepository audioDataRepository,
                                                  AudioPlaylistRepository audioPlaylistRepository,
