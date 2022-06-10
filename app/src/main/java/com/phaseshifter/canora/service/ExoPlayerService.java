@@ -28,10 +28,8 @@ import com.phaseshifter.canora.service.state.PlayerState;
 import com.phaseshifter.canora.ui.activities.MainActivity;
 import com.phaseshifter.canora.utils.Observable;
 import com.phaseshifter.canora.utils.android.bitmap.BitmapUtils;
-import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.Player;
-import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.source.MediaSource;
 
 import java.util.List;
@@ -81,6 +79,8 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
     private float volume = 0.5f;
 
     private Boolean isForeground = false; //Should be implemented by android.app.Service class, but it is not.
+
+    private boolean focusGainWait = false;
 
     //Binder
     private final IBinder mBinder = new LocalBinder();
@@ -351,9 +351,15 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
     public void onAudioFocusChange(int focusChange) {
         Log.v(LOG_TAG, "onAudioFocusChange " + focusChange);
         if (focusChange <= 0) {
-            pause();
+            if (state.get().isPlaying()) {
+                focusGainWait = true;
+                pause();
+            }
         } else {
-            resume();
+            if (focusGainWait) {
+                focusGainWait = false;
+                resume();
+            }
         }
     }
 
@@ -427,47 +433,32 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
             notificationBuilder.addAction(R.drawable.main_btnnext, "next", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_NEXT), PendingIntent.FLAG_IMMUTABLE));
         }
 
-        boolean isHuaweiLollipop = (android.os.Build.VERSION.SDK_INT == Build.VERSION_CODES.LOLLIPOP_MR1 || android.os.Build.VERSION.SDK_INT == Build.VERSION_CODES.LOLLIPOP)
-                && Build.MANUFACTURER.equalsIgnoreCase("HUAWEI");
-
-        if (!isHuaweiLollipop) {
-            notificationBuilder.setStyle(new Notification.MediaStyle()
-                    .setMediaSession(mediaSession.getSessionToken())
-                    .setShowActionsInCompactView(0, 1, 2));
-            if (track != null) {
-                notificationBuilder
-                        .setContentTitle(track.getMetadata().getTitle())
-                        .setContentText(track.getMetadata().getArtist());
-                Bitmap artwork = null;
-                try {
-                    if (track.getMetadata().getArtwork() != null)
-                        artwork = track.getMetadata().getArtwork().getDataSource().getBitmap(this);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                if (artwork == null)
-                    artwork = BitmapFactory.decodeResource(getResources(), R.drawable.artwork_unset);
-                if (artwork != null) {
-                    notificationBuilder.setLargeIcon(artwork);
-                }
-            } else {
-                notificationBuilder
-                        .setContentTitle("")
-                        .setContentText("");
-                Bitmap artwork = BitmapUtils.getBitmapForResource(this, R.drawable.artwork_unset);
-                if (artwork != null)
-                    notificationBuilder.setLargeIcon(artwork);
+        notificationBuilder.setStyle(new Notification.MediaStyle()
+                .setMediaSession(mediaSession.getSessionToken())
+                .setShowActionsInCompactView(0, 1, 2));
+        if (track != null) {
+            notificationBuilder
+                    .setContentTitle(track.getMetadata().getTitle())
+                    .setContentText(track.getMetadata().getArtist());
+            Bitmap artwork = null;
+            try {
+                if (track.getMetadata().getArtwork() != null)
+                    artwork = track.getMetadata().getArtwork().getDataSource().getBitmap(this);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            if (artwork == null)
+                artwork = BitmapFactory.decodeResource(getResources(), R.drawable.artwork_unset);
+            if (artwork != null) {
+                notificationBuilder.setLargeIcon(artwork);
             }
         } else {
-            if (track != null) {
-                notificationBuilder
-                        .setContentTitle(track.getMetadata().getTitle())
-                        .setContentText(track.getMetadata().getArtist());
-            } else {
-                notificationBuilder
-                        .setContentTitle("")
-                        .setContentText("");
-            }
+            notificationBuilder
+                    .setContentTitle("")
+                    .setContentText("");
+            Bitmap artwork = BitmapUtils.getBitmapForResource(this, R.drawable.artwork_unset);
+            if (artwork != null)
+                notificationBuilder.setLargeIcon(artwork);
         }
 
         notificationBuilder.setSmallIcon(R.drawable.notification_smallicon);
@@ -484,7 +475,7 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
         if (nfm != null) {
             nfm.notify(NOTIFICATION_ID, notification);
         }
-        if (playing) {
+        if (playbackController.getContent() != null) {
             Log.v(LOG_TAG, "Start Foreground");
             if (!isForeground)
                 startForeground(NOTIFICATION_ID, notification);
