@@ -239,9 +239,6 @@ public abstract class MainActionCreator {
                         break;
                 }
 
-                if (currentState.getContentIndicator() != null)
-                    service.setContent(MainSelector.getTracksForIndicator(currentState.getContentIndicator(), currentState, audioDataRepository, audioPlaylistRepository, scAudioDataRepo));
-
                 store.dispatch(new MainAction(MainActionType.SET_CONTENT, payload));
                 store.dispatch(getReformatContent(store));
 
@@ -345,12 +342,8 @@ public abstract class MainActionCreator {
     public static Action getChangeIndicators(Store<MainStateImmutable> store,
                                              AudioDataRepository audioDataRepository,
                                              AudioPlaylistRepository audioPlaylistRepository,
-                                             SettingsRepository settingsRepository,
-                                             ThemeRepository themeRepository,
                                              SCAudioDataRepo scAudioDataRepo,
                                              MediaPlayerService service,
-                                             Executor presExec,
-                                             Executor mainExec,
                                              SelectionIndicator contentIndicator,
                                              SelectionIndicator uiIndicator) {
         return new Thunk.ThunkAction() {
@@ -361,12 +354,7 @@ public abstract class MainActionCreator {
                 state.setContentIndicator(contentIndicator);
                 state.setUiIndicator(uiIndicator);
                 store.dispatch(new MainAction(MainActionType.SET_INDICATORS, state));
-                if (store.getState().getUiIndicator().getSelector() == AudioContentSelector.SOUNDCLOUD_CHARTS
-                        && !store.getState().getUiIndicator().isPlaylistView()) {
-                    return refreshAndFetchRepoData(store, audioDataRepository, audioPlaylistRepository, settingsRepository, themeRepository, scAudioDataRepo, service, presExec, mainExec);
-                } else {
-                    return fetchAudioData(store, audioDataRepository, audioPlaylistRepository, scAudioDataRepo, service);
-                }
+                return fetchAudioData(store, audioDataRepository, audioPlaylistRepository, scAudioDataRepo, service);
             }
         };
     }

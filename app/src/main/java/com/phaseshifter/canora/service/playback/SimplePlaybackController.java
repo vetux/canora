@@ -134,7 +134,7 @@ public class SimplePlaybackController implements PlaybackController {
             if (!found)
                 currentTrack = null;
         }
-        content = c;
+        content = new ArrayList<>(c);
         shuffleCache.clear();
         shuffleCache.addAll(content);
         if (currentTrack != null)
