@@ -14,6 +14,7 @@ import com.phaseshifter.canora.plugin.soundcloud.api_v2.client.SCV2Client;
 import com.phaseshifter.canora.plugin.soundcloud.api_v2.data.SCV2StreamProtocol;
 import com.phaseshifter.canora.plugin.soundcloud.api_v2.data.SCV2Track;
 import com.phaseshifter.canora.plugin.soundcloud.api_v2.data.SCV2TrackStreamData;
+import com.phaseshifter.canora.utils.Pair;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -34,7 +35,7 @@ public class AudioDataSourceSC implements AudioDataSource, Serializable {
     private static CountDownLatch latch = new CountDownLatch(0);
 
     private final List<SCV2Track.MediaTranscoding> codings = new ArrayList<>();
-    private final List<SCV2TrackStreamData> streams = new ArrayList<>();
+    private final List<Pair<SCV2StreamProtocol, String>> streams = new ArrayList<>();
 
     private SCV2Client getClient() {
         if (client == null) {
@@ -75,7 +76,9 @@ public class AudioDataSourceSC implements AudioDataSource, Serializable {
                 try {
                     SCV2Client client = getClient();
                     streams.clear();
-                    streams.addAll(client.getTemporaryStreamUrls(codings));
+                    for (SCV2TrackStreamData data : client.getTemporaryStreamUrls(codings)) {
+                        streams.add(new Pair<>(data.protocol, data.url));
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -93,13 +96,13 @@ public class AudioDataSourceSC implements AudioDataSource, Serializable {
         }
         List<MediaSource> ret = new ArrayList<>();
         DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(context, "clank");
-        for (SCV2TrackStreamData stream : streams) {
-            switch (stream.protocol) {
+        for (Pair<SCV2StreamProtocol, String> stream : streams) {
+            switch (stream.first) {
                 case HLS:
-                    ret.add(new HlsMediaSource.Factory(dataSourceFactory).createMediaSource(MediaItem.fromUri(Uri.parse(stream.url))));
+                    ret.add(new HlsMediaSource.Factory(dataSourceFactory).createMediaSource(MediaItem.fromUri(Uri.parse(stream.second))));
                     break;
                 case PROGRESSIVE:
-                    ret.add(new ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(MediaItem.fromUri(Uri.parse(stream.url))));
+                    ret.add(new ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(MediaItem.fromUri(Uri.parse(stream.second))));
                     break;
             }
         }

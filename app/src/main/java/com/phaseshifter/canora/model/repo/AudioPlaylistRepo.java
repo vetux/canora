@@ -1,6 +1,7 @@
 package com.phaseshifter.canora.model.repo;
 
 import android.util.Log;
+
 import com.phaseshifter.canora.data.media.audio.AudioData;
 import com.phaseshifter.canora.data.media.audio.metadata.AudioMetadata;
 import com.phaseshifter.canora.data.media.audio.metadata.AudioMetadataMemory;
@@ -50,11 +51,11 @@ public class AudioPlaylistRepo implements AudioPlaylistRepository {
         if (playlist == null)
             throw new IllegalArgumentException();
 
-        ImageData artwork = playlist.getMetadata().getArtwork();
+        List<AudioData> modifiedTracks = prepareData(playlist.getData());
 
-        List<AudioData> modifiedTracks = prepareData(playlist.getData(), artwork);
-
-        PlaylistMetadataMemory metadata = new PlaylistMetadataMemory(key, playlist.getMetadata().getTitle(), artwork);
+        PlaylistMetadataMemory metadata = new PlaylistMetadataMemory(key,
+                playlist.getMetadata().getTitle(),
+                playlist.getMetadata().getArtwork());
         AudioPlaylist generatedPlaylist = new AudioPlaylist(metadata, modifiedTracks);
         playlists.put(key, generatedPlaylist);
 
@@ -73,16 +74,16 @@ public class AudioPlaylistRepo implements AudioPlaylistRepository {
         if (playlist == null)
             throw new IllegalArgumentException();
 
-        ImageData image = playlist.getMetadata().getArtwork();
-
-        List<AudioData> modifiedTracks = prepareData(playlist.getData(), image);
+        List<AudioData> modifiedTracks = prepareData(playlist.getData());
 
         UUID uuid = UUID.randomUUID();
 
         if (playlists.containsKey(uuid))
             throw new RuntimeException("UUID Collision for " + uuid);
 
-        PlaylistMetadataMemory metadata = new PlaylistMetadataMemory(uuid, playlist.getMetadata().getTitle(), image);
+        PlaylistMetadataMemory metadata = new PlaylistMetadataMemory(uuid,
+                playlist.getMetadata().getTitle(),
+                playlist.getMetadata().getArtwork());
         AudioPlaylist generatedPlaylist = new AudioPlaylist(metadata, modifiedTracks);
         playlists.put(uuid, generatedPlaylist);
 
@@ -101,11 +102,11 @@ public class AudioPlaylistRepo implements AudioPlaylistRepository {
         if (value == null)
             throw new IllegalArgumentException();
 
-        ImageData image = value.getMetadata().getArtwork();
+        List<AudioData> modifiedData = prepareData(value.getData());
 
-        List<AudioData> modifiedData = prepareData(value.getData(), image);
-
-        PlaylistMetadataMemory metadata = new PlaylistMetadataMemory(key, value.getMetadata().getTitle(), image);
+        PlaylistMetadataMemory metadata = new PlaylistMetadataMemory(key,
+                value.getMetadata().getTitle(),
+                value.getMetadata().getArtwork());
         AudioPlaylist generatedPlaylist = new AudioPlaylist(metadata, modifiedData);
         playlists.put(key, generatedPlaylist);
 
@@ -161,7 +162,7 @@ public class AudioPlaylistRepo implements AudioPlaylistRepository {
         }
     }
 
-    private List<AudioData> prepareData(List<AudioData> orig, ImageData artwork) {
+    private List<AudioData> prepareData(List<AudioData> orig) {
         List<AudioData> modifiedTracks = new ArrayList<>();
         List<UUID> usedUUIDS = new ArrayList<>();
         for (AudioData track : orig) {
@@ -177,7 +178,7 @@ public class AudioPlaylistRepo implements AudioPlaylistRepository {
                     existingMetadata.getAlbum(),
                     existingMetadata.getGenres(),
                     existingMetadata.getLength(),
-                    artwork
+                    existingMetadata.getArtwork()
             );
             modifiedTracks.add(new AudioData(modifiedMetadata, track.getDataSource()));
         }
