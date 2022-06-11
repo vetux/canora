@@ -459,6 +459,10 @@ public abstract class MainActionCreator {
                         // Do not sort the content of chart contents and search results because they are infinite scrolls.
                         processedTracks = currentState.getContentTracks();
                         payload.setSortedTracks(processedTracks);
+                        if (currentState.getUiIndicator().getSelector() == AudioContentSelector.SOUNDCLOUD_CHARTS) {
+                            if (currentState.isFiltering())
+                                processedTracks = ListFilter.filterAudioData(processedTracks, currentState.getFilterDefinition());
+                        }
                     } else {
                         processedTracks = ListSorter.sortAudioData(currentState.getContentTracks(), currentState.getSortingDefinition());
                         payload.setSortedTracks(processedTracks);
@@ -479,12 +483,6 @@ public abstract class MainActionCreator {
         return new Thunk.ThunkAction() {
             @Override
             public Action run() {
-                if (store.getState().getUiIndicator().getSelector() == AudioContentSelector.SOUNDCLOUD_SEARCH
-                        || (store.getState().getUiIndicator().getSelector() == AudioContentSelector.SOUNDCLOUD_CHARTS
-                        && !store.getState().getUiIndicator().isPlaylistView())) {
-                    return null;
-                }
-
                 MainStateImmutable currentState = store.getState();
                 MainState payload = new MainState();
                 payload.setContentTracks(currentState.getContentTracks());
@@ -502,7 +500,10 @@ public abstract class MainActionCreator {
                     }
                 } else {
                     if (currentState.isFiltering()) {
-                        payload.setVisibleTracks(ListFilter.filterAudioData(payload.getSortedTracks(), currentState.getFilterDefinition()));
+                        if (currentState.getUiIndicator().getSelector() == AudioContentSelector.SOUNDCLOUD_SEARCH)
+                            payload.setVisibleTracks(payload.getSortedTracks());
+                        else
+                            payload.setVisibleTracks(ListFilter.filterAudioData(payload.getSortedTracks(), currentState.getFilterDefinition()));
                     } else {
                         payload.setVisibleTracks(payload.getSortedTracks());
                     }
