@@ -212,7 +212,15 @@ public class ContentViewModel implements StateListener<MainStateImmutable> {
                         notFoundText.set(context.getString(R.string.main_notfound0soundcloudSearch));
                         break;
                     case SOUNDCLOUD_CHARTS:
-                        notFoundText.set(context.getString(R.string.main_notfound0soundcloudCharts));
+                        if (updatedState.getUiIndicator().isPlaylistView())
+                            notFoundText.set("Error");
+                        else {
+                            if (updatedState.getContentLoadSemaphore() > 0) {
+                                notFoundText.set(context.getString(R.string.main_notfound0loading));
+                            } else {
+                                notFoundText.set(context.getString(R.string.main_notfound0noTracks));
+                            }
+                        }
                         break;
                 }
             }
