@@ -146,28 +146,9 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
             view.setControlMax(updatedState.isControlsMaximized());
 
         if (updatedState.getUiIndicator().isPlaylistView()) {
-            if (updatedState.getVisiblePlaylists() == null
-                    || updatedState.getVisiblePlaylists().size() == 0) {
-                if (updatedState.isFiltering()) {
-                    view.showNotFound(updatedState.getUiIndicator().getSelector(), getPlaylistTitle(updatedState.getUiIndicator(), audioDataRepository, audioPlaylistRepository, scAudioDataRepo), updatedState.getFilterDefinition().filterFor);
-                } else {
-                    view.showNotFound(updatedState.getUiIndicator().getSelector(), getPlaylistTitle(updatedState.getUiIndicator(), audioDataRepository, audioPlaylistRepository, scAudioDataRepo));
-                }
-            } else {
-                view.showPlaylistContent();
-            }
+            view.showPlaylistContent();
         } else {
-            if (updatedState.getVisibleTracks() == null
-                    || updatedState.getVisibleTracks().size() == 0) {
-                if (updatedState.isFiltering()) {
-                    view.showNotFound(updatedState.getUiIndicator().getSelector(), getPlaylistTitle(updatedState.getUiIndicator(), audioDataRepository, audioPlaylistRepository, scAudioDataRepo), updatedState.getFilterDefinition().filterFor);
-                } else {
-                    view.showNotFound(updatedState.getUiIndicator().getSelector(), getPlaylistTitle(updatedState.getUiIndicator(), audioDataRepository, audioPlaylistRepository, scAudioDataRepo));
-                }
-            } else {
-                view.showTrackContent();
-            }
-
+            view.showTrackContent();
         }
         lastState = updatedState;
     }

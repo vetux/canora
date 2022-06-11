@@ -55,10 +55,6 @@ public interface MainContract {
 
         void showPlaylistContentDetails(int index);
 
-        void showNotFound(AudioContentSelector selector, String playlistTitle);
-
-        void showNotFound(AudioContentSelector selector, String playlistTitle, String searchText);
-
         void showMenuTrackContent(int index, ContextMenu menu);
 
         void showMenuPlaylistContent(int index, ContextMenu menu);

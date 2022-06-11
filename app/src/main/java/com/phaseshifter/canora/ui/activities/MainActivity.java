@@ -565,10 +565,6 @@ public class MainActivity extends Activity implements MainContract.View,
     @Override
     public void showTrackContent() {
         runOnUiThread(() -> {
-            View notFoundText = findViewById(R.id.display_text_notfound);
-            if (notFoundText != null) {
-                notFoundText.setVisibility(View.GONE);
-            }
             if (motionLayoutController != null) {
                 motionLayoutController.showTracks();
             }
@@ -578,10 +574,6 @@ public class MainActivity extends Activity implements MainContract.View,
     @Override
     public void showPlaylistContent() {
         runOnUiThread(() -> {
-            View notFoundText = findViewById(R.id.display_text_notfound);
-            if (notFoundText != null) {
-                notFoundText.setVisibility(View.GONE);
-            }
             if (motionLayoutController != null) {
                 motionLayoutController.showPlaylists();
             }
@@ -597,76 +589,6 @@ public class MainActivity extends Activity implements MainContract.View,
     @Override
     public void showPlaylistContentDetails(int index) {
         runOnUiThread(() -> {
-        });
-    }
-
-    @Override
-    public void showNotFound(AudioContentSelector selector, String playlistTitle) {
-        runOnUiThread(() -> {
-            if (selector == AudioContentSelector.TRACKS
-                    || selector == AudioContentSelector.SOUNDCLOUD_SEARCH
-                    || playlistTitle != null)
-                showTrackContent();
-            else
-                showPlaylistContent();
-
-            TextView notFoundText = findViewById(R.id.display_text_notfound);
-            if (notFoundText != null) {
-                notFoundText.setVisibility(View.VISIBLE);
-                switch (selector) {
-                    case TRACKS:
-                        notFoundText.setText(getString(R.string.main_notfound0noTracks));
-                        break;
-                    case PLAYLISTS:
-                        if (playlistTitle != null)
-                            notFoundText.setText(getString(R.string.main_notfound0noTracks));
-                        else
-                            notFoundText.setText(getString(R.string.main_notfound0noPlaylists));
-                        break;
-                    case ARTISTS:
-                        if (playlistTitle != null)
-                            notFoundText.setText(getString(R.string.main_notfound0noTracks));
-                        else
-                            notFoundText.setText(getString(R.string.main_notfound0noArtists));
-                        break;
-                    case ALBUMS:
-                        if (playlistTitle != null)
-                            notFoundText.setText(getString(R.string.main_notfound0noTracks));
-                        else
-                            notFoundText.setText(getString(R.string.main_notfound0noAlbums));
-                        break;
-                    case GENRES:
-                        if (playlistTitle != null)
-                            notFoundText.setText(getString(R.string.main_notfound0noTracks));
-                        else
-                            notFoundText.setText(getString(R.string.main_notfound0noGenres));
-                        break;
-                    case SOUNDCLOUD_SEARCH:
-                        notFoundText.setText(getString(R.string.main_notfound0soundcloudSearch));
-                        break;
-                    case SOUNDCLOUD_CHARTS:
-                        notFoundText.setText(getString(R.string.main_notfound0soundcloudCharts));
-                        break;
-                }
-            }
-        });
-    }
-
-    @Override
-    public void showNotFound(AudioContentSelector selector, String playlistTitle, String searchText) {
-        runOnUiThread(() -> {
-            if (selector == AudioContentSelector.TRACKS
-                    || selector == AudioContentSelector.SOUNDCLOUD_SEARCH
-                    || playlistTitle != null)
-                showTrackContent();
-            else
-                showPlaylistContent();
-
-            TextView notFoundText = findViewById(R.id.display_text_notfound);
-            if (notFoundText != null) {
-                notFoundText.setVisibility(View.VISIBLE);
-                notFoundText.setText(getString(R.string.main_notfound0stringNotFound, searchText));
-            }
         });
     }
 
@@ -1144,6 +1066,16 @@ public class MainActivity extends Activity implements MainContract.View,
                     if (searchText.isFocused()) {
                         searchText.setSelection(searchText.getText().length());
                     }
+                }
+            }
+        });
+        contentViewModel.notFoundText.addObserver(new Observable.Observer<String>() {
+            @Override
+            public void update(Observable<String> observable, String value) {
+                TextView notFoundText = findViewById(R.id.display_text_notfound);
+                if (notFoundText != null) {
+                    notFoundText.setVisibility(value == null ? View.GONE : View.VISIBLE);
+                    notFoundText.setText(value);
                 }
             }
         });

@@ -35,6 +35,8 @@ public class ContentViewModel implements StateListener<MainStateImmutable> {
     public final Observable<Integer> contentPlaylistHighlight = new Observable<>(0);
     public final Observable<HashSet<Integer>> contentPlaylistsSelection = new Observable<>();
 
+    public final Observable<String> notFoundText = new Observable<>();
+
     //TEMP
     public final Observable<AudioContentSelector> navigationHighlightPosition = new Observable<>(AudioContentSelector.TRACKS);
     public final Observable<String> searchText = new Observable<>();
@@ -155,6 +157,67 @@ public class ContentViewModel implements StateListener<MainStateImmutable> {
             } else {
                 contentTracksHighlight.set(null);
             }
+        }
+        boolean showText = false;
+        if (updatedState.getUiIndicator().isPlaylistView()) {
+            showText = updatedState.getVisiblePlaylists() == null || updatedState.getVisiblePlaylists().isEmpty();
+        } else {
+            showText = updatedState.getVisibleTracks() == null || updatedState.getVisibleTracks().isEmpty();
+        }
+        if (showText) {
+            if (updatedState.isFiltering()) {
+                String text = updatedState.getFilterDefinition().filterFor;
+                if (updatedState.getUiIndicator().getSelector() == AudioContentSelector.SOUNDCLOUD_SEARCH) {
+                    if (updatedState.getContentLoadSemaphore() > 0) {
+                        notFoundText.set(context.getString(R.string.main_notfound0loading));
+                    } else {
+                        if (text.isEmpty())
+                            notFoundText.set(context.getString(R.string.main_notfound0soundcloudSearch));
+                        else
+                            notFoundText.set(context.getString(R.string.main_notfound0stringNotFound, text));
+                    }
+                } else {
+                    notFoundText.set(context.getString(R.string.main_notfound0stringNotFound, text));
+                }
+            } else {
+                switch (updatedState.getUiIndicator().getSelector()) {
+                    case TRACKS:
+                        notFoundText.set(context.getString(R.string.main_notfound0noTracks));
+                        break;
+                    case PLAYLISTS:
+                        if (updatedState.getUiIndicator().isPlaylistView())
+                            notFoundText.set(context.getString(R.string.main_notfound0noPlaylists));
+                        else
+                            notFoundText.set(context.getString(R.string.main_notfound0noTracks));
+                        break;
+                    case ARTISTS:
+                        if (updatedState.getUiIndicator().isPlaylistView())
+                            notFoundText.set(context.getString(R.string.main_notfound0noArtists));
+                        else
+                            notFoundText.set(context.getString(R.string.main_notfound0noTracks));
+                        break;
+                    case ALBUMS:
+                        if (updatedState.getUiIndicator().isPlaylistView())
+                            notFoundText.set(context.getString(R.string.main_notfound0noAlbums));
+                        else
+                            notFoundText.set(context.getString(R.string.main_notfound0noTracks));
+                        break;
+                    case GENRES:
+                        if (updatedState.getUiIndicator().isPlaylistView())
+                            notFoundText.set(context.getString(R.string.main_notfound0noGenres));
+                        else
+                            notFoundText.set(context.getString(R.string.main_notfound0noTracks));
+                        break;
+                    case SOUNDCLOUD_SEARCH:
+                        notFoundText.set(context.getString(R.string.main_notfound0soundcloudSearch));
+                        break;
+                    case SOUNDCLOUD_CHARTS:
+                        notFoundText.set(context.getString(R.string.main_notfound0soundcloudCharts));
+                        break;
+                }
+            }
+        } else {
+            notFoundText.set(null);
         }
         previousState = updatedState;
     }

@@ -16,8 +16,9 @@
     <string name="main_notfound0noArtists">No Artists found</string>
     <string name="main_notfound0noGenres">No Genres found</string>
     <string name="main_notfound0stringNotFound">\"%1$s\" not found</string>
-    <string name="main_notfound0soundcloudSearch">Enter text to begin search…</string>
-    <string name="main_notfound0soundcloudCharts">No Charts found</string>
+    <string name="main_notfound0soundcloudSearch">Enter text to search on SoundCloud…</string>
+    <string name="main_notfound0soundcloudCharts">No SoundCloud Charts found</string>
+    <string name="main_notfound0loading">Loading…</string>
 
     <string name="main_toolbar_title0tracks">Tracks</string>
     <string name="main_toolbar_title0playlists">Playlists</string>
@@ -35,9 +36,9 @@
     <string name="main_toast_text0addedItems">Added %1$d items to %2$s</string>
     <string name="main_toast_text0deletedItemsFrom">Deleted %1$d items from %2$s</string>
     <string name="main_toast_text0deletedItems">Deleted %1$d items</string>
-    <string name="main_toast_text0deletedPlaylists">Deleted %1$d playlists</string>
+    <string name="main_toast_text0deletedPlaylists">Deleted %1$d Playlists</string>
     <string name="main_toast_text0deletedPlaylist">Deleted %1$s</string>
-    <string name="main_toast_text0createdPlaylist">Created playlist %1$s with %2$d items</string>
+    <string name="main_toast_text0createdPlaylist">Created Playlist %1$s with %2$d items</string>
     <string name="main_toast_text0successWritingFile">Successfully wrote file:\n %1$s</string>
     <string name="main_toast_text0errorWritingFile">Failed writing file:\n %1$s</string>
     <string name="main_toast_text0editedPlaylist">Successfully edited Playlist</string>
