@@ -4,6 +4,8 @@ import android.content.Context;
 
 import com.google.android.exoplayer2.source.MediaSource;
 
+import java.util.List;
+
 public interface AudioDataSource {
     /**
      * Prepare the data source for playback.
@@ -23,5 +25,5 @@ public interface AudioDataSource {
      * @return The created MediaSource object, non null.
      * @throws Exception If the MediaSource object could not be instantiated.
      */
-    MediaSource getExoPlayerSource(Context context) throws Exception;
+    List<MediaSource> getExoPlayerSources(Context context) throws Exception;
 }

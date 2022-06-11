@@ -6,13 +6,17 @@ import android.net.Uri;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
+import com.google.android.exoplayer2.source.hls.HlsMediaSource;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.phaseshifter.canora.data.media.audio.source.AudioDataSource;
 import com.phaseshifter.canora.plugin.soundcloud.api_v2.client.SCV2Client;
+import com.phaseshifter.canora.plugin.soundcloud.api_v2.data.SCV2StreamProtocol;
 import com.phaseshifter.canora.plugin.soundcloud.api_v2.data.SCV2Track;
+import com.phaseshifter.canora.plugin.soundcloud.api_v2.data.SCV2TrackStreamData;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
@@ -29,8 +33,8 @@ public class AudioDataSourceSC implements AudioDataSource, Serializable {
     private static ExecutorService pool = Executors.newSingleThreadExecutor();
     private static CountDownLatch latch = new CountDownLatch(0);
 
-    private final List<SCV2Track.MediaTranscoding> codings;
-    private final AtomicReference<String> streamUrl = new AtomicReference<>();
+    private final List<SCV2Track.MediaTranscoding> codings = new ArrayList<>();
+    private final List<SCV2TrackStreamData> streams = new ArrayList<>();
 
     private SCV2Client getClient() {
         if (client == null) {
@@ -59,20 +63,19 @@ public class AudioDataSourceSC implements AudioDataSource, Serializable {
     }
 
     public AudioDataSourceSC(List<SCV2Track.MediaTranscoding> codings) {
-        this.codings = codings;
+        this.codings.addAll(codings);
     }
 
     @Override
     public void prepare() {
         syncWithPool();
-
-        if (streamUrl.get() == null) {
+        if (streams.isEmpty()) {
             latch = new CountDownLatch(1);
             pool.submit(() -> {
                 try {
                     SCV2Client client = getClient();
-                    String url = client.getTemporaryStreamUrl(codings).url;
-                    streamUrl.set(url);
+                    streams.clear();
+                    streams.addAll(client.getTemporaryStreamUrls(codings));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -82,17 +85,25 @@ public class AudioDataSourceSC implements AudioDataSource, Serializable {
     }
 
     @Override
-    public MediaSource getExoPlayerSource(Context context) {
+    public List<MediaSource> getExoPlayerSources(Context context) {
         prepare();
-
         syncWithPool();
-
-        if (streamUrl.get() == null) {
-            throw new RuntimeException("Failed to retrieve stream url for track " + codings);
+        if (streams.isEmpty()) {
+            throw new RuntimeException("Failed to retrieve stream data for track " + codings);
         }
-
+        List<MediaSource> ret = new ArrayList<>();
         DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(context, "clank");
-        return new ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(MediaItem.fromUri(Uri.parse(streamUrl.get())));
+        for (SCV2TrackStreamData stream : streams) {
+            switch (stream.protocol) {
+                case HLS:
+                    ret.add(new HlsMediaSource.Factory(dataSourceFactory).createMediaSource(MediaItem.fromUri(Uri.parse(stream.url))));
+                    break;
+                case PROGRESSIVE:
+                    ret.add(new ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(MediaItem.fromUri(Uri.parse(stream.url))));
+                    break;
+            }
+        }
+        return ret;
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.phaseshifter.canora.ui.utils;
 
 import android.view.View;
 import android.view.ViewGroup;
+
 import com.phaseshifter.canora.R;
 import com.phaseshifter.canora.ui.data.AudioContentSelector;
 
@@ -43,6 +44,12 @@ public class CustomNavigationDrawer {
                 break;
             case GENRES:
                 root.findViewById(R.id.nav_button_genres).setSelected(true);
+                break;
+            case SOUNDCLOUD_SEARCH:
+                root.findViewById(R.id.nav_button_soundcloud_search).setSelected(true);
+                break;
+            case SOUNDCLOUD_CHARTS:
+                root.findViewById(R.id.nav_button_soundcloud_charts).setSelected(true);
                 break;
         }
     }

@@ -12,6 +12,8 @@ import com.google.android.exoplayer2.upstream.FileDataSource;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class AudioDataSourceFile implements AudioDataSource, Serializable {
@@ -28,7 +30,7 @@ public class AudioDataSourceFile implements AudioDataSource, Serializable {
     }
 
     @Override
-    public MediaSource getExoPlayerSource(Context context) throws Exception {
+    public List<MediaSource> getExoPlayerSources(Context context) throws Exception {
         String targetFilePath = file.getAbsolutePath();
         File targetFile = new File(targetFilePath);
         if (!targetFile.exists()) {
@@ -40,7 +42,9 @@ public class AudioDataSourceFile implements AudioDataSource, Serializable {
                     return new FileDataSource();
                 }
             };
-            return new ProgressiveMediaSource.Factory(factory).createMediaSource(MediaItem.fromUri(Uri.fromFile(targetFile)));
+            List<MediaSource> ret = new ArrayList<>();
+            ret.add(new ProgressiveMediaSource.Factory(factory).createMediaSource(MediaItem.fromUri(Uri.fromFile(targetFile))));
+            return ret;
         }
     }
 

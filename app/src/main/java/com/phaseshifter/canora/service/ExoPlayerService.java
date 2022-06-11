@@ -32,7 +32,9 @@ import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.source.MediaSource;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -81,6 +83,9 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
     private Boolean isForeground = false; //Should be implemented by android.app.Service class, but it is not.
 
     private boolean focusGainWait = false;
+
+    private final List<MediaSource> trackSources = new ArrayList<>();
+    private int trackSourceIndex;
 
     //Binder
     private final IBinder mBinder = new LocalBinder();
@@ -147,6 +152,14 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
                 error.printStackTrace();
                 broadcastError();
                 onStateModified();
+                if (!trackSources.isEmpty()) {
+                    trackSourceIndex++;
+                    if (trackSourceIndex >= 0 && trackSourceIndex < trackSources.size()) {
+                        updateTrackSource();
+                    } else {
+                        next();
+                    }
+                }
             }
         });
         exoPlayer.setVolume(volume);
@@ -588,16 +601,30 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
 
         exoPlayer.stop(true);
         exoPlayer.setPlayWhenReady(true);
-        MediaSource source;
+
         try {
-            source = file.getDataSource().getExoPlayerSource(this);
+            trackSources.clear();
+            trackSources.addAll(file.getDataSource().getExoPlayerSources(this));
         } catch (Exception e) {
-            Log.e(LOG_TAG, "Failed to retrieve MediaSource");
+            trackSources.clear();
+            Log.e(LOG_TAG, "Failed to retrieve MediaSources");
             e.printStackTrace();
             return false;
         }
-        Log.v(LOG_TAG, "Preparing MediaSource for track " + file.getMetadata().getTitle());
-        exoPlayer.prepare(source);
+
+        trackSourceIndex = 0;
+
+        Log.v(LOG_TAG, "Prepared MediaSources for track " + file.getMetadata().getTitle());
+
+        updateTrackSource();
+
         return true;
+    }
+
+    private void updateTrackSource() {
+        Log.v(LOG_TAG, "Updating MediaSource Current: " + trackSourceIndex + " Sources: " + trackSources);
+        exoPlayer.stop(true);
+        exoPlayer.setPlayWhenReady(true);
+        exoPlayer.prepare(trackSources.get(trackSourceIndex));
     }
 }

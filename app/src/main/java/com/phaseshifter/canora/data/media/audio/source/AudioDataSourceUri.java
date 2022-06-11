@@ -11,6 +11,8 @@ import com.google.android.exoplayer2.upstream.DataSource;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -36,14 +38,16 @@ public class AudioDataSourceUri implements AudioDataSource, Serializable {
     }
 
     @Override
-    public MediaSource getExoPlayerSource(Context context) {
+    public List<MediaSource> getExoPlayerSources(Context context) {
         DataSource.Factory factory = new DataSource.Factory() {
             @Override
             public DataSource createDataSource() {
                 return new ContentDataSource(context);
             }
         };
-        return new ProgressiveMediaSource.Factory(factory).createMediaSource(MediaItem.fromUri(uri));
+        List<MediaSource> ret = new ArrayList<>();
+        ret.add(new ProgressiveMediaSource.Factory(factory).createMediaSource(MediaItem.fromUri(uri)));
+        return ret;
     }
 
     @Override

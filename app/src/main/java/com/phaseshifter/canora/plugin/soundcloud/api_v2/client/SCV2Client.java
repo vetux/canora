@@ -144,51 +144,47 @@ public class SCV2Client {
     }
 
     /**
-     * Returns a SCV2TrackStreamData object containing the temporarly streamable url and the corresponding protocol.
-     * If there are multiple stream protocols available the function will return the first
-     * available protocol in this order:
-     * <p>
-     * 0 : PROGRESSIVE
-     * 1 : HLS
-     * <p>
-     * Eg. if there is a PROGRESSIVE and a HLS url available the function will choose PROGRESSIVE.
+     * Returns a list of SCV2TrackStreamData objects containing the temporarily streamable url and the corresponding protocol.
      *
-     * @param codings The track to obtain the streamable url of.
+     * @param codings The track to obtain the streamable urls of.
      * @return The SCV2TrackStreamData object containing the url, or null if not available.
      * @throws IOException           Thrown when the HTTP connection could not be made. Indicates a fatal local error.
      * @throws SCConnectionException Thrown when the request was rejected by the server. Indicates an invalid clientID or change in api.
      * @throws SCParsingException    Reports a fatal error in the parsing of the returned html / json. Indicates a change in the api.
      */
-    public SCV2TrackStreamData getTemporaryStreamUrl(List<SCV2Track.MediaTranscoding> codings) throws SCParsingException, IOException, SCConnectionException, JSONException {
+    public List<SCV2TrackStreamData> getTemporaryStreamUrls(List<SCV2Track.MediaTranscoding> codings) throws SCParsingException, IOException, SCConnectionException, JSONException {
         logger.log(LOG_TAG, "Get temporary stream url: " + codings);
         if (codings == null)
             return null;
-        String stagerUrl = null;
-        SCV2StreamProtocol protocol = null;
+
+        List<SCV2TrackStreamData> ret = new ArrayList<>();
         for (SCV2Track.MediaTranscoding coding : codings) {
+            String stagerUrl = null;
+            SCV2StreamProtocol protocol = null;
             if (coding.getProtocol().equals("progressive")) {
                 stagerUrl = coding.getUrl();
                 protocol = SCV2StreamProtocol.PROGRESSIVE;
-            } else if (stagerUrl == null && coding.getProtocol().equals("hls")) {
+            } else if (coding.getProtocol().equals("hls")) {
                 stagerUrl = coding.getUrl();
                 protocol = SCV2StreamProtocol.HLS;
             }
-        }
-        if (stagerUrl == null) {
-            return null;
-        }
-        List<Pair<String, String>> parameters = new ArrayList<>();
-        parameters.add(new Pair<>(SCV2Constants.PARAMETER_GET_CLIENTID, clientID));
-        HttpRequest request = new HttpRequest(HttpMethod.GET, stagerUrl, parameters);
-        HttpResponse response = client.doRequest(request);
-        if (response.getStatusCode() != HttpStatusCode.OK.code) {
+            if (stagerUrl == null) {
+                return null;
+            }
+            List<Pair<String, String>> parameters = new ArrayList<>();
+            parameters.add(new Pair<>(SCV2Constants.PARAMETER_GET_CLIENTID, clientID));
+            HttpRequest request = new HttpRequest(HttpMethod.GET, stagerUrl, parameters);
+            HttpResponse response = client.doRequest(request);
+            if (response.getStatusCode() != HttpStatusCode.OK.code) {
+                response.close();
+                throw new SCConnectionException("Request to api-v2 endpoint rejected. Status Code: " + response.getStatusCode());
+            }
+            String json = response.getBodyString();
             response.close();
-            throw new SCConnectionException("Request to api-v2 endpoint rejected. Status Code: " + response.getStatusCode());
+            String url = new SCV2JsonParser().getStreamUrlFromStager(json);
+            ret.add(new SCV2TrackStreamData(url, protocol));
         }
-        String json = response.getBodyString();
-        response.close();
-        String url = new SCV2JsonParser().getStreamUrlFromStager(json);
-        return new SCV2TrackStreamData(url, protocol);
+        return ret;
     }
 
     /**

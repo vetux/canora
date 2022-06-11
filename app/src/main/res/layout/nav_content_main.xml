@@ -10,13 +10,17 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp">
 
         <ImageView
             android:id="@+id/imageView17"
-            android:layout_width="55dp"
-            android:layout_height="55dp"
-            android:padding="12dp"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="20dp"
+            android:padding="2dp"
             android:src="@drawable/ic_baseline_sd_storage_24"
             android:tint="?onColorPrimary"
             app:layout_constraintStart_toStartOf="parent" />
@@ -30,13 +34,6 @@
             android:textColor="?onColorPrimary"
             android:gravity="center_vertical"/>
     </LinearLayout>
-
-    <View
-        android:id="@+id/divider3"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="?android:attr/listDivider"
-        android:backgroundTint="?onColorPrimary"/>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/nav_button_tracks"
@@ -229,21 +226,18 @@
             app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <View
-        android:id="@+id/divider2"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="?android:attr/listDivider"
-        android:backgroundTint="?onColorPrimary"/>
-
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp">
         <ImageView
             android:id="@+id/imageView18"
-            android:layout_width="55dp"
-            android:layout_height="55dp"
-            android:padding="10dp"
+            android:layout_width="60dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="10dp"
+            android:padding="2dp"
             android:src="@drawable/soundcloud_logo_big_white"
             app:tint="?onColorPrimary"
             app:layout_constraintStart_toStartOf="parent" />
@@ -256,13 +250,6 @@
             android:textColor="?onColorPrimary"
             android:gravity="center_vertical"/>
     </LinearLayout>
-
-    <View
-        android:id="@+id/divider5"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="?android:attr/listDivider"
-        android:backgroundTint="?onColorPrimary" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/nav_button_soundcloud_search"
@@ -339,24 +326,18 @@
             app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <View
-        android:id="@+id/divider4"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="?android:attr/listDivider"
-        android:backgroundTint="?onColorPrimary" />
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/nav_button_settings"
         android:layout_width="match_parent"
         android:layout_height="@dimen/nav_content_item_height"
+        android:layout_marginTop="10dp"
         android:background="@drawable/nav_button_background">
 
         <ImageView
             android:id="@+id/imageView10"
             android:layout_width="@dimen/nav_content_item_height"
             android:layout_height="@dimen/nav_content_item_height"
-            android:layout_marginStart="20dp"
+            android:layout_marginStart="3dp"
             android:padding="10dp"
             android:scaleType="fitXY"
             android:src="@drawable/baseline_build_white_48dp"
@@ -395,7 +376,7 @@
             android:id="@+id/imageView9"
             android:layout_width="@dimen/nav_content_item_height"
             android:layout_height="@dimen/nav_content_item_height"
-            android:layout_marginStart="20dp"
+            android:layout_marginStart="3dp"
             android:padding="10dp"
             android:scaleType="fitXY"
             android:src="@drawable/baseline_star_half_white_48dp"
@@ -433,7 +414,7 @@
             android:id="@+id/imageView20"
             android:layout_width="@dimen/nav_content_item_height"
             android:layout_height="@dimen/nav_content_item_height"
-            android:layout_marginStart="20dp"
+            android:layout_marginStart="3dp"
             android:padding="10dp"
             android:scaleType="fitXY"
             android:src="@drawable/baseline_info_white_48dp"
