@@ -1,6 +1,7 @@
 package com.phaseshifter.canora.service.playback;
 
 import android.util.Log;
+
 import com.phaseshifter.canora.data.media.audio.AudioData;
 import com.phaseshifter.canora.model.comparison.AudioDataComparsion;
 
@@ -21,6 +22,9 @@ public class SimplePlaybackController implements PlaybackController {
     private boolean shuffle;
     private boolean repeat;
     private List<AudioData> content;
+
+    private final Random rand = new Random();
+    private int nextRandom = rand.nextInt();
 
     public SimplePlaybackController() {
         shuffle = false;
@@ -60,17 +64,15 @@ public class SimplePlaybackController implements PlaybackController {
             currentTrack = forwardHistory.pop();
             currentIndex = getIndexOfID(currentTrack.getMetadata().getId());
             return currentTrack;
-        }
-        if (shuffle) {
+        } else if (shuffle) {
             Log.v(LOG_TAG, "SHUFFLE ON");
             if (shuffleCache.size() <= 0) {
                 shuffleCache.addAll(content);
             }
-            Random rand = new Random();
-            int t = rand.nextInt(shuffleCache.size());
-            currentTrack = shuffleCache.get(t);
-            shuffleCache.remove(t);
+            currentTrack = shuffleCache.get(nextRandom);
+            shuffleCache.remove(nextRandom);
             currentIndex = getIndexOfID(currentTrack.getMetadata().getId());
+            nextRandom = rand.nextInt(shuffleCache.size());
         } else {
             Log.v(LOG_TAG, "SHUFFLE OFF");
             if (content.size() > 1 && currentIndex < content.size() - 1) {
@@ -81,6 +83,30 @@ public class SimplePlaybackController implements PlaybackController {
             currentTrack = content.get(currentIndex);
         }
         return currentTrack;
+    }
+
+    public AudioData peekNext() {
+        Log.v(LOG_TAG, "getNext");
+        if (content == null || content.size() == 0) {
+            Log.e(LOG_TAG, "ERROR: CONTENT EMPTY / INVALID");
+            return null;
+        }
+        if (forwardHistory.size() > 0) {
+            Log.v(LOG_TAG, "FORWARD HISTORY");
+            return forwardHistory.peek();
+        } else if (shuffle) {
+            Log.v(LOG_TAG, "SHUFFLE ON");
+            return shuffleCache.get(nextRandom);
+        } else {
+            Log.v(LOG_TAG, "SHUFFLE OFF");
+            int index = currentIndex;
+            if (content.size() > 1 && currentIndex < content.size() - 1) {
+                index = currentIndex + 1;
+            } else {
+                index = 0;
+            }
+            return content.get(index);
+        }
     }
 
     public AudioData getPrev() {

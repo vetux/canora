@@ -254,6 +254,7 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
     public void next() {
         Log.v(LOG_TAG, "next");
         AudioData n = playbackController.getNext();
+        playbackController.peekNext().getDataSource().prepare();
         if (n != null) {
             Log.v(LOG_TAG, "Setting up Track: " + n.getMetadata().getTitle());
             createPlayer(n);

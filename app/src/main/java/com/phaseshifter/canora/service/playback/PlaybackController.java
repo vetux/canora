@@ -21,6 +21,8 @@ public interface PlaybackController {
 
     AudioData getNext();
 
+    AudioData peekNext();
+
     AudioData getPrev();
 
     AudioData getCurrentTrack();
