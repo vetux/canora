@@ -33,8 +33,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public abstract class MainActionCreator {
     private static final String LOG_TAG = "MainActionCreator";
@@ -52,17 +50,27 @@ public abstract class MainActionCreator {
             @Override
             public Action run() {
                 store.dispatch(new MainAction(MainActionType.CONTENT_LOAD_START));
+                store.dispatch(new MainAction(MainActionType.SEARCH_LOAD_START));
                 presExec.execute(() -> {
                     audioDataRepository.refresh();
 
-                    if (store.getState().getUiIndicator().getSelector() == AudioContentSelector.SOUNDCLOUD_SEARCH)
-                        scAudioDataRepo.refreshSearchResults(store.getState().getFilterDefinition().filterFor, 10, 0);
-                    else if (store.getState().getUiIndicator().getSelector() == AudioContentSelector.SOUNDCLOUD_CHARTS)
-                        scAudioDataRepo.refreshCharts(10);
+                    if (store.getState().getUiIndicator().getSelector() == AudioContentSelector.SOUNDCLOUD_SEARCH) {
+                        String q = store.getState().getFilterDefinition().filterFor;
+                        int page = store.getState().getSearchPage();
+                        if (scAudioDataRepo.getSearchText() == null || !scAudioDataRepo.getSearchText().equals(q) || scAudioDataRepo.getSearchPage() != page) {
+                            scAudioDataRepo.refreshSearch(q);
+                        }
+                    } else if (store.getState().getUiIndicator().getSelector() == AudioContentSelector.SOUNDCLOUD_CHARTS) {
+                        if (!store.getState().getUiIndicator().isPlaylistView()) {
+                            // Get the index of the playlist into the contentPlaylists array list based on the uuid.
+                            scAudioDataRepo.refreshCharts(scAudioDataRepo.getChartsIndex(store.getState().getUiIndicator().getUuid()));
+                        }
+                    }
 
                     mainExec.execute(() -> {
                         store.dispatch(fetchRepoData(store, audioDataRepository, audioPlaylistRepository, settingsRepository, themeRepository, scAudioDataRepo, service));
                         store.dispatch(new MainAction(MainActionType.CONTENT_LOAD_STOP));
+                        store.dispatch(new MainAction(MainActionType.SEARCH_LOAD_STOP));
                     });
                 });
                 return null;
@@ -218,23 +226,13 @@ public abstract class MainActionCreator {
                         break;
                     case SOUNDCLOUD_CHARTS:
                         if (currentState.getUiIndicator().isPlaylistView()) {
-                            ArrayList<AudioPlaylist> l = new ArrayList<>();
-
-                            Enumeration<AudioPlaylist> pl = scAudioDataRepo.getCharts().elements();
+                            List<AudioPlaylist> pl = scAudioDataRepo.getChartsPlaylists();
                             payload.setContentTracks(currentState.getContentTracks());
-                            while (pl.hasMoreElements())
-                                l.add(pl.nextElement());
-
-                            payload.setContentPlaylists(l);
+                            payload.setContentPlaylists(pl);
                         } else {
-                            for (AudioPlaylist playlist : currentState.getContentPlaylists()) {
-                                if (playlist.getMetadata().getId() == currentState.getUiIndicator().getUuid()) {
-                                    List<AudioData> tr = playlist.getData();
-                                    payload.setContentTracks(tr);
-                                    payload.setContentPlaylists(currentState.getContentPlaylists());
-                                    break;
-                                }
-                            }
+                            int index = scAudioDataRepo.getChartsIndex(currentState.getUiIndicator().getUuid());
+                            payload.setContentTracks(scAudioDataRepo.getChartsPlaylists().get(index).getData());
+                            payload.setContentPlaylists(currentState.getContentPlaylists());
                         }
                         break;
                     case YOUTUBE_SEARCH:
@@ -347,8 +345,12 @@ public abstract class MainActionCreator {
     public static Action getChangeIndicators(Store<MainStateImmutable> store,
                                              AudioDataRepository audioDataRepository,
                                              AudioPlaylistRepository audioPlaylistRepository,
+                                             SettingsRepository settingsRepository,
+                                             ThemeRepository themeRepository,
                                              SCAudioDataRepo scAudioDataRepo,
                                              MediaPlayerService service,
+                                             Executor presExec,
+                                             Executor mainExec,
                                              SelectionIndicator contentIndicator,
                                              SelectionIndicator uiIndicator) {
         return new Thunk.ThunkAction() {
@@ -359,7 +361,12 @@ public abstract class MainActionCreator {
                 state.setContentIndicator(contentIndicator);
                 state.setUiIndicator(uiIndicator);
                 store.dispatch(new MainAction(MainActionType.SET_INDICATORS, state));
-                return fetchAudioData(store, audioDataRepository, audioPlaylistRepository, scAudioDataRepo, service);
+                if (store.getState().getUiIndicator().getSelector() == AudioContentSelector.SOUNDCLOUD_CHARTS
+                        && !store.getState().getUiIndicator().isPlaylistView()) {
+                    return refreshAndFetchRepoData(store, audioDataRepository, audioPlaylistRepository, settingsRepository, themeRepository, scAudioDataRepo, service, presExec, mainExec);
+                } else {
+                    return fetchAudioData(store, audioDataRepository, audioPlaylistRepository, scAudioDataRepo, service);
+                }
             }
         };
     }
@@ -459,10 +466,17 @@ public abstract class MainActionCreator {
                     if (currentState.isFiltering())
                         processedPlaylists = ListFilter.filterAudioPlaylist(processedPlaylists, currentState.getFilterDefinition());
                 } else {
-                    processedTracks = ListSorter.sortAudioData(currentState.getContentTracks(), currentState.getSortingDefinition());
-                    payload.setSortedTracks(processedTracks);
-                    if (currentState.isFiltering() && currentState.getUiIndicator().getSelector() != AudioContentSelector.SOUNDCLOUD_SEARCH)
-                        processedTracks = ListFilter.filterAudioData(processedTracks, currentState.getFilterDefinition());
+                    if (currentState.getUiIndicator().getSelector() == AudioContentSelector.SOUNDCLOUD_SEARCH
+                            || currentState.getUiIndicator().getSelector() == AudioContentSelector.SOUNDCLOUD_CHARTS) {
+                        // Do not sort the content of chart contents and search results because they are infinite scrolls.
+                        processedTracks = currentState.getContentTracks();
+                        payload.setSortedTracks(processedTracks);
+                    } else {
+                        processedTracks = ListSorter.sortAudioData(currentState.getContentTracks(), currentState.getSortingDefinition());
+                        payload.setSortedTracks(processedTracks);
+                        if (currentState.isFiltering())
+                            processedTracks = ListFilter.filterAudioData(processedTracks, currentState.getFilterDefinition());
+                    }
                 }
                 payload.setContentTracks(currentState.getContentTracks());
                 payload.setContentPlaylists(currentState.getContentPlaylists());
@@ -477,7 +491,9 @@ public abstract class MainActionCreator {
         return new Thunk.ThunkAction() {
             @Override
             public Action run() {
-                if (store.getState().getUiIndicator().getSelector() == AudioContentSelector.SOUNDCLOUD_SEARCH) {
+                if (store.getState().getUiIndicator().getSelector() == AudioContentSelector.SOUNDCLOUD_SEARCH
+                        || (store.getState().getUiIndicator().getSelector() == AudioContentSelector.SOUNDCLOUD_CHARTS
+                        && !store.getState().getUiIndicator().isPlaylistView())) {
                     return null;
                 }
 

@@ -56,6 +56,9 @@ public class MainState implements MainStateImmutable, Serializable {
 
     protected boolean devMode = false;
 
+    protected int searchPage = 0;
+    protected boolean scrollLoading = false;
+
     public MainState() {
     }
 
@@ -117,6 +120,8 @@ public class MainState implements MainStateImmutable, Serializable {
         shuffling = copy.shuffling;
         repeating = copy.repeating;
         devMode = copy.devMode;
+        searchPage = copy.searchPage;
+        scrollLoading = copy.scrollLoading;
     }
 
     public MainState(MainStateImmutable copy) {
@@ -316,5 +321,23 @@ public class MainState implements MainStateImmutable, Serializable {
 
     public void setDevMode(boolean devMode) {
         this.devMode = devMode;
+    }
+
+    @Override
+    public int getSearchPage() {
+        return searchPage;
+    }
+
+    public void setSearchPage(int page) {
+        this.searchPage = page;
+    }
+
+    @Override
+    public boolean isScrollLoading() {
+        return scrollLoading;
+    }
+
+    public void setScrollLoading(boolean loading) {
+        this.scrollLoading = loading;
     }
 }

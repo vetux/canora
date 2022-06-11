@@ -143,6 +143,8 @@ public interface MainContract {
 
         void onSearchTextChange(String text);
 
+        void onSearchTextEditingFinished();
+
         void onNavigationButtonClick();
 
         void onOptionsButtonClick();
@@ -164,6 +166,8 @@ public interface MainContract {
         void onPlaylistContentClick(int index);
 
         void onPlaylistContentLongClick(int index);
+
+        void onTrackContentScrollToBottom();
 
         void onMenuAction(OptionsMenu.Action action, OptionsMenu menu);
 

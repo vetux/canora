@@ -18,41 +18,98 @@ import com.phaseshifter.canora.plugin.soundcloud.api_v2.data.SCV2Track;
 
 import java.util.ArrayList;
 import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 public class SCAudioDataRepo {
     private SCV2Client client = null;
 
-    private String prevSearch;
-    private int prevResPerPage;
-    private int prevPage;
+    private final List<AudioData> searchResults = new ArrayList<>();
 
-    private int prevResPerPageCharts;
+    private final HashMap<SCGenre, Integer> chartPages = new HashMap<>();
 
-    private List<AudioData> searchResults = new ArrayList<>();
-    private Dictionary<UUID, AudioPlaylist> charts = new Hashtable<>();
+    private final HashMap<SCGenre, Integer> genreIndexMapping = new HashMap<>();
+    private final HashMap<Integer, SCGenre> indexGenreMapping = new HashMap<>();
 
-    public void refreshSearchResults(String q, int resPerPage, int page) {
-        searchResults = search(q, resPerPage, page);
+    private final ArrayList<AudioPlaylist> charts = new ArrayList<>();
 
-        prevSearch = q;
-        prevResPerPage = resPerPage;
-        prevPage = page;
+    private String searchText;
+    private int searchPage;
+
+    private static final int resPerPage = 10;
+
+    public SCAudioDataRepo() {
+        int i = 0;
+        for (SCGenre genre : SCGenre.values()) {
+            indexGenreMapping.put(i, genre);
+            genreIndexMapping.put(genre, i);
+            i++;
+            charts.add(new AudioPlaylist(new PlaylistMetadataMemory(UUID.randomUUID(),
+                    genre.parameterValue.substring("soundcloud:genres:".length()),
+                    null), new ArrayList<>()));
+        }
     }
 
-    public void refreshCharts(int resPerPage) {
-        charts = getCharts(resPerPage);
+    public int getSearchPage() {
+        return searchPage;
+    }
 
-        prevResPerPageCharts = resPerPage;
+    public String getSearchText() {
+        return searchText;
+    }
+
+    public void refreshSearch(String q) {
+        if (searchText != null && searchText.equals(q)) {
+            searchPage++;
+            searchResults.addAll(search(q, searchPage));
+        } else {
+            searchPage = 0;
+            searchResults.clear();
+            searchResults.addAll(search(q, searchPage));
+        }
+        searchText = q;
+    }
+
+    public int getChartsIndex(UUID uuid) {
+        int i = 0;
+        for (AudioPlaylist pl : charts) {
+            if (pl.getMetadata().getId() == uuid) {
+                return i;
+            }
+            i++;
+        }
+        throw new RuntimeException("Invalid uuid");
+    }
+
+    public void refreshCharts(int currentGenre) {
+        SCGenre genre = indexGenreMapping.get(currentGenre);
+        assert genre != null;
+
+        AudioPlaylist pl = charts.get(currentGenre);
+
+        if (chartPages.containsKey(genre)) {
+            Integer page = chartPages.get(genre);
+            assert (pl != null && page != null);
+            page++;
+            chartPages.put(genre, page);
+            SCV2Charts c = receiveCharts(genre, page);
+            pl.getData().addAll(getTracks(c));
+        } else {
+            SCV2Charts c = receiveCharts(genre, 0);
+            pl.getData().addAll(getTracks(c));
+            chartPages.put(genre, 0);
+        }
     }
 
     public List<AudioData> getSearchResults() {
         return searchResults;
     }
 
-    public Dictionary<UUID, AudioPlaylist> getCharts() {
+    public List<AudioPlaylist> getChartsPlaylists() {
         return charts;
     }
 
@@ -98,72 +155,56 @@ public class SCAudioDataRepo {
         }
     }
 
-    private List<AudioData> search(String q, int resultsPerPage, int pageNumber) {
-        if (prevSearch != null && prevSearch.equals(q) && prevResPerPage == resultsPerPage && prevPage == pageNumber) {
-            return searchResults;
-        }
-
+    private List<AudioData> search(String q, int pageNumber) {
         List<SCV2Track> tracks = new ArrayList<>();
 
         if (!q.isEmpty()) {
             SCV2Client client = getClient();
             try {
-                tracks = client.getTracksContainingString(q, resultsPerPage, pageNumber);
+                tracks = client.getTracksContainingString(q, resPerPage, pageNumber);
             } catch (Exception e) {
                 e.printStackTrace();
                 updateClientId();
                 try {
-                    tracks = client.getTracksContainingString(q, resultsPerPage, pageNumber);
+                    tracks = client.getTracksContainingString(q, resPerPage, pageNumber);
                 } catch (Exception x) {
                     x.printStackTrace();
                 }
             }
         }
 
-        searchResults = new ArrayList<>();
+        List<AudioData> ret = new ArrayList<>();
         for (SCV2Track track : tracks) {
-            searchResults.add(getAudioData(track));
+            ret.add(getAudioData(track));
         }
-        return searchResults;
+        return ret;
     }
 
-    private Dictionary<UUID, AudioPlaylist> getCharts(int resultsPerPage) {
-        if (prevResPerPageCharts == resultsPerPage)
-            return charts;
+    private List<AudioData> getTracks(SCV2Charts c) {
+        ArrayList<AudioData> t = new ArrayList<>();
+        for (SCV2ChartTrack track : c.getTracks()) {
+            t.add(getAudioData(track.getTrack()));
+        }
+        return t;
+    }
 
+    private SCV2Charts receiveCharts(SCGenre genre, int pageNumber) {
         SCV2Client client = getClient();
 
-        charts = new Hashtable<>();
-
-        for (SCGenre genre : SCGenre.values()) {
-            SCV2Charts c;
+        SCV2Charts ret;
+        try {
+            ret = client.getCharts(genre, resPerPage, pageNumber);
+        } catch (Exception e) {
+            e.printStackTrace();
+            updateClientId();
             try {
-                c = client.getCharts(genre, resultsPerPage, 0);
-            } catch (Exception e) {
-                e.printStackTrace();
-                updateClientId();
-                try {
-                    c = client.getCharts(genre, resultsPerPage, 0);
-                } catch (Exception x) {
-                    x.printStackTrace();
-                    c = null;
-                }
-            }
-            if (c != null) {
-                ArrayList<AudioData> t = new ArrayList<>();
-                for (SCV2ChartTrack track : c.getTracks()) {
-                    t.add(getAudioData(track.getTrack()));
-                }
-
-                UUID uuid = UUID.randomUUID();
-
-                charts.put(uuid, new AudioPlaylist(new PlaylistMetadataMemory(uuid,
-                        genre.parameterValue.substring("soundcloud:genres:".length()),
-                        null),
-                        t));
+                ret = client.getCharts(genre, resPerPage, pageNumber);
+            } catch (Exception x) {
+                x.printStackTrace();
+                ret = null;
             }
         }
 
-        return charts;
+        return ret;
     }
 }

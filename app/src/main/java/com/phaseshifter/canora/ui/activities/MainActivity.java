@@ -77,6 +77,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static com.phaseshifter.canora.utils.IntegerConversion.safeLongToInt;
 import static com.phaseshifter.canora.utils.android.Miscellaneous.leftpadZero;
@@ -122,6 +124,11 @@ public class MainActivity extends Activity implements MainContract.View,
     private final int[] lastTouchCoords = new int[2];
 
     private Runnable scopedStorageCallback;
+
+    private Timer searchTimer = new Timer();
+    private final long SEARCH_FINISHED_DELAY = 1000; // milliseconds
+
+    private int trackListViewScrollState = SCROLL_STATE_IDLE;
 
     //START Android Interfaces
 
@@ -304,12 +311,22 @@ public class MainActivity extends Activity implements MainContract.View,
 
     @Override
     public void onScrollStateChanged(AbsListView view, int scrollState) {
+        switch (view.getId()) {
+            case R.id.display_listview_tracks:
+                trackListViewScrollState = scrollState;
+                break;
+            case R.id.display_gridview_playlists:
+                break;
+        }
     }
 
     @Override
     public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
         switch (view.getId()) {
             case R.id.display_listview_tracks:
+                if ((visibleItemCount == (totalItemCount - firstVisibleItem) && trackListViewScrollState > 0)) {
+                    presenter.onTrackContentScrollToBottom();
+                }
                 break;
             case R.id.display_gridview_playlists:
                 break;
@@ -388,6 +405,19 @@ public class MainActivity extends Activity implements MainContract.View,
 
     @Override
     public void afterTextChanged(Editable s) {
+        searchTimer.cancel();
+        searchTimer = new Timer();
+        searchTimer.schedule(
+                new TimerTask() {
+                    @Override
+                    public void run() {
+                        runOnUiThread(() -> {
+                            presenter.onSearchTextEditingFinished();
+                        });
+                    }
+                },
+                SEARCH_FINISHED_DELAY
+        );
     }
 
     @Override

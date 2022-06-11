@@ -32,10 +32,14 @@ public class MainActionType {
     public static final String SET_SORTDEF = "SET_SORTDEF";
 
     public static final String SET_VOLUME = "SET_VOLUME";
-
     public static final String SET_SHUFFLE = "SET_SHUFFLE";
-
     public static final String SET_REPEAT = "SET_REPEAT";
 
     public static final String SET_DEVMODE = "SET_DEBUGMODE";
+
+    public static final String SEARCH_LOAD_START = "SEARCH_LOAD_START";
+    public static final String SEARCH_LOAD_STOP = "SEARCH_LOAD_STOP";
+
+    public static final String SEARCH_INCREMENT_PAGE = "SEARCH_INCREMENT_PAGE";
+    public static final String SEARCH_RESET_PAGE = "SEARCH_RESET_PAGE";
 }

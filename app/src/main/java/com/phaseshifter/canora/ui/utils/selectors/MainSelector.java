@@ -31,14 +31,11 @@ public abstract class MainSelector {
                 playlist = audioDataRepository.getGenre(indicator.getUuid());
                 break;
             case SOUNDCLOUD_CHARTS:
-                if (scAudioDataRepo.getCharts() != null) {
-                    Enumeration<AudioPlaylist> pls = scAudioDataRepo.getCharts().elements();
-                    while (pls.hasMoreElements()) {
-                        AudioPlaylist pl = pls.nextElement();
-                        if (pl.getMetadata().getId() == indicator.getUuid()) {
-                            playlist = pl;
-                            break;
-                        }
+                List<AudioPlaylist> pls = scAudioDataRepo.getChartsPlaylists();
+                for (AudioPlaylist pl : pls) {
+                    if (pl.getMetadata().getId() == indicator.getUuid()) {
+                        playlist = pl;
+                        break;
                     }
                 }
                 break;
@@ -66,9 +63,9 @@ public abstract class MainSelector {
             case GENRES:
                 return ListSorter.sortAudioData(audioDataRepository.getGenre(indicator.getUuid()).getData(), currentState.getSortingDefinition());
             case SOUNDCLOUD_SEARCH:
-                return ListSorter.sortAudioData(scAudioDataRepo.getSearchResults(), currentState.getSortingDefinition());
+                return scAudioDataRepo.getSearchResults();
             case SOUNDCLOUD_CHARTS:
-                return ListSorter.sortAudioData(scAudioDataRepo.getCharts().get(indicator.getUuid()).getData(), currentState.getSortingDefinition());
+                return scAudioDataRepo.getChartsPlaylists().get(scAudioDataRepo.getChartsIndex(indicator.getUuid())).getData();
             default:
                 throw new RuntimeException("INVALID SELECTOR: " + indicator.getSelector());
         }

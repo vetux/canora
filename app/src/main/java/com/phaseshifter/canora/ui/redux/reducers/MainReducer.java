@@ -92,6 +92,18 @@ public class MainReducer extends Reducer<MainStateImmutable> {
             case SET_DEVMODE:
                 ret.setDevMode(castedAction.getPayload().isDevMode());
                 break;
+            case SEARCH_LOAD_START:
+                ret.setScrollLoading(true);
+                break;
+            case SEARCH_LOAD_STOP:
+                ret.setScrollLoading(false);
+                break;
+            case SEARCH_INCREMENT_PAGE:
+                ret.setSearchPage(state.getSearchPage() + 1);
+                break;
+            case SEARCH_RESET_PAGE:
+                ret.setSearchPage(0);
+                break;
         }
         return ret;
     }

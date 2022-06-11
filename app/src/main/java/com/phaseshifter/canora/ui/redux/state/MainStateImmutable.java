@@ -54,4 +54,8 @@ public interface MainStateImmutable {
     boolean isRepeating();
 
     boolean isDevMode();
+
+    int getSearchPage();
+
+    boolean isScrollLoading();
 }
