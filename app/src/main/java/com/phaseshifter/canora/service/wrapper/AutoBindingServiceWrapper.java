@@ -6,6 +6,7 @@ import android.content.ServiceConnection;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+
 import com.phaseshifter.canora.data.media.audio.AudioData;
 import com.phaseshifter.canora.service.ExoPlayerService;
 import com.phaseshifter.canora.service.MediaPlayerService;
@@ -95,183 +96,264 @@ public class AutoBindingServiceWrapper implements ServiceConnection, MediaPlayer
 
     @Override
     public void shutdown() {
-        exec.execute(() -> {
-            if (requireService())
-                mainHandler.post(() -> {
-                    if (serviceRef.get() != null)
-                        serviceRef.get().shutdown();
-                });
-        });
+        verifyMainThread();
+        if (serviceRef.get() != null) {
+            serviceRef.get().shutdown();
+        } else {
+            exec.execute(() -> {
+                if (requireService())
+                    mainHandler.post(() -> {
+                        if (serviceRef.get() != null)
+                            serviceRef.get().shutdown();
+                    });
+            });
+        }
     }
 
     @Override
     public void setContent(List<AudioData> pl) {
-        exec.execute(() -> {
-            if (requireService())
-                mainHandler.post(() -> {
-                    if (serviceRef.get() != null)
-                        serviceRef.get().setContent(pl);
-                });
-        });
+        verifyMainThread();
+        if (serviceRef.get() != null) {
+            serviceRef.get().setContent(pl);
+        } else {
+            exec.execute(() -> {
+                if (requireService())
+                    mainHandler.post(() -> {
+                        if (serviceRef.get() != null)
+                            serviceRef.get().setContent(pl);
+                    });
+            });
+        }
     }
 
     @Override
     public void play(UUID id) {
-        exec.execute(() -> {
-            if (requireService())
-                mainHandler.post(() -> {
-                    if (serviceRef.get() != null) {
-                        serviceRef.get().play(id);
-                    }
-                });
-        });
+        verifyMainThread();
+        if (serviceRef.get() != null){
+            serviceRef.get().play(id);
+        } else {
+            exec.execute(() -> {
+                if (requireService())
+                    mainHandler.post(() -> {
+                        if (serviceRef.get() != null) {
+                            serviceRef.get().play(id);
+                        }
+                    });
+            });
+        }
     }
 
     @Override
     public void next() {
-        exec.execute(() -> {
-            if (requireService())
-                mainHandler.post(() -> {
-                    if (serviceRef.get() != null)
-                        serviceRef.get().next();
-                });
-        });
+        verifyMainThread();
+        if (serviceRef.get() != null){
+            serviceRef.get().next();
+        } else {
+            exec.execute(() -> {
+                if (requireService())
+                    mainHandler.post(() -> {
+                        if (serviceRef.get() != null)
+                            serviceRef.get().next();
+                    });
+            });
+        }
     }
 
     @Override
     public void previous() {
-        exec.execute(() -> {
-            if (requireService())
-                mainHandler.post(() -> {
-                    if (serviceRef.get() != null)
-                        serviceRef.get().previous();
-                });
-        });
+        verifyMainThread();
+        if (serviceRef.get() != null){
+            serviceRef.get().previous();
+        } else {
+            exec.execute(() -> {
+                if (requireService())
+                    mainHandler.post(() -> {
+                        if (serviceRef.get() != null)
+                            serviceRef.get().previous();
+                    });
+            });
+        }
     }
 
     @Override
     public void pauseResume() {
-        exec.execute(() -> {
-            if (requireService())
-                mainHandler.post(() -> {
-                    if (serviceRef.get() != null)
-                        serviceRef.get().pauseResume();
-                });
-        });
+        verifyMainThread();
+        if (serviceRef.get() != null){
+            serviceRef.get().pauseResume();
+        } else {
+            exec.execute(() -> {
+                if (requireService())
+                    mainHandler.post(() -> {
+                        if (serviceRef.get() != null)
+                            serviceRef.get().pauseResume();
+                    });
+            });
+        }
     }
 
     @Override
     public void pause() {
-        exec.execute(() -> {
-            if (requireService())
-                mainHandler.post(() -> {
-                    if (serviceRef.get() != null)
-                        serviceRef.get().pause();
-                });
-        });
+        verifyMainThread();
+        if (serviceRef.get() != null){
+            serviceRef.get().pause();
+        } else {
+            exec.execute(() -> {
+                if (requireService())
+                    mainHandler.post(() -> {
+                        if (serviceRef.get() != null)
+                            serviceRef.get().pause();
+                    });
+            });
+        }
     }
 
     @Override
     public void resume() {
-        exec.execute(() -> {
-            if (requireService())
-                mainHandler.post(() -> {
-                    if (serviceRef.get() != null)
-                        serviceRef.get().resume();
-                });
-        });
+        verifyMainThread();
+        if (serviceRef.get() != null){
+            serviceRef.get().resume();
+        } else {
+            exec.execute(() -> {
+                if (requireService())
+                    mainHandler.post(() -> {
+                        if (serviceRef.get() != null)
+                            serviceRef.get().resume();
+                    });
+            });
+        }
     }
 
     @Override
     public void seek(float p) {
-        exec.execute(() -> {
-            if (requireService())
-                mainHandler.post(() -> {
-                    if (serviceRef.get() != null)
-                        serviceRef.get().seek(p);
-                });
-        });
+        verifyMainThread();
+        if (serviceRef.get() != null){
+            serviceRef.get().seek(p);
+        } else {
+            exec.execute(() -> {
+                if (requireService())
+                    mainHandler.post(() -> {
+                        if (serviceRef.get() != null)
+                            serviceRef.get().seek(p);
+                    });
+            });
+        }
     }
 
     @Override
     public void seek(long ms) {
-        exec.execute(() -> {
-            if (requireService())
-                mainHandler.post(() -> {
-                    if (serviceRef.get() != null)
-                        serviceRef.get().seek(ms);
-                });
-        });
+        verifyMainThread();
+        if (serviceRef.get() != null){
+            serviceRef.get().seek(ms);
+        } else {
+            exec.execute(() -> {
+                if (requireService())
+                    mainHandler.post(() -> {
+                        if (serviceRef.get() != null)
+                            serviceRef.get().seek(ms);
+                    });
+            });
+        }
     }
 
     @Override
     public void stop() {
-        exec.execute(() -> {
-            if (requireService())
-                mainHandler.post(() -> {
-                    if (serviceRef.get() != null)
-                        serviceRef.get().stop();
-                });
-        });
+        verifyMainThread();
+        if (serviceRef.get() != null){
+            serviceRef.get().stop();
+        } else {
+            exec.execute(() -> {
+                if (requireService())
+                    mainHandler.post(() -> {
+                        if (serviceRef.get() != null)
+                            serviceRef.get().stop();
+                    });
+            });
+        }
     }
 
     @Override
     public void switchShuffle() {
-        exec.execute(() -> {
-            if (requireService())
-                mainHandler.post(() -> {
-                    if (serviceRef.get() != null)
-                        serviceRef.get().switchShuffle();
-                });
-        });
+        verifyMainThread();
+        if (serviceRef.get() != null){
+            serviceRef.get().switchShuffle();
+        } else {
+            exec.execute(() -> {
+                if (requireService())
+                    mainHandler.post(() -> {
+                        if (serviceRef.get() != null)
+                            serviceRef.get().switchShuffle();
+                    });
+            });
+        }
     }
 
     @Override
     public void setShuffle(boolean state) {
-        exec.execute(() -> {
-            if (requireService())
-                mainHandler.post(() -> {
-                    if (serviceRef.get() != null)
-                        serviceRef.get().setShuffle(state);
-                });
-        });
+        verifyMainThread();
+        if (serviceRef.get() != null){
+            serviceRef.get().setShuffle(state);
+        } else {
+            exec.execute(() -> {
+                if (requireService())
+                    mainHandler.post(() -> {
+                        if (serviceRef.get() != null)
+                            serviceRef.get().setShuffle(state);
+                    });
+            });
+        }
     }
 
     @Override
     public void switchRepeat() {
-        exec.execute(() -> {
-            if (requireService())
-                mainHandler.post(() -> {
-                    if (serviceRef.get() != null)
-                        serviceRef.get().switchRepeat();
-                });
-        });
+        verifyMainThread();
+        if (serviceRef.get() != null){
+            serviceRef.get().switchRepeat();
+        } else {
+            exec.execute(() -> {
+                if (requireService())
+                    mainHandler.post(() -> {
+                        if (serviceRef.get() != null)
+                            serviceRef.get().switchRepeat();
+                    });
+            });
+        }
     }
 
     @Override
     public void setRepeat(boolean state) {
-        exec.execute(() -> {
-            if (requireService())
-                mainHandler.post(() -> {
-                    if (serviceRef.get() != null)
-                        serviceRef.get().setRepeat(state);
-                });
-        });
+        verifyMainThread();
+        if (serviceRef.get() != null){
+            serviceRef.get().setRepeat(state);
+        } else {
+            exec.execute(() -> {
+                if (requireService())
+                    mainHandler.post(() -> {
+                        if (serviceRef.get() != null)
+                            serviceRef.get().setRepeat(state);
+                    });
+            });
+        }
     }
 
     @Override
     public void setVolume(float vol) {
-        exec.execute(() -> {
-            if (requireService())
-                mainHandler.post(() -> {
-                    if (serviceRef.get() != null)
-                        serviceRef.get().setVolume(vol);
-                });
-        });
+        verifyMainThread();
+        if (serviceRef.get() != null){
+            serviceRef.get().setVolume(vol);
+        } else {
+            exec.execute(() -> {
+                if (requireService())
+                    mainHandler.post(() -> {
+                        if (serviceRef.get() != null)
+                            serviceRef.get().setVolume(vol);
+                    });
+            });
+        }
     }
 
     @Override
     public Observable<PlayerState> getState() {
+        verifyMainThread();
         return stateProxy;
     }
 
