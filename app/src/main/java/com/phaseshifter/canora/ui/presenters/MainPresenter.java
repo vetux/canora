@@ -358,7 +358,7 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
                 store.dispatch(actionCreator.getChangeIndicators(currentState.getUiIndicator(), currentState.getUiIndicator()));
             }
             currentState = store.getState();
-            service.setContent(MainSelector.getTracksForIndicator(currentState.getContentIndicator(), currentState, audioDataRepository, audioPlaylistRepository, scAudioDataRepo));
+            service.setContent(currentState.getContentTracks());
             service.play(processedData.get(index).getMetadata().getId());
         }
     }
