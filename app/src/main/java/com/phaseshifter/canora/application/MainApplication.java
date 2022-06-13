@@ -42,7 +42,7 @@ public class MainApplication extends Application {
     }
 
     public String getPlaylistPath() {
-        return getFilesDir().getAbsolutePath() + "/Playlists";
+        return getFilesDir().getAbsolutePath() + "/playlists/";
     }
 
     public void removeBundle(String key) {

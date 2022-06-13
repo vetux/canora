@@ -1,5 +1,6 @@
 package com.phaseshifter.canora.model.repo;
 
+import android.icu.util.Output;
 import android.util.Log;
 
 import com.phaseshifter.canora.data.media.audio.AudioData;
@@ -16,38 +17,40 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class AudioPlaylistRepo implements AudioPlaylistRepository {
     private final String LOG_TAG = "AudiPlaylistRepo";
-
-    private final File playlistFile;
-
+    private final File playlistsDirectory;
     private final IObjectSerializer serializer;
+    private final Map<UUID, AudioPlaylist> playlists = new HashMap<>();
 
-    private HashMap<UUID, AudioPlaylist> playlists = null;
-
-    public AudioPlaylistRepo(File playlistFile) {
+    public AudioPlaylistRepo(File playlistsDirectory) {
+        if (playlistsDirectory == null)
+            throw new IllegalArgumentException();
         serializer = new ObjectSerializer();
-        this.playlistFile = playlistFile;
+        this.playlistsDirectory = playlistsDirectory;
+        if (!playlistsDirectory.mkdirs()) {
+            Log.v(LOG_TAG, "Failed to create playlists directory at " + playlistsDirectory);
+        }
+        playlists.putAll(readPlaylists());
     }
 
     @Override
     public List<AudioPlaylist> getAll() {
-        checkContainer();
         return new ArrayList<>(playlists.values());
     }
 
     @Override
     public AudioPlaylist get(UUID key) {
-        checkContainer();
         return playlists.get(key);
     }
 
     @Override
     public AudioPlaylist set(UUID key, AudioPlaylist playlist) {
         Log.v(LOG_TAG, "Create Playlist " + key + " " + playlist);
-        checkContainer();
+
         if (playlist == null)
             throw new IllegalArgumentException();
 
@@ -60,7 +63,7 @@ public class AudioPlaylistRepo implements AudioPlaylistRepository {
         playlists.put(key, generatedPlaylist);
 
         try {
-            writePlaylists(new FileOutputStream(playlistFile), playlists);
+            writePlaylist(generatedPlaylist);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -70,7 +73,7 @@ public class AudioPlaylistRepo implements AudioPlaylistRepository {
     @Override
     public AudioPlaylist add(AudioPlaylist playlist) {
         Log.v(LOG_TAG, "Add Playlist " + playlist);
-        checkContainer();
+
         if (playlist == null)
             throw new IllegalArgumentException();
 
@@ -88,7 +91,7 @@ public class AudioPlaylistRepo implements AudioPlaylistRepository {
         playlists.put(uuid, generatedPlaylist);
 
         try {
-            writePlaylists(new FileOutputStream(playlistFile), playlists);
+            writePlaylist(generatedPlaylist);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -98,7 +101,7 @@ public class AudioPlaylistRepo implements AudioPlaylistRepository {
     @Override
     public void replace(UUID key, AudioPlaylist value) {
         Log.v(LOG_TAG, "Replace Playlist " + key + " " + value);
-        checkContainer();
+
         if (value == null)
             throw new IllegalArgumentException();
 
@@ -111,7 +114,7 @@ public class AudioPlaylistRepo implements AudioPlaylistRepository {
         playlists.put(key, generatedPlaylist);
 
         try {
-            writePlaylists(new FileOutputStream(playlistFile), playlists);
+            writePlaylist(generatedPlaylist);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -120,46 +123,25 @@ public class AudioPlaylistRepo implements AudioPlaylistRepository {
     @Override
     public void remove(UUID key) {
         Log.v(LOG_TAG, "Remove Playlist " + key);
-        checkContainer();
         playlists.remove(key);
-        try {
-            writePlaylists(new FileOutputStream(playlistFile), playlists);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        getPlaylistFile(key).delete();
     }
 
     @Override
     public void remove(List<UUID> keys) {
         Log.v(LOG_TAG, "Remove Playlists " + keys);
-        checkContainer();
         if (keys == null)
             throw new IllegalArgumentException();
         for (UUID key : keys) {
             Log.v(LOG_TAG, "Delete Playlist " + key);
             playlists.remove(key);
-        }
-        try {
-            writePlaylists(new FileOutputStream(playlistFile), playlists);
-        } catch (IOException e) {
-            e.printStackTrace();
+            getPlaylistFile(key).delete();
         }
     }
 
     @Override
     public long getSize() {
-        return playlistFile.length();
-    }
-
-    private void checkContainer() {
-        if (playlists == null) {
-            try {
-                playlists = readPlaylists(new FileInputStream(playlistFile));
-            } catch (IOException e) {
-                e.printStackTrace();
-                playlists = new HashMap<>();
-            }
-        }
+        return playlists.values().size();
     }
 
     private List<AudioData> prepareData(List<AudioData> orig) {
@@ -185,43 +167,57 @@ public class AudioPlaylistRepo implements AudioPlaylistRepository {
         return modifiedTracks;
     }
 
-    private HashMap<UUID, AudioPlaylist> readPlaylists(InputStream istream) {
-        if (istream == null)
-            throw new IllegalArgumentException();
-        byte[] playlistBytes;
-        try {
-            playlistBytes = getBytesFromStream(istream);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return new HashMap<>();
+    private Map<UUID, AudioPlaylist> readPlaylists() {
+        Map<UUID, AudioPlaylist> ret = new HashMap<>();
+        File[] playlistFiles = playlistsDirectory.listFiles();
+        if (playlistFiles != null) {
+            for (File playlistFile : playlistFiles) {
+                try {
+                    AudioPlaylist pl = readPlaylist(new FileInputStream(playlistFile));
+                    ret.put(pl.getMetadata().getId(), pl);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
-        if (playlistBytes.length == 0) {
-            Log.v(LOG_TAG, "No playlist data found.");
-            return new HashMap<>();
-        }
-        Log.v(LOG_TAG, "Compressed playlists byte size: " + playlistBytes.length + " bytes.");
-        try {
-            playlistBytes = Gzip.decompress(playlistBytes);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return new HashMap<>();
-        }
-        Log.v(LOG_TAG, "Decompressed playlists byte size: " + playlistBytes.length + " bytes.");
-        try {
-            return (HashMap<UUID, AudioPlaylist>) serializer.deserialize(playlistBytes);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new HashMap<>();
-        }
+        return ret;
     }
 
-    public void writePlaylists(OutputStream ostream, HashMap<UUID, AudioPlaylist> playlists) throws IOException {
-        if (ostream == null || playlists == null)
+    private AudioPlaylist readPlaylist(InputStream istream) throws Exception {
+        if (istream == null)
             throw new IllegalArgumentException();
-        byte[] buffer = serializer.serialize(playlists);
+
+        byte[] playlistBytes = getBytesFromStream(istream);
+        if (playlistBytes.length == 0) {
+            throw new Exception("No playlist data found.");
+        }
+
+        Log.v(LOG_TAG, "Compressed playlist byte size: " + playlistBytes.length + " bytes.");
+
+        playlistBytes = Gzip.decompress(playlistBytes);
+
+        Log.v(LOG_TAG, "Decompressed playlists byte size: " + playlistBytes.length + " bytes.");
+
+        return (AudioPlaylist) serializer.deserialize(playlistBytes);
+    }
+
+    private void writePlaylist(AudioPlaylist playlist) throws IOException {
+        if (playlist == null) {
+            throw new IllegalArgumentException();
+        }
+        File file = getPlaylistFile(playlist.getMetadata().getId());
+        if (!file.createNewFile()) {
+            throw new IOException("Failed to create playlist file at " + file);
+        }
+        FileOutputStream stream = new FileOutputStream(file);
+        byte[] buffer = serializer.serialize(playlist);
         buffer = Gzip.compress(buffer);
-        ostream.write(buffer);
-        ostream.close();
+        stream.write(buffer);
+        stream.close();
+    }
+
+    private File getPlaylistFile(UUID id) {
+        return new File(playlistsDirectory, id.toString());
     }
 
     private byte[] getBytesFromStream(InputStream istream) throws IOException {

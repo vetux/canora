@@ -20,24 +20,25 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ImageDataSourceUri implements ImageDataSource, Serializable {
     private static final long serialVersionUID = 1;
 
-    private Uri uri;
+    private String uriStr;
 
     private static ExecutorService pool = Executors.newSingleThreadExecutor();
 
     public ImageDataSourceUri(Uri uri) {
         if (uri == null)
             throw new IllegalArgumentException();
-        this.uri = uri;
+        this.uriStr = uri.toString();
     }
 
     public Uri getUri() {
-        return uri;
+        return Uri.parse(uriStr);
     }
 
     @Override
     public Bitmap getBitmap(Context context) throws IOException {
         if (context == null)
             throw new IllegalArgumentException();
+        Uri uri = getUri();
         if (uri.getScheme().equals("https")
                 || uri.getScheme().equals("http")) {
 
@@ -65,6 +66,7 @@ public class ImageDataSourceUri implements ImageDataSource, Serializable {
 
     @Override
     public InputStream getStream(Context context) throws Exception {
+        Uri uri = getUri();
         if (uri.getScheme().equals("https")
                 || uri.getScheme().equals("http")) {
             URL url = new URL(uri.toString());
@@ -79,26 +81,26 @@ public class ImageDataSourceUri implements ImageDataSource, Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ImageDataSourceUri that = (ImageDataSourceUri) o;
-        return Objects.equals(uri, that.uri);
+        return uriStr.equals(that.uriStr);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uri);
+        return Objects.hash(uriStr);
     }
 
     @Override
     public String toString() {
         return "ImageDataSourceUri{" +
-                "uri=" + uri +
+                "uri=" + uriStr +
                 '}';
     }
 
     private void writeObject(ObjectOutputStream os) throws IOException {
-        os.writeObject(uri.toString());
+        os.writeObject(uriStr);
     }
 
     private void readObject(ObjectInputStream is) throws ClassNotFoundException, IOException {
-        uri = Uri.parse((String) is.readObject());
+        uriStr = (String) is.readObject();
     }
 }

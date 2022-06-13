@@ -27,14 +27,14 @@ import java.util.Objects;
 public class AudioDataSourceUri implements AudioDataSource, Serializable {
     private static final long serialVersionUID = 1;
 
-    private transient Uri uri;
+    private String uriStr;
 
     public AudioDataSourceUri(Uri uri) {
-        this.uri = uri;
+        this.uriStr = uri.toString();
     }
 
     public Uri getUri() {
-        return uri;
+        return Uri.parse(uriStr);
     }
 
     @Override
@@ -45,6 +45,7 @@ public class AudioDataSourceUri implements AudioDataSource, Serializable {
                 return new ContentDataSource(context);
             }
         };
+        Uri uri = getUri();
         List<MediaSource> ret = new ArrayList<>();
         ret.add(new ProgressiveMediaSource.Factory(factory).createMediaSource(MediaItem.fromUri(uri)));
         return ret;
@@ -55,26 +56,26 @@ public class AudioDataSourceUri implements AudioDataSource, Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AudioDataSourceUri that = (AudioDataSourceUri) o;
-        return Objects.equals(uri, that.uri);
+        return Objects.equals(uriStr, that.uriStr);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uri);
+        return Objects.hash(uriStr);
     }
 
     @Override
     public String toString() {
         return "AudioDataSourceUri{" +
-                "uri=" + uri +
+                "uri=" + uriStr +
                 '}';
     }
 
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-        uri = Uri.parse((String) in.readObject());
+        uriStr = (String) in.readObject();
     }
 
     private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-        out.writeObject(uri.toString());
+        out.writeObject(uriStr);
     }
 }
