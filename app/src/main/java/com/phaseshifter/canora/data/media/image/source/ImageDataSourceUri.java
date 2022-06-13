@@ -41,7 +41,6 @@ public class ImageDataSourceUri implements ImageDataSource, Serializable {
         Uri uri = getUri();
         if (uri.getScheme().equals("https")
                 || uri.getScheme().equals("http")) {
-
             AtomicReference<Bitmap> bitmap = new AtomicReference<>();
             Future<?> f = pool.submit(() -> {
                 try {
@@ -51,8 +50,7 @@ public class ImageDataSourceUri implements ImageDataSource, Serializable {
                     e.printStackTrace();
                 }
             });
-            while (!f.isDone()) {
-            }
+            while (!f.isDone()) {}
             return bitmap.get();
         } else {
             if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {

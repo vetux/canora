@@ -37,6 +37,9 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 //TODO:Testing: Create Unit Tests for Service.
 //TODO: Implement volume fade
@@ -86,6 +89,8 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
 
     private final List<MediaSource> trackSources = new ArrayList<>();
     private int trackSourceIndex;
+
+    private ThreadPoolExecutor pool = new ThreadPoolExecutor(1, 1, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
 
     //Binder
     private final IBinder mBinder = new LocalBinder();
@@ -412,94 +417,104 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
     }
 
     private void updateNotification(PlayerState state) {
-        AudioData track = state.getCurrentTrack();
-        boolean playing = state.isPlaying();
-        final Notification.Builder notificationBuilder;
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            notificationBuilder = new Notification.Builder(this, NOTIFICATION_CHANNEL_ID)
-                    .addAction(new Notification.Action.Builder(
-                            Icon.createWithResource(this, R.drawable.main_btnprev),
-                            "prev", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_PREV), PendingIntent.FLAG_IMMUTABLE)
-                    ).build());
-            if (playing) {
-                notificationBuilder.addAction(new Notification.Action.Builder(
-                        Icon.createWithResource(this, R.drawable.main_btnpause),
-                        "pause", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_PLAYBACK_PAUSE), PendingIntent.FLAG_IMMUTABLE))
-                        .build());
+        pool.submit(() -> {
+            AudioData track = state.getCurrentTrack();
+            Bitmap artworkBitmap = null;
+            if (track != null) {
+                try {
+                    if (track.getMetadata().getArtwork() != null)
+                        artworkBitmap = track.getMetadata().getArtwork().getDataSource().getBitmap(this);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                if (artworkBitmap == null)
+                    artworkBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.artwork_unset);
             } else {
-                notificationBuilder.addAction(new Notification.Action.Builder(
-                        Icon.createWithResource(this, R.drawable.main_btnplay),
-                        "play", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_PLAYBACK_RESUME), PendingIntent.FLAG_IMMUTABLE))
-                        .build());
+                artworkBitmap = BitmapUtils.getBitmapForResource(this, R.drawable.artwork_unset);
             }
-            notificationBuilder.addAction(new Notification.Action.Builder(
-                    Icon.createWithResource(this, R.drawable.main_btnnext),
-                    "next", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_NEXT), PendingIntent.FLAG_IMMUTABLE))
-                    .build());
-        } else {
-            notificationBuilder = new Notification.Builder(this)
-                    .addAction(R.drawable.main_btnprev, "prev", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_PREV), PendingIntent.FLAG_IMMUTABLE));
-            if (playing) {
-                notificationBuilder.addAction(R.drawable.main_btnpause, "pause", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_PLAYBACK_PAUSE), PendingIntent.FLAG_IMMUTABLE));
-            } else {
-                notificationBuilder.addAction(R.drawable.main_btnplay, "play", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_PLAYBACK_RESUME), PendingIntent.FLAG_IMMUTABLE));
-            }
-            notificationBuilder.addAction(R.drawable.main_btnnext, "next", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_NEXT), PendingIntent.FLAG_IMMUTABLE));
-        }
+            boolean playing = state.isPlaying();
 
-        notificationBuilder.setStyle(new Notification.MediaStyle()
-                .setMediaSession(mediaSession.getSessionToken())
-                .setShowActionsInCompactView(0, 1, 2));
-        if (track != null) {
-            notificationBuilder
-                    .setContentTitle(track.getMetadata().getTitle())
-                    .setContentText(track.getMetadata().getArtist());
-            Bitmap artwork = null;
-            try {
-                if (track.getMetadata().getArtwork() != null)
-                    artwork = track.getMetadata().getArtwork().getDataSource().getBitmap(this);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            if (artwork == null)
-                artwork = BitmapFactory.decodeResource(getResources(), R.drawable.artwork_unset);
-            if (artwork != null) {
-                notificationBuilder.setLargeIcon(artwork);
-            }
-        } else {
-            notificationBuilder
-                    .setContentTitle("")
-                    .setContentText("");
-            Bitmap artwork = BitmapUtils.getBitmapForResource(this, R.drawable.artwork_unset);
-            if (artwork != null)
-                notificationBuilder.setLargeIcon(artwork);
-        }
+            final Bitmap artwork = artworkBitmap;
 
-        notificationBuilder.setSmallIcon(R.drawable.notification_smallicon);
+            runOnMainThread(() -> {
+                final Notification.Builder notificationBuilder;
+                if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    notificationBuilder = new Notification.Builder(this, NOTIFICATION_CHANNEL_ID)
+                            .addAction(new Notification.Action.Builder(
+                                    Icon.createWithResource(this, R.drawable.main_btnprev),
+                                    "prev", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_PREV), PendingIntent.FLAG_IMMUTABLE)
+                            ).build());
+                    if (playing) {
+                        notificationBuilder.addAction(new Notification.Action.Builder(
+                                Icon.createWithResource(this, R.drawable.main_btnpause),
+                                "pause", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_PLAYBACK_PAUSE), PendingIntent.FLAG_IMMUTABLE))
+                                .build());
+                    } else {
+                        notificationBuilder.addAction(new Notification.Action.Builder(
+                                Icon.createWithResource(this, R.drawable.main_btnplay),
+                                "play", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_PLAYBACK_RESUME), PendingIntent.FLAG_IMMUTABLE))
+                                .build());
+                    }
+                    notificationBuilder.addAction(new Notification.Action.Builder(
+                            Icon.createWithResource(this, R.drawable.main_btnnext),
+                            "next", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_NEXT), PendingIntent.FLAG_IMMUTABLE))
+                            .build());
+                } else {
+                    notificationBuilder = new Notification.Builder(this)
+                            .addAction(R.drawable.main_btnprev, "prev", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_PREV), PendingIntent.FLAG_IMMUTABLE));
+                    if (playing) {
+                        notificationBuilder.addAction(R.drawable.main_btnpause, "pause", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_PLAYBACK_PAUSE), PendingIntent.FLAG_IMMUTABLE));
+                    } else {
+                        notificationBuilder.addAction(R.drawable.main_btnplay, "play", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_PLAYBACK_RESUME), PendingIntent.FLAG_IMMUTABLE));
+                    }
+                    notificationBuilder.addAction(R.drawable.main_btnnext, "next", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_NEXT), PendingIntent.FLAG_IMMUTABLE));
+                }
 
-        Intent resultIntent = new Intent(this, MainActivity.class);
-        resultIntent.setAction("android.intent.action.MAIN");
-        resultIntent.addCategory("android.intent.category.LAUNCHER");
-        notificationBuilder.setContentIntent(PendingIntent.getActivity(this, 0, resultIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE));
-        notificationBuilder.setDeleteIntent(PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_QUIT), PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE));
+                notificationBuilder.setStyle(new Notification.MediaStyle()
+                        .setMediaSession(mediaSession.getSessionToken())
+                        .setShowActionsInCompactView(0, 1, 2));
+                if (track != null) {
+                    notificationBuilder
+                            .setContentTitle(track.getMetadata().getTitle())
+                            .setContentText(track.getMetadata().getArtist());
+                } else {
+                    notificationBuilder
+                            .setContentTitle("")
+                            .setContentText("");
+                }
 
-        Notification notification = notificationBuilder.build();
+                if (artwork != null) {
+                    notificationBuilder.setLargeIcon(artwork);
+                }
 
-        NotificationManager nfm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        if (nfm != null) {
-            nfm.notify(NOTIFICATION_ID, notification);
-        }
-        if (playbackController.getContent() != null) {
-            Log.v(LOG_TAG, "Start Foreground");
-            if (!isForeground)
-                startForeground(NOTIFICATION_ID, notification);
-            isForeground = true;
-        } else {
-            Log.v(LOG_TAG, "Stop Foreground");
-            if (isForeground)
-                stopForeground(false);
-            isForeground = false;
-        }
+                notificationBuilder.setSmallIcon(R.drawable.notification_smallicon);
+
+                Intent resultIntent = new Intent(this, MainActivity.class);
+                resultIntent.setAction("android.intent.action.MAIN");
+                resultIntent.addCategory("android.intent.category.LAUNCHER");
+                notificationBuilder.setContentIntent(PendingIntent.getActivity(this, 0, resultIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE));
+                notificationBuilder.setDeleteIntent(PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_QUIT), PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE));
+
+                Notification notification = notificationBuilder.build();
+
+
+                NotificationManager nfm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                if (nfm != null) {
+                    nfm.notify(NOTIFICATION_ID, notification);
+                }
+                if (playbackController.getContent() != null) {
+                    Log.v(LOG_TAG, "Start Foreground");
+                    if (!isForeground)
+                        startForeground(NOTIFICATION_ID, notification);
+                    isForeground = true;
+                } else {
+                    Log.v(LOG_TAG, "Stop Foreground");
+                    if (isForeground)
+                        stopForeground(false);
+                    isForeground = false;
+                }
+            });
+        });
     }
 
     private void updateMediaSession(PlayerState state) {
