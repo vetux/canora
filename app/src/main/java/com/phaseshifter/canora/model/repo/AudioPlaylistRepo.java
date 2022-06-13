@@ -206,8 +206,11 @@ public class AudioPlaylistRepo implements AudioPlaylistRepository {
             throw new IllegalArgumentException();
         }
         File file = getPlaylistFile(playlist.getMetadata().getId());
+        if (!file.delete()) {
+            throw new IOException("Failed to delete file at " + file);
+        }
         if (!file.createNewFile()) {
-            throw new IOException("Failed to create playlist file at " + file);
+            throw new IOException("Playlist file already exists at " + file);
         }
         FileOutputStream stream = new FileOutputStream(file);
         byte[] buffer = serializer.serialize(playlist);
