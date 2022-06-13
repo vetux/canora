@@ -138,7 +138,8 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
             }
         }
 
-        view.setDebugDisplay(updatedState.isDevMode());
+        if (lastState == null || lastState.isDevMode() != updatedState.isDevMode())
+            view.setDebugDisplay(updatedState.isDevMode());
 
         if (themeChange
                 || lastState == null
@@ -150,10 +151,12 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
                 || !Objects.equals(updatedState.isControlsMaximized(), lastState.isControlsMaximized()))
             view.setControlMax(updatedState.isControlsMaximized());
 
-        if (updatedState.getUiIndicator().isPlaylistView()) {
-            view.showPlaylistContent();
-        } else {
-            view.showTrackContent();
+        if (lastState == null || lastState.getUiIndicator() != updatedState.getUiIndicator()) {
+            if (updatedState.getUiIndicator().isPlaylistView()) {
+                view.showPlaylistContent();
+            } else {
+                view.showTrackContent();
+            }
         }
         lastState = updatedState;
     }
