@@ -358,7 +358,7 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
                 store.dispatch(actionCreator.getChangeIndicators(currentState.getUiIndicator(), currentState.getUiIndicator()));
             }
             currentState = store.getState();
-            service.setContent(currentState.getContentTracks());
+            service.setContent(currentState.getSortedTracks());
             service.play(processedData.get(index).getMetadata().getId());
         }
     }
