@@ -11,11 +11,14 @@ import com.phaseshifter.canora.data.media.image.source.ImageDataSourceUri;
 import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
 import com.phaseshifter.canora.data.media.playlist.metadata.PlaylistMetadataMemory;
 import com.phaseshifter.canora.plugin.soundcloud.api.data.SCGenre;
+import com.phaseshifter.canora.plugin.soundcloud.api.exceptions.SCConnectionException;
+import com.phaseshifter.canora.plugin.soundcloud.api.exceptions.SCParsingException;
 import com.phaseshifter.canora.plugin.soundcloud.api_v2.client.SCV2Client;
 import com.phaseshifter.canora.plugin.soundcloud.api_v2.data.SCV2ChartTrack;
 import com.phaseshifter.canora.plugin.soundcloud.api_v2.data.SCV2Charts;
 import com.phaseshifter.canora.plugin.soundcloud.api_v2.data.SCV2Track;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.HashMap;
@@ -40,9 +43,12 @@ public class SCAudioDataRepo {
     private String searchText;
     private int searchPage;
 
+    private String clientID;
+
     private static final int resPerPage = 10;
 
-    public SCAudioDataRepo() {
+    public SCAudioDataRepo(String clientID) {
+        this.clientID = clientID;
         int i = 0;
         for (SCGenre genre : SCGenre.values()) {
             indexGenreMapping.put(i, genre);
@@ -54,6 +60,10 @@ public class SCAudioDataRepo {
         }
     }
 
+    public SCAudioDataRepo() {
+        this(null);
+    }
+
     public int getSearchPage() {
         return searchPage;
     }
@@ -62,16 +72,90 @@ public class SCAudioDataRepo {
         return searchText;
     }
 
+    public String getClientID() {
+        return clientID;
+    }
+
+    public void setClientID(String id) {
+        clientID = id;
+        if (client == null) {
+            client = new SCV2Client();
+        }
+        client.setClientID(clientID);
+    }
+
     public void refreshSearch(String q) {
         if (searchText != null && searchText.equals(q)) {
             searchPage++;
-            searchResults.addAll(search(q, searchPage));
         } else {
             searchPage = 0;
             searchResults.clear();
-            searchResults.addAll(search(q, searchPage));
         }
         searchText = q;
+        List<AudioData> results;
+        try {
+            results = search(q, searchPage);
+        } catch (Exception e) {
+            e.printStackTrace();
+            try {
+                updateClientId();
+                results = search(q, searchPage);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                results = null;
+            }
+        }
+        if (results != null) {
+            searchResults.addAll(results);
+        }
+    }
+
+    public void refreshCharts(int currentGenre) {
+        SCGenre genre = indexGenreMapping.get(currentGenre);
+        assert genre != null;
+
+        AudioPlaylist pl = charts.get(currentGenre);
+
+        if (chartPages.containsKey(genre)) {
+            Integer page = chartPages.get(genre);
+            assert (pl != null && page != null);
+            page++;
+            SCV2Charts c;
+            try {
+                c = receiveCharts(genre, page);
+            } catch (Exception e) {
+                e.printStackTrace();
+                try {
+                    updateClientId();
+                    c = receiveCharts(genre, page);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    c = null;
+                }
+            }
+            if (c != null) {
+                pl.getData().addAll(getTracks(c));
+                chartPages.put(genre, page);
+            }
+        } else {
+            SCV2Charts c;
+            try {
+                c = receiveCharts(genre, 0);
+            } catch (Exception e) {
+                e.printStackTrace();
+                try {
+                    updateClientId();
+                    c = receiveCharts(genre, 0);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    c = null;
+                }
+            }
+            if (c != null) {
+                pl.getData().addAll(getTracks(c));
+                chartPages.put(genre, 0);
+            }
+        }
     }
 
     public int getChartsIndex(UUID uuid) {
@@ -85,26 +169,6 @@ public class SCAudioDataRepo {
         throw new RuntimeException("Invalid uuid");
     }
 
-    public void refreshCharts(int currentGenre) {
-        SCGenre genre = indexGenreMapping.get(currentGenre);
-        assert genre != null;
-
-        AudioPlaylist pl = charts.get(currentGenre);
-
-        if (chartPages.containsKey(genre)) {
-            Integer page = chartPages.get(genre);
-            assert (pl != null && page != null);
-            page++;
-            chartPages.put(genre, page);
-            SCV2Charts c = receiveCharts(genre, page);
-            pl.getData().addAll(getTracks(c));
-        } else {
-            SCV2Charts c = receiveCharts(genre, 0);
-            pl.getData().addAll(getTracks(c));
-            chartPages.put(genre, 0);
-        }
-    }
-
     public List<AudioData> getSearchResults() {
         return searchResults;
     }
@@ -113,24 +177,24 @@ public class SCAudioDataRepo {
         return charts;
     }
 
-    private SCV2Client getClient() {
-        if (client == null) {
-            client = new SCV2Client();
-            updateClientId();
-        }
-        return client;
-    }
-
     private void updateClientId() {
         try {
-            try {
-                client.setClientID(client.getNewClientID());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            clientID = client.getNewClientID();
+            client.setClientID(clientID);
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private SCV2Client getClient() throws SCConnectionException, SCParsingException, IOException {
+        if (client == null) {
+            client = new SCV2Client();
+            if (clientID == null) {
+                clientID = client.getNewClientID();
+            }
+            client.setClientID(clientID);
+        }
+        return client;
     }
 
     private AudioData getAudioData(SCV2Track track) {
@@ -155,22 +219,20 @@ public class SCAudioDataRepo {
         }
     }
 
-    private List<AudioData> search(String q, int pageNumber) {
+    private List<AudioData> getTracks(SCV2Charts c) {
+        ArrayList<AudioData> t = new ArrayList<>();
+        for (SCV2ChartTrack track : c.getTracks()) {
+            t.add(getAudioData(track.getTrack()));
+        }
+        return t;
+    }
+
+    private List<AudioData> search(String q, int pageNumber) throws SCConnectionException, SCParsingException, IOException {
         List<SCV2Track> tracks = new ArrayList<>();
 
         if (!q.isEmpty()) {
             SCV2Client client = getClient();
-            try {
-                tracks = client.getTracksContainingString(q, resPerPage, pageNumber);
-            } catch (Exception e) {
-                e.printStackTrace();
-                updateClientId();
-                try {
-                    tracks = client.getTracksContainingString(q, resPerPage, pageNumber);
-                } catch (Exception x) {
-                    x.printStackTrace();
-                }
-            }
+            tracks = client.getTracksContainingString(q, resPerPage, pageNumber);
         }
 
         List<AudioData> ret = new ArrayList<>();
@@ -180,31 +242,8 @@ public class SCAudioDataRepo {
         return ret;
     }
 
-    private List<AudioData> getTracks(SCV2Charts c) {
-        ArrayList<AudioData> t = new ArrayList<>();
-        for (SCV2ChartTrack track : c.getTracks()) {
-            t.add(getAudioData(track.getTrack()));
-        }
-        return t;
-    }
-
-    private SCV2Charts receiveCharts(SCGenre genre, int pageNumber) {
+    private SCV2Charts receiveCharts(SCGenre genre, int pageNumber) throws SCConnectionException, SCParsingException, IOException {
         SCV2Client client = getClient();
-
-        SCV2Charts ret;
-        try {
-            ret = client.getCharts(genre, resPerPage, pageNumber);
-        } catch (Exception e) {
-            e.printStackTrace();
-            updateClientId();
-            try {
-                ret = client.getCharts(genre, resPerPage, pageNumber);
-            } catch (Exception x) {
-                x.printStackTrace();
-                ret = null;
-            }
-        }
-
-        return ret;
+        return client.getCharts(genre, resPerPage, pageNumber);
     }
 }

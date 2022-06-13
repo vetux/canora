@@ -9,6 +9,7 @@ import com.phaseshifter.canora.data.media.playlist.metadata.PlaylistMetadataMemo
 import com.phaseshifter.canora.data.settings.BooleanSetting;
 import com.phaseshifter.canora.data.settings.FloatSetting;
 import com.phaseshifter.canora.data.settings.IntegerSetting;
+import com.phaseshifter.canora.data.settings.StringSetting;
 import com.phaseshifter.canora.model.editor.AudioMetadataEditor;
 import com.phaseshifter.canora.model.formatting.ListFilter;
 import com.phaseshifter.canora.model.formatting.ListSorter;
@@ -92,8 +93,7 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
                          SCAudioDataRepo scAudioDataRepo,
                          AudioMetadataEditor metadataEditor,
                          Executor mainThread,
-                         List<StateListener<MainStateImmutable>> viewmodels
-    ) {
+                         List<StateListener<MainStateImmutable>> viewmodels) {
         this.view = view;
         this.service = service;
         this.audioDataRepository = audioDataRepository;
@@ -103,6 +103,7 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
         this.scAudioDataRepo = scAudioDataRepo;
         this.metadataEditor = metadataEditor;
         this.mainThread = mainThread;
+        scAudioDataRepo.setClientID(settingsRepository.getString(StringSetting.SC_CLIENTID));
         presExec = new ThreadPoolExecutor(1, 1, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
         final MainState cachedState;
         if (savedState instanceof MainState)
@@ -877,6 +878,7 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
 
     @Override
     public Serializable saveState() {
+        settingsRepository.putString(StringSetting.SC_CLIENTID, scAudioDataRepo.getClientID());
         return (MainState) lastState;
     }
 
