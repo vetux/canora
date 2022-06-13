@@ -107,9 +107,17 @@ public class MainState implements MainStateImmutable, Serializable {
         }
         controlsMaximized = copy.controlsMaximized;
         filtering = copy.filtering;
-        filterDefinition = new FilterDef(copy.filterDefinition);
+        if (copy.filterDefinition == null) {
+            filterDefinition = new FilterDef();
+        } else {
+            filterDefinition = new FilterDef(copy.filterDefinition);
+        }
         selecting = copy.selecting;
-        selection = new HashSet<>(copy.selection);
+        if (copy.selection == null) {
+            selection = new HashSet<>();
+        } else {
+            selection = new HashSet<>(copy.selection);
+        }
         sortingDefinition = new SortDef(copy.sortingDefinition);
         if (copy.theme == null) {
             theme = null;
