@@ -33,24 +33,67 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.Executor;
+import java.util.concurrent.FutureTask;
 
-public abstract class MainActionCreator {
+public class MainActionCreator {
     private static final String LOG_TAG = "MainActionCreator";
 
-    public static Action refreshAndFetchRepoData(Store<MainStateImmutable> store,
-                                                 AudioDataRepository audioDataRepository,
-                                                 AudioPlaylistRepository audioPlaylistRepository,
-                                                 SettingsRepository settingsRepository,
-                                                 ThemeRepository themeRepository,
-                                                 SCAudioDataRepo scAudioDataRepo,
-                                                 MediaPlayerService service,
-                                                 Executor presExec,
-                                                 Executor mainExec) {
+    private final Store<MainStateImmutable> store;
+    private final AudioDataRepository audioDataRepository;
+    private final AudioPlaylistRepository audioPlaylistRepository;
+    private final SettingsRepository settingsRepository;
+    private final ThemeRepository themeRepository;
+    private final SCAudioDataRepo scAudioDataRepo;
+    private final MediaPlayerService service;
+    private final Executor presExec;
+    private final Executor mainExec;
+
+    private FutureTask<Boolean> task = null;
+
+    public MainActionCreator(Store<MainStateImmutable> store,
+                             AudioDataRepository audioDataRepository,
+                             AudioPlaylistRepository audioPlaylistRepository,
+                             SettingsRepository settingsRepository,
+                             ThemeRepository themeRepository,
+                             SCAudioDataRepo scAudioDataRepo,
+                             MediaPlayerService service,
+                             Executor presExec,
+                             Executor mainExec) {
+        this.store = store;
+        this.audioDataRepository = audioDataRepository;
+        this.audioPlaylistRepository = audioPlaylistRepository;
+        this.settingsRepository = settingsRepository;
+        this.themeRepository = themeRepository;
+        this.scAudioDataRepo = scAudioDataRepo;
+        this.service = service;
+        this.presExec = presExec;
+        this.mainExec = mainExec;
+    }
+
+    public Action refreshAndFetchRepoData() {
         return new Thunk.ThunkAction() {
             @Override
             public Action run() {
                 store.dispatch(new MainAction(MainActionType.CONTENT_LOAD_START));
                 store.dispatch(new MainAction(MainActionType.SEARCH_LOAD_START));
+
+                if (task != null) {
+                    while (!task.isDone()) {
+                        try {
+                            task.get();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+
+                task = new FutureTask<>(() -> {
+                    store.dispatch(fetchRepoData());
+                    store.dispatch(new MainAction(MainActionType.CONTENT_LOAD_STOP));
+                    store.dispatch(new MainAction(MainActionType.SEARCH_LOAD_STOP));
+                    return true;
+                });
+
                 presExec.execute(() -> {
                     audioDataRepository.refresh();
 
@@ -67,24 +110,14 @@ public abstract class MainActionCreator {
                         }
                     }
 
-                    mainExec.execute(() -> {
-                        store.dispatch(fetchRepoData(store, audioDataRepository, audioPlaylistRepository, settingsRepository, themeRepository, scAudioDataRepo, service));
-                        store.dispatch(new MainAction(MainActionType.CONTENT_LOAD_STOP));
-                        store.dispatch(new MainAction(MainActionType.SEARCH_LOAD_STOP));
-                    });
+                    mainExec.execute(task);
                 });
                 return null;
             }
         };
     }
 
-    public static Action fetchRepoData(Store<MainStateImmutable> store,
-                                       AudioDataRepository audioDataRepository,
-                                       AudioPlaylistRepository audioPlaylistRepository,
-                                       SettingsRepository settingsRepository,
-                                       ThemeRepository themeRepository,
-                                       SCAudioDataRepo scAudioDataRepo,
-                                       MediaPlayerService service) {
+    public Action fetchRepoData() {
         return new Thunk.ThunkAction() {
             @Override
             public Action run() {
@@ -135,17 +168,13 @@ public abstract class MainActionCreator {
                 service.setRepeat(currentState.isRepeating());
                 service.setShuffle(currentState.isShuffling());
 
-                store.dispatch(fetchAudioData(store, audioDataRepository, audioPlaylistRepository, scAudioDataRepo, service));
+                store.dispatch(fetchAudioData());
                 return new MainAction(MainActionType.CONTENT_LOAD_STOP);
             }
         };
     }
 
-    public static Action fetchAudioData(Store<MainStateImmutable> store,
-                                        AudioDataRepository audioDataRepository,
-                                        AudioPlaylistRepository audioPlaylistRepository,
-                                        SCAudioDataRepo scAudioDataRepo,
-                                        MediaPlayerService service) {
+    public Action fetchAudioData() {
         return new Thunk.ThunkAction() {
             @Override
             public Action run() {
@@ -240,14 +269,14 @@ public abstract class MainActionCreator {
                 }
 
                 store.dispatch(new MainAction(MainActionType.SET_CONTENT, payload));
-                store.dispatch(getReformatContent(store));
+                store.dispatch(getReformatContent());
 
                 return new MainAction(MainActionType.CONTENT_LOAD_STOP);
             }
         };
     }
 
-    public static Action setPlaybackState(Store<MainStateImmutable> store, PlayerState state) {
+    public Action setPlaybackState(PlayerState state) {
         return new Thunk.ThunkAction() {
             @Override
             public Action run() {
@@ -258,7 +287,7 @@ public abstract class MainActionCreator {
         };
     }
 
-    public static Action switchFiltering(Store<MainStateImmutable> store) {
+    public Action switchFiltering() {
         return new Thunk.ThunkAction() {
             @Override
             public Action run() {
@@ -270,13 +299,12 @@ public abstract class MainActionCreator {
                         store.dispatch(new MainAction(MainActionType.CONTROL_MIN));
                     store.dispatch(new MainAction(MainActionType.FILTER_ENABLE));
                 }
-                return getFilterContent(store);
+                return getFilterContent();
             }
         };
     }
 
-    public static Action searchTextChange(Store<MainStateImmutable> store,
-                                          String text) {
+    public Action searchTextChange(String text) {
         return new Thunk.ThunkAction() {
             @Override
             public Action run() {
@@ -284,49 +312,33 @@ public abstract class MainActionCreator {
                 MainState payload = new MainState();
                 payload.setFilterDefinition(new FilterDef(currentState.getFilterDefinition().filterBy, text));
                 store.dispatch(new MainAction(MainActionType.FILTER_SETDEF, payload));
-                return getFilterContent(store);
+                return getFilterContent();
             }
         };
     }
 
-    public static Action getChangeSortingState(Store<MainStateImmutable> store,
-                                               SortDef def,
-                                               AudioDataRepository audioDataRepository,
-                                               AudioPlaylistRepository audioPlaylistRepository,
-                                               SCAudioDataRepo scAudioDataRepo,
-                                               MediaPlayerService service) {
+    public Action getChangeSortingState(SortDef def) {
         return new Thunk.ThunkAction() {
             @Override
             public Action run() {
                 MainState payload = new MainState();
                 payload.setSortingDefinition(def);
                 store.dispatch(new MainAction(MainActionType.SET_SORTDEF, payload));
-                return fetchAudioData(store, audioDataRepository, audioPlaylistRepository, scAudioDataRepo, service);
+                return fetchAudioData();
             }
         };
     }
 
-    public static Action getChangeFilterState(Store<MainStateImmutable> store,
-                                              AudioDataRepository audioDataRepository,
-                                              AudioPlaylistRepository audioPlaylistRepository,
-                                              SCAudioDataRepo scAudioDataRepo,
-                                              MediaPlayerService service,
-                                              boolean filtering) {
+    public Action getChangeFilterState(boolean filtering) {
         return new Thunk.ThunkAction() {
             @Override
             public Action run() {
-                return getChangeFilterState(store, audioDataRepository, audioPlaylistRepository, scAudioDataRepo, service, filtering, store.getState().getFilterDefinition());
+                return getChangeFilterState(filtering, store.getState().getFilterDefinition());
             }
         };
     }
 
-    public static Action getChangeFilterState(Store<MainStateImmutable> store,
-                                              AudioDataRepository audioDataRepository,
-                                              AudioPlaylistRepository audioPlaylistRepository,
-                                              SCAudioDataRepo scAudioDataRepo,
-                                              MediaPlayerService service,
-                                              boolean filtering,
-                                              FilterDef def) {
+    public Action getChangeFilterState(boolean filtering, FilterDef def) {
         return new Thunk.ThunkAction() {
             @Override
             public Action run() {
@@ -334,18 +346,13 @@ public abstract class MainActionCreator {
                 state.setFiltering(filtering);
                 state.setFilterDefinition(def);
                 store.dispatch(new MainAction(MainActionType.SET_FILTERSTATE, state));
-                return fetchAudioData(store, audioDataRepository, audioPlaylistRepository, scAudioDataRepo, service);
+                return fetchAudioData();
             }
         };
     }
 
-    public static Action getChangeIndicators(Store<MainStateImmutable> store,
-                                             AudioDataRepository audioDataRepository,
-                                             AudioPlaylistRepository audioPlaylistRepository,
-                                             SCAudioDataRepo scAudioDataRepo,
-                                             MediaPlayerService service,
-                                             SelectionIndicator contentIndicator,
-                                             SelectionIndicator uiIndicator) {
+    public Action getChangeIndicators(SelectionIndicator contentIndicator,
+                                      SelectionIndicator uiIndicator) {
         return new Thunk.ThunkAction() {
             @Override
             public Action run() {
@@ -354,12 +361,12 @@ public abstract class MainActionCreator {
                 state.setContentIndicator(contentIndicator);
                 state.setUiIndicator(uiIndicator);
                 store.dispatch(new MainAction(MainActionType.SET_INDICATORS, state));
-                return fetchAudioData(store, audioDataRepository, audioPlaylistRepository, scAudioDataRepo, service);
+                return fetchAudioData();
             }
         };
     }
 
-    public static Action getChangeSelectionMode(Store<MainStateImmutable> store, boolean isSelecting) {
+    public Action getChangeSelectionMode(boolean isSelecting) {
         return new Thunk.ThunkAction() {
             @Override
             public Action run() {
@@ -373,7 +380,7 @@ public abstract class MainActionCreator {
         };
     }
 
-    public static Action getChangeSelection(HashSet<UUID> selection) {
+    public Action getChangeSelection(HashSet<UUID> selection) {
         return new Thunk.ThunkAction() {
             @Override
             public Action run() {
@@ -384,7 +391,7 @@ public abstract class MainActionCreator {
         };
     }
 
-    public static Action getChangeControlMax(boolean controlMax) {
+    public Action getChangeControlMax(boolean controlMax) {
         return new Thunk.ThunkAction() {
             @Override
             public Action run() {
@@ -395,7 +402,7 @@ public abstract class MainActionCreator {
         };
     }
 
-    public static Action getChangeVolume(float volume) {
+    public Action getChangeVolume(float volume) {
         return new Thunk.ThunkAction() {
             @Override
             public Action run() {
@@ -406,7 +413,7 @@ public abstract class MainActionCreator {
         };
     }
 
-    public static Action getChangeShuffle(boolean shuffle) {
+    public Action getChangeShuffle(boolean shuffle) {
         return new Thunk.ThunkAction() {
             @Override
             public Action run() {
@@ -417,7 +424,7 @@ public abstract class MainActionCreator {
         };
     }
 
-    public static Action getChangeRepeat(boolean repeat) {
+    public Action getChangeRepeat(boolean repeat) {
         return new Thunk.ThunkAction() {
             @Override
             public Action run() {
@@ -428,7 +435,7 @@ public abstract class MainActionCreator {
         };
     }
 
-    public static Action getChangeDevMode(boolean devMode) {
+    public Action getChangeDevMode(boolean devMode) {
         return new Thunk.ThunkAction() {
             @Override
             public Action run() {
@@ -439,7 +446,7 @@ public abstract class MainActionCreator {
         };
     }
 
-    public static Action getReformatContent(Store<MainStateImmutable> store) {
+    public Action getReformatContent() {
         return new Thunk.ThunkAction() {
             @Override
             public Action run() {
@@ -479,7 +486,7 @@ public abstract class MainActionCreator {
         };
     }
 
-    public static Action getFilterContent(Store<MainStateImmutable> store) {
+    public Action getFilterContent() {
         return new Thunk.ThunkAction() {
             @Override
             public Action run() {
@@ -520,7 +527,7 @@ public abstract class MainActionCreator {
      * @param audioDataRepository The AudioDataRepository to run the checks on
      * @return The passed indicator if data is available for it, or the passed indicator reset to submenu if not, or null if the supplied indicator was null.
      */
-    private static SelectionIndicator patchIndicator(SelectionIndicator indicator, AudioDataRepository audioDataRepository) {
+    private SelectionIndicator patchIndicator(SelectionIndicator indicator, AudioDataRepository audioDataRepository) {
         if (indicator == null)
             return null;
         switch (indicator.getSelector()) {

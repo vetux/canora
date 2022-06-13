@@ -16,6 +16,7 @@ import com.phaseshifter.canora.plugin.soundcloud.api.exceptions.SCParsingExcepti
 import com.phaseshifter.canora.plugin.soundcloud.api_v2.client.SCV2Client;
 import com.phaseshifter.canora.plugin.soundcloud.api_v2.data.SCV2ChartTrack;
 import com.phaseshifter.canora.plugin.soundcloud.api_v2.data.SCV2Charts;
+import com.phaseshifter.canora.plugin.soundcloud.api_v2.data.SCV2ChartsMutable;
 import com.phaseshifter.canora.plugin.soundcloud.api_v2.data.SCV2Track;
 
 import java.io.IOException;
@@ -42,6 +43,10 @@ public class SCAudioDataRepo {
 
     private String searchText;
     private int searchPage;
+    private boolean searchLimitReached;
+
+    private int chartsActiveGenre;
+    private boolean chartsLimitReached;
 
     private String clientID;
 
@@ -76,6 +81,14 @@ public class SCAudioDataRepo {
         return clientID;
     }
 
+    public boolean isSearchLimitReached() {
+        return searchLimitReached;
+    }
+
+    public boolean isChartsLimitReached() {
+        return chartsLimitReached;
+    }
+
     public void setClientID(String id) {
         clientID = id;
         if (client == null) {
@@ -86,13 +99,18 @@ public class SCAudioDataRepo {
 
     public void refreshSearch(String q) {
         if (searchText != null && searchText.equals(q)) {
+            if (searchLimitReached) {
+                return;
+            }
             searchPage++;
         } else {
+            searchLimitReached = false;
             searchPage = 0;
             searchResults.clear();
         }
         searchText = q;
-        List<AudioData> results;
+        List<SCV2Track> results;
+        boolean succeeded = true;
         try {
             results = search(q, searchPage);
         } catch (Exception e) {
@@ -102,58 +120,64 @@ public class SCAudioDataRepo {
                 results = search(q, searchPage);
             } catch (Exception ex) {
                 ex.printStackTrace();
-                results = null;
+                succeeded = false;
+                results = new ArrayList<>();
             }
         }
-        if (results != null) {
-            searchResults.addAll(results);
+
+        if (succeeded) {
+            if (results == null) {
+                // Last page reached
+                searchLimitReached = true;
+            } else {
+                searchResults.addAll(getTracks(results));
+            }
         }
     }
 
     public void refreshCharts(int currentGenre) {
+        if (chartsActiveGenre == currentGenre && chartsLimitReached) {
+            return;
+        }
+        chartsActiveGenre = currentGenre;
+
         SCGenre genre = indexGenreMapping.get(currentGenre);
         assert genre != null;
 
         AudioPlaylist pl = charts.get(currentGenre);
 
+        int page = 0;
         if (chartPages.containsKey(genre)) {
-            Integer page = chartPages.get(genre);
-            assert (pl != null && page != null);
-            page++;
-            SCV2Charts c;
+            page = chartPages.get(genre);
+        }
+
+        boolean succeeded = true;
+        SCV2Charts c;
+        try {
+            c = receiveCharts(genre, page);
+        } catch (Exception e) {
+            e.printStackTrace();
             try {
+                updateClientId();
                 c = receiveCharts(genre, page);
-            } catch (Exception e) {
-                e.printStackTrace();
-                try {
-                    updateClientId();
-                    c = receiveCharts(genre, page);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    c = null;
-                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                succeeded = false;
+                c = new SCV2ChartsMutable();
             }
-            if (c != null) {
+        }
+
+        if (succeeded) {
+            if (c == null) {
+                chartsLimitReached = true;
+            } else {
                 pl.getData().addAll(getTracks(c));
+
+                if (chartPages.containsKey(genre)) {
+                    page++;
+                }
+
                 chartPages.put(genre, page);
-            }
-        } else {
-            SCV2Charts c;
-            try {
-                c = receiveCharts(genre, 0);
-            } catch (Exception e) {
-                e.printStackTrace();
-                try {
-                    updateClientId();
-                    c = receiveCharts(genre, 0);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    c = null;
-                }
-            }
-            if (c != null) {
-                pl.getData().addAll(getTracks(c));
-                chartPages.put(genre, 0);
             }
         }
     }
@@ -227,19 +251,21 @@ public class SCAudioDataRepo {
         return t;
     }
 
-    private List<AudioData> search(String q, int pageNumber) throws SCConnectionException, SCParsingException, IOException {
-        List<SCV2Track> tracks = new ArrayList<>();
-
-        if (!q.isEmpty()) {
-            SCV2Client client = getClient();
-            tracks = client.getTracksContainingString(q, resPerPage, pageNumber);
-        }
-
+    private List<AudioData> getTracks(List<SCV2Track> tracks) {
         List<AudioData> ret = new ArrayList<>();
         for (SCV2Track track : tracks) {
             ret.add(getAudioData(track));
         }
         return ret;
+    }
+
+    private List<SCV2Track> search(String q, int pageNumber) throws SCConnectionException, SCParsingException, IOException {
+        if (!q.isEmpty()) {
+            SCV2Client client = getClient();
+            return client.getTracksContainingString(q, resPerPage, pageNumber);
+        } else {
+            return null;
+        }
     }
 
     private SCV2Charts receiveCharts(SCGenre genre, int pageNumber) throws SCConnectionException, SCParsingException, IOException {

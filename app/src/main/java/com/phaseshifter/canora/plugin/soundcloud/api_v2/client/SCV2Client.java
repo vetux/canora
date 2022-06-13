@@ -63,7 +63,7 @@ public class SCV2Client {
      * @param q             Term to search for
      * @param tracksPerPage Number of tracks per page
      * @param pageNumber    0 Equals the first page, 1 equals the second page and so on
-     * @return A List of SCTrack objects returned from soundcloud.
+     * @return A List of SCTrack objects returned from soundcloud or null if no results exist for the given pageNumber
      * @throws IOException           Thrown when the HTTP connection could not be made. Indicates a fatal local error.
      * @throws SCConnectionException Thrown when the request was rejected by the server. Indicates an invalid clientID or change in api.
      * @throws SCParsingException    Reports a fatal error in the parsing of the returned html / json. Indicates a change in the api.
@@ -79,13 +79,17 @@ public class SCV2Client {
         parameters.add(new Pair<>(SCV2Constants.PARAMETER_GET_LINKEDPARTITIONING, "1"));
         HttpRequest request = new HttpRequest(HttpMethod.GET, SCV2Constants.URL_APIV2_BASE + SCV2Constants.SUFFIX_SEARCH + SCV2Constants.SUFFIX_TRACKS, parameters);
         HttpResponse response = client.doRequest(request);
-        if (response.getStatusCode() != HttpStatusCode.OK.code) {
+        if (response.getStatusCode() == HttpStatusCode.NOT_FOUND.code) {
+            response.close();
+            return null;
+        } else if (response.getStatusCode() == HttpStatusCode.OK.code) {
+            String json = response.getBodyString();
+            response.close();
+            return new SCV2JsonParser().getTracks(json);
+        } else {
             response.close();
             throw new SCConnectionException("Request to api-v2 endpoint rejected. Status Code: " + response.getStatusCode());
         }
-        String json = response.getBodyString();
-        response.close();
-        return new SCV2JsonParser().getTracks(json);
     }
 
     /**
@@ -117,7 +121,7 @@ public class SCV2Client {
      * @param genre         The SCGenre to get the charts of
      * @param tracksPerPage The number of tracks returned per request.
      * @param pageNumber    0 Equals the first page, 1 equals the second page and so on
-     * @return The SCV2Charts object representing the charts for the given genre.
+     * @return The SCV2Charts object representing the charts for the given genre or null if no results exist for the given pageNumber
      * @throws IOException           Thrown when the HTTP connection could not be made. Indicates a fatal local error.
      * @throws SCConnectionException Thrown when the request was rejected by the server. Indicates an invalid clientID or change in api.
      * @throws SCParsingException    Reports a fatal error in the parsing of the returned html / json. Indicates a change in the api.
@@ -134,13 +138,17 @@ public class SCV2Client {
         parameters.add(new Pair<>(SCV2Constants.PARAMETER_GET_LINKEDPARTITIONING, "1"));
         HttpRequest request = new HttpRequest(HttpMethod.GET, SCV2Constants.URL_APIV2_BASE + SCV2Constants.SUFFIX_CHARTS, parameters);
         HttpResponse response = client.doRequest(request);
-        if (response.getStatusCode() != HttpStatusCode.OK.code) {
+        if (response.getStatusCode() == HttpStatusCode.NOT_FOUND.code) {
+            response.close();
+            return null;
+        } else if (response.getStatusCode() == HttpStatusCode.OK.code) {
+            String json = response.getBodyString();
+            response.close();
+            return new SCV2JsonParser().getCharts(json);
+        } else {
             response.close();
             throw new SCConnectionException("Request to api-v2 endpoint rejected. Status Code: " + response.getStatusCode());
         }
-        String json = response.getBodyString();
-        response.close();
-        return new SCV2JsonParser().getCharts(json);
     }
 
     /**
