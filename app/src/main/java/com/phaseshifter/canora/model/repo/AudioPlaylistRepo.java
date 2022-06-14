@@ -14,6 +14,7 @@ import com.phaseshifter.canora.utils.serialization.IObjectSerializer;
 import com.phaseshifter.canora.utils.serialization.ObjectSerializer;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -206,8 +207,10 @@ public class AudioPlaylistRepo implements AudioPlaylistRepository {
             throw new IllegalArgumentException();
         }
         File file = getPlaylistFile(playlist.getMetadata().getId());
-        if (!file.delete()) {
-            throw new IOException("Failed to delete file at " + file);
+        try {
+            file.delete();
+        } catch (Exception e){
+            e.printStackTrace();
         }
         if (!file.createNewFile()) {
             throw new IOException("Playlist file already exists at " + file);
