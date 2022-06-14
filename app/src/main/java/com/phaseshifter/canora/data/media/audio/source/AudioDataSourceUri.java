@@ -70,12 +70,4 @@ public class AudioDataSourceUri implements AudioDataSource, Serializable {
                 "uri=" + uriStr +
                 '}';
     }
-
-    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-        uriStr = (String) in.readObject();
-    }
-
-    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-        out.writeObject(uriStr);
-    }
 }

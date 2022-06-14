@@ -93,12 +93,4 @@ public class ImageDataSourceUri implements ImageDataSource, Serializable {
                 "uri=" + uriStr +
                 '}';
     }
-
-    private void writeObject(ObjectOutputStream os) throws IOException {
-        os.writeObject(uriStr);
-    }
-
-    private void readObject(ObjectInputStream is) throws ClassNotFoundException, IOException {
-        uriStr = (String) is.readObject();
-    }
 }

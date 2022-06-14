@@ -136,12 +136,6 @@ public class MainState implements MainStateImmutable, Serializable {
         this((MainState) copy);
     }
 
-    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-        in.defaultReadObject();
-        selection = new HashSet<>();
-        filterDefinition = new FilterDef();
-    }
-
     @Override
     public int getContentLoadSemaphore() {
         return contentLoadSemaphore;
