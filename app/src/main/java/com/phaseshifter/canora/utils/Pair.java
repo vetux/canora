@@ -1,6 +1,8 @@
 package com.phaseshifter.canora.utils;
 
-public class Pair<T, V> {
+import java.io.Serializable;
+
+public class Pair<T, V> implements Serializable {
     public T first;
     public V second;
 
