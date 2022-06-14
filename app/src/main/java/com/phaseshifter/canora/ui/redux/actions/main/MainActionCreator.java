@@ -72,10 +72,6 @@ public class MainActionCreator {
         return new Thunk.ThunkAction() {
             @Override
             public Action run() {
-                if (store.getState().getContentLoadSemaphore() > 0) {
-                    return null;
-                }
-
                 store.dispatch(new MainAction(MainActionType.CONTENT_LOAD_START));
                 store.dispatch(new MainAction(MainActionType.SEARCH_LOAD_START));
 
