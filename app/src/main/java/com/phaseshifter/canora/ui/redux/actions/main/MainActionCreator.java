@@ -48,8 +48,6 @@ public class MainActionCreator {
     private final Executor presExec;
     private final Executor mainExec;
 
-    private FutureTask<Boolean> task = null;
-
     public MainActionCreator(Store<MainStateImmutable> store,
                              AudioDataRepository audioDataRepository,
                              AudioPlaylistRepository audioPlaylistRepository,
@@ -74,25 +72,12 @@ public class MainActionCreator {
         return new Thunk.ThunkAction() {
             @Override
             public Action run() {
-                store.dispatch(new MainAction(MainActionType.CONTENT_LOAD_START));
-                store.dispatch(new MainAction(MainActionType.SEARCH_LOAD_START));
-
-                if (task != null) {
-                    while (!task.isDone()) {
-                        try {
-                            task.get();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
+                if (store.getState().getContentLoadSemaphore() > 0) {
+                    return null;
                 }
 
-                task = new FutureTask<>(() -> {
-                    store.dispatch(fetchRepoData());
-                    store.dispatch(new MainAction(MainActionType.CONTENT_LOAD_STOP));
-                    store.dispatch(new MainAction(MainActionType.SEARCH_LOAD_STOP));
-                    return true;
-                });
+                store.dispatch(new MainAction(MainActionType.CONTENT_LOAD_START));
+                store.dispatch(new MainAction(MainActionType.SEARCH_LOAD_START));
 
                 presExec.execute(() -> {
                     audioDataRepository.refresh();
@@ -110,8 +95,13 @@ public class MainActionCreator {
                         }
                     }
 
-                    mainExec.execute(task);
+                    mainExec.execute(() -> {
+                        store.dispatch(fetchRepoData());
+                        store.dispatch(new MainAction(MainActionType.CONTENT_LOAD_STOP));
+                        store.dispatch(new MainAction(MainActionType.SEARCH_LOAD_STOP));
+                    });
                 });
+
                 return null;
             }
         };
