@@ -31,13 +31,7 @@ public abstract class MainSelector {
                 playlist = audioDataRepository.getGenre(indicator.getUuid());
                 break;
             case SOUNDCLOUD_CHARTS:
-                List<AudioPlaylist> pls = scAudioDataRepo.getChartsPlaylists();
-                for (AudioPlaylist pl : pls) {
-                    if (pl.getMetadata().getId() == indicator.getUuid()) {
-                        playlist = pl;
-                        break;
-                    }
-                }
+                playlist = scAudioDataRepo.getChartsPlaylists().get(scAudioDataRepo.getChartsIndex(indicator.getUuid()));
                 break;
         }
         if (playlist != null)

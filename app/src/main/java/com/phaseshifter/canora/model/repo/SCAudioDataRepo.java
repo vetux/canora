@@ -185,12 +185,12 @@ public class SCAudioDataRepo {
     public int getChartsIndex(UUID uuid) {
         int i = 0;
         for (AudioPlaylist pl : charts) {
-            if (pl.getMetadata().getId() == uuid) {
+            if (pl.getMetadata().getId().equals(uuid)) {
                 return i;
             }
             i++;
         }
-        throw new RuntimeException("Invalid uuid");
+        throw new RuntimeException("Invalid uuid " + uuid);
     }
 
     public List<AudioData> getSearchResults() {
