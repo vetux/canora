@@ -502,7 +502,7 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
                 if (nfm != null) {
                     nfm.notify(NOTIFICATION_ID, notification);
                 }
-                if (playbackController.getContent() != null) {
+                if (playing) {
                     Log.v(LOG_TAG, "Start Foreground");
                     if (!isForeground)
                         startForeground(NOTIFICATION_ID, notification);
