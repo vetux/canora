@@ -24,7 +24,7 @@ public class SimplePlaybackController implements PlaybackController {
     private List<AudioData> content;
 
     private final Random rand = new Random();
-    private int nextRandom = rand.nextInt();
+    private int nextRandom = -1;
 
     public SimplePlaybackController() {
         shuffle = false;
@@ -68,6 +68,10 @@ public class SimplePlaybackController implements PlaybackController {
             Log.v(LOG_TAG, "SHUFFLE ON");
             if (shuffleCache.size() <= 0) {
                 shuffleCache.addAll(content);
+                nextRandom = rand.nextInt(shuffleCache.size());
+            }
+            if (nextRandom < 0){
+                nextRandom = rand.nextInt(shuffleCache.size());
             }
             currentTrack = shuffleCache.get(nextRandom);
             shuffleCache.remove(nextRandom);
