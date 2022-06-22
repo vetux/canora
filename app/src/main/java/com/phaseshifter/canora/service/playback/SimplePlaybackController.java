@@ -66,16 +66,16 @@ public class SimplePlaybackController implements PlaybackController {
             return currentTrack;
         } else if (shuffle) {
             Log.v(LOG_TAG, "SHUFFLE ON");
-            if (shuffleCache.size() <= 0) {
-                shuffleCache.addAll(content);
-                nextRandom = rand.nextInt(shuffleCache.size());
-            }
             if (nextRandom < 0){
                 nextRandom = rand.nextInt(shuffleCache.size());
             }
             currentTrack = shuffleCache.get(nextRandom);
             shuffleCache.remove(nextRandom);
             currentIndex = getIndexOfID(currentTrack.getMetadata().getId());
+            if (shuffleCache.size() <= 0) {
+                shuffleCache.addAll(content);
+                nextRandom = rand.nextInt(shuffleCache.size());
+            }
             nextRandom = rand.nextInt(shuffleCache.size());
         } else {
             Log.v(LOG_TAG, "SHUFFLE OFF");
