@@ -100,6 +100,9 @@ public class SimplePlaybackController implements PlaybackController {
             return forwardHistory.peek();
         } else if (shuffle) {
             Log.v(LOG_TAG, "SHUFFLE ON");
+            if (nextRandom < 0){
+                nextRandom = rand.nextInt(shuffleCache.size());
+            }
             return shuffleCache.get(nextRandom);
         } else {
             Log.v(LOG_TAG, "SHUFFLE OFF");
