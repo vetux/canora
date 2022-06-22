@@ -129,6 +129,8 @@ public class MainActivity extends Activity implements MainContract.View,
 
     private int trackListViewScrollState = SCROLL_STATE_IDLE;
 
+    private boolean showingTracks = false;
+
     //START Android Interfaces
 
     @Override
@@ -611,12 +613,27 @@ public class MainActivity extends Activity implements MainContract.View,
     @Override
     public void showTrackContent() {
         runOnUiThread(() -> {
+            showingTracks = true;
             ListView tracks = findViewById(R.id.display_listview_tracks);
             GridView playlists = findViewById(R.id.display_gridview_playlists);
+
             if (tracks != null
                     && playlists != null) {
                 tracks.setVisibility(View.VISIBLE);
-                playlists.setVisibility(View.GONE);
+                playlists.animate()
+                        .translationX(-playlists.getWidth())
+                        .setDuration(250)
+                        .setListener(new AnimatorListenerAdapter() {
+                            @Override
+                            public void onAnimationEnd(Animator animation) {
+                                if (showingTracks) {
+                                    playlists.setVisibility(View.GONE);
+                                }
+                            }
+                        });
+                tracks.animate()
+                        .translationX(0)
+                        .setDuration(250);
             }
         });
     }
@@ -624,12 +641,27 @@ public class MainActivity extends Activity implements MainContract.View,
     @Override
     public void showPlaylistContent() {
         runOnUiThread(() -> {
+            showingTracks = false;
             ListView tracks = findViewById(R.id.display_listview_tracks);
             GridView playlists = findViewById(R.id.display_gridview_playlists);
             if (tracks != null
                     && playlists != null) {
-                tracks.setVisibility(View.GONE);
                 playlists.setVisibility(View.VISIBLE);
+                playlists.setTranslationX(-playlists.getWidth());
+                tracks.animate()
+                        .translationX(tracks.getWidth())
+                        .setDuration(250)
+                        .setListener(new AnimatorListenerAdapter() {
+                            @Override
+                            public void onAnimationEnd(Animator animation) {
+                                if (!showingTracks) {
+                                    tracks.setVisibility(View.GONE);
+                                }
+                            }
+                        });
+                playlists.animate()
+                        .translationX(0)
+                        .setDuration(250);
             }
         });
     }
