@@ -155,7 +155,8 @@
                 android:textColor="?onTexControl"
                 android:textSize="14sp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/control_seekbar_progressdynamic" />
+                app:layout_constraintTop_toBottomOf="@id/control_seekbar_progressdynamic"
+                android:translationY="-10dp"/>
 
             <TextView
                 android:id="@+id/control_text_digit1"
@@ -172,7 +173,8 @@
                 android:textColor="?onTexControl"
                 android:textSize="14sp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/control_seekbar_progressdynamic" />
+                app:layout_constraintTop_toBottomOf="@id/control_seekbar_progressdynamic"
+                android:translationY="-10dp"/>
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -187,7 +189,9 @@
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:background="@drawable/ripple_imagebutton_square"
-                android:src="@drawable/main_shuffle"
+                android:src="@drawable/shuffle"
+                android:scaleType="fitXY"
+                android:padding="5dp"
                 android:tint="?onTexControl"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@id/control_button_prev_full"
@@ -208,8 +212,10 @@
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:background="@drawable/ripple_imagebutton_square"
-                android:src="@drawable/main_btnprev"
+                android:src="@drawable/skip_previous"
                 android:tint="?onTexControl"
+                android:scaleType="fitXY"
+                android:padding="5dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@id/control_button_play_full"
                 app:layout_constraintStart_toEndOf="@id/control_button_spacer_left"
@@ -222,7 +228,9 @@
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"
                 android:background="@drawable/ripple_imagebutton_square"
-                android:src="@drawable/main_btnplay"
+                android:src="@drawable/play_circle"
+                android:scaleType="fitXY"
+                android:padding="5dp"
                 android:tint="?onTexControl"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@id/control_button_next_full"
@@ -234,7 +242,9 @@
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:background="@drawable/ripple_imagebutton_square"
-                android:src="@drawable/main_btnnext"
+                android:src="@drawable/skip_next"
+                android:scaleType="fitXY"
+                android:padding="5dp"
                 android:tint="?onTexControl"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@id/control_button_spacer_right"
@@ -255,7 +265,9 @@
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:background="@drawable/ripple_imagebutton_square"
-                android:src="@drawable/main_repeat"
+                android:src="@drawable/repeat"
+                android:scaleType="fitXY"
+                android:padding="5dp"
                 android:tint="?onTexControl"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"

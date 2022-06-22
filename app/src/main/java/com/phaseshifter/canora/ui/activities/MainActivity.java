@@ -1277,18 +1277,24 @@ public class MainActivity extends Activity implements MainContract.View,
             public void update(Observable<Boolean> observable, Boolean value) {
                 ImageButton playbutton = findViewById(R.id.control_button_play);
                 if (playbutton != null) {
-                    if (value)
-                        playbutton.setImageResource(R.drawable.main_btnpause);
-                    else
-                        playbutton.setImageResource(R.drawable.main_btnplay);
+                    if (value) {
+                        playbutton.setImageResource(R.drawable.pause);
+                        playbutton.setImageTintList(ColorStateList.valueOf(AttributeConversion.getColorForAtt(R.attr.colorSecondary, MainActivity.this)));
+                    } else {
+                        playbutton.setImageResource(R.drawable.play_arrow);
+                        playbutton.setImageTintList(ColorStateList.valueOf(AttributeConversion.getColorForAtt(R.attr.onColorPrimary, MainActivity.this)));
+                    }
                 }
 
                 ImageButton playbuttonFull = findViewById(R.id.control_button_play_full);
                 if (playbuttonFull != null) {
-                    if (value)
-                        playbuttonFull.setImageResource(R.drawable.main_btnpause);
-                    else
-                        playbuttonFull.setImageResource(R.drawable.main_btnplay);
+                    if (value) {
+                        playbuttonFull.setImageResource(R.drawable.pause_circle);
+                        playbuttonFull.setImageTintList(ColorStateList.valueOf(AttributeConversion.getColorForAtt(R.attr.colorSecondary, MainActivity.this)));
+                    } else {
+                        playbuttonFull.setImageResource(R.drawable.play_circle);
+                        playbuttonFull.setImageTintList(ColorStateList.valueOf(AttributeConversion.getColorForAtt(R.attr.onColorPrimary, MainActivity.this)));
+                    }
                 }
 
                 SeekBar seekBarDraggable = findViewById(R.id.control_seekbar_progressdynamic);
@@ -1316,10 +1322,12 @@ public class MainActivity extends Activity implements MainContract.View,
                 ImageButton shuffleButton = findViewById(R.id.control_button_shuffle);
                 if (shuffleButton != null) {
                     if (value) {
+                        shuffleButton.setImageResource(R.drawable.shuffle_on);
                         shuffleButton.setImageTintList(
                                 ColorStateList.valueOf(AttributeConversion.getColorForAtt(R.attr.colorSecondary, MainActivity.this))
                         );
                     } else {
+                        shuffleButton.setImageResource(R.drawable.shuffle);
                         shuffleButton.setImageTintList(
                                 ColorStateList.valueOf(AttributeConversion.getColorForAtt(R.attr.onColorPrimary, MainActivity.this))
                         );
@@ -1332,14 +1340,17 @@ public class MainActivity extends Activity implements MainContract.View,
             public void update(Observable<Boolean> observable, Boolean value) {
                 ImageButton repeatButton = findViewById(R.id.control_button_repeat);
                 if (repeatButton != null) {
-                    if (value)
+                    if (value) {
+                        repeatButton.setImageResource(R.drawable.repeat_on);
                         repeatButton.setImageTintList(
                                 ColorStateList.valueOf(AttributeConversion.getColorForAtt(R.attr.colorSecondary, MainActivity.this))
                         );
-                    else
+                    } else {
+                        repeatButton.setImageResource(R.drawable.repeat);
                         repeatButton.setImageTintList(
                                 ColorStateList.valueOf(AttributeConversion.getColorForAtt(R.attr.onColorPrimary, MainActivity.this))
                         );
+                    }
                 }
             }
         });

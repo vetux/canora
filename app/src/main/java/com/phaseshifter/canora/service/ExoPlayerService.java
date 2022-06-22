@@ -441,33 +441,33 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
                 if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     notificationBuilder = new Notification.Builder(this, NOTIFICATION_CHANNEL_ID)
                             .addAction(new Notification.Action.Builder(
-                                    Icon.createWithResource(this, R.drawable.main_btnprev),
+                                    Icon.createWithResource(this, R.drawable.skip_previous),
                                     "prev", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_PREV), PendingIntent.FLAG_IMMUTABLE)
                             ).build());
                     if (playing) {
                         notificationBuilder.addAction(new Notification.Action.Builder(
-                                Icon.createWithResource(this, R.drawable.main_btnpause),
+                                Icon.createWithResource(this, R.drawable.pause),
                                 "pause", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_PLAYBACK_PAUSE), PendingIntent.FLAG_IMMUTABLE))
                                 .build());
                     } else {
                         notificationBuilder.addAction(new Notification.Action.Builder(
-                                Icon.createWithResource(this, R.drawable.main_btnplay),
+                                Icon.createWithResource(this, R.drawable.play_arrow),
                                 "play", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_PLAYBACK_RESUME), PendingIntent.FLAG_IMMUTABLE))
                                 .build());
                     }
                     notificationBuilder.addAction(new Notification.Action.Builder(
-                            Icon.createWithResource(this, R.drawable.main_btnnext),
+                            Icon.createWithResource(this, R.drawable.skip_next),
                             "next", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_NEXT), PendingIntent.FLAG_IMMUTABLE))
                             .build());
                 } else {
                     notificationBuilder = new Notification.Builder(this)
-                            .addAction(R.drawable.main_btnprev, "prev", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_PREV), PendingIntent.FLAG_IMMUTABLE));
+                            .addAction(R.drawable.skip_previous, "prev", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_PREV), PendingIntent.FLAG_IMMUTABLE));
                     if (playing) {
-                        notificationBuilder.addAction(R.drawable.main_btnpause, "pause", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_PLAYBACK_PAUSE), PendingIntent.FLAG_IMMUTABLE));
+                        notificationBuilder.addAction(R.drawable.pause, "pause", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_PLAYBACK_PAUSE), PendingIntent.FLAG_IMMUTABLE));
                     } else {
-                        notificationBuilder.addAction(R.drawable.main_btnplay, "play", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_PLAYBACK_RESUME), PendingIntent.FLAG_IMMUTABLE));
+                        notificationBuilder.addAction(R.drawable.play_arrow, "play", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_PLAYBACK_RESUME), PendingIntent.FLAG_IMMUTABLE));
                     }
-                    notificationBuilder.addAction(R.drawable.main_btnnext, "next", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_NEXT), PendingIntent.FLAG_IMMUTABLE));
+                    notificationBuilder.addAction(R.drawable.skip_next, "next", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_NEXT), PendingIntent.FLAG_IMMUTABLE));
                 }
 
                 notificationBuilder.setStyle(new Notification.MediaStyle()
