@@ -4,7 +4,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="2dp">
-    <com.phaseshifter.canora.ui.widgets.CustomImageView android:id="@+id/main_imageview_background"
+    <com.phaseshifter.canora.ui.widgets.CustomImageView android:id="@+id/grid_item_background"
                                                            android:layout_width="match_parent"
                                                            android:layout_height="match_parent"
                                                            android:scaleType="?scaleTexSurface"

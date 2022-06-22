@@ -165,9 +165,9 @@ public interface MainContract {
 
         void onTrackContentScrollToBottom();
 
-        void onMenuAction(OptionsMenu.Action action, OptionsMenu menu);
+        void onMenuAction(OptionsMenu.Action action);
 
-        void onMenuAction(int index, ContextMenu.Action action, ContextMenu menu);
+        void onMenuAction(int index, ContextMenu.Action action);
 
         void onMediaStoreDataChange();
 
@@ -176,8 +176,6 @@ public interface MainContract {
         void onEditorResult(AudioPlaylist data, boolean error, boolean canceled, boolean deleted);
 
         void onTransportControlChange(boolean controlMax);
-
-        void onSearchChange(boolean searching);
 
         void onNavigationClick(NavigationItem item);
 

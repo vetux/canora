@@ -1,6 +1,8 @@
 package com.phaseshifter.canora.ui.activities;
 
 import android.Manifest;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -20,7 +22,6 @@ import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,6 +31,7 @@ import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.motion.widget.MotionLayout;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
@@ -42,7 +44,6 @@ import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
 import com.phaseshifter.canora.data.theme.AppTheme;
 import com.phaseshifter.canora.model.editor.AudioMetadataMask;
 import com.phaseshifter.canora.model.editor.JaudioTaggerEditor;
-import com.phaseshifter.canora.model.repo.SCAudioDataRepo;
 import com.phaseshifter.canora.model.repo.SettingsRepo;
 import com.phaseshifter.canora.model.repo.ThemeRepo;
 import com.phaseshifter.canora.service.wrapper.AutoBindingServiceWrapper;
@@ -63,7 +64,6 @@ import com.phaseshifter.canora.ui.redux.core.StateListener;
 import com.phaseshifter.canora.ui.redux.state.MainStateImmutable;
 import com.phaseshifter.canora.ui.utils.CustomNavigationDrawer;
 import com.phaseshifter.canora.ui.utils.dialog.MainDialogFactory;
-import com.phaseshifter.canora.ui.utils.motionlayout.MainMotionLayoutController;
 import com.phaseshifter.canora.ui.utils.popup.ListPopupFactory;
 import com.phaseshifter.canora.ui.viewmodels.ContentViewModel;
 import com.phaseshifter.canora.ui.viewmodels.PlayerStateViewModel;
@@ -82,6 +82,7 @@ import java.util.TimerTask;
 
 import static com.phaseshifter.canora.utils.IntegerConversion.safeLongToInt;
 import static com.phaseshifter.canora.utils.android.Miscellaneous.leftpadZero;
+import static com.phaseshifter.canora.utils.android.Miscellaneous.toggleKeyboardView;
 
 //TODO: Implement ACTION_VIEW intent handling
 public class MainActivity extends Activity implements MainContract.View,
@@ -115,8 +116,6 @@ public class MainActivity extends Activity implements MainContract.View,
     private AudioPlaylistArrayAdapter playlistAdapter;
 
     private ValueAnimator animator;
-
-    private MainMotionLayoutController motionLayoutController;
 
     private ContentObserver externalContentObserver;
 
@@ -423,12 +422,15 @@ public class MainActivity extends Activity implements MainContract.View,
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
+            case R.id.control_button_prev_full:
             case R.id.control_button_prev:
                 presenter.onPrev();
                 break;
+            case R.id.control_button_play_full:
             case R.id.control_button_play:
                 presenter.onPlay();
                 break;
+            case R.id.control_button_next_full:
             case R.id.control_button_next:
                 presenter.onNext();
                 break;
@@ -449,6 +451,17 @@ public class MainActivity extends Activity implements MainContract.View,
                 break;
             case R.id.control_button_volume:
                 presenter.onVolumeButtonClick();
+                break;
+            case R.id.control_button_open:
+                presenter.onTransportControlChange(true);
+                setControlMax(true);
+                break;
+            case R.id.control_button_close:
+                presenter.onTransportControlChange(false);
+                setControlMax(false);
+                break;
+            case R.id.display_button_floating_addto:
+                presenter.onMenuAction(OptionsMenu.Action.ADD_SELECTION);
                 break;
         }
     }
@@ -527,11 +540,16 @@ public class MainActivity extends Activity implements MainContract.View,
     @Override
     public void setSearchMax(boolean searchMax) {
         runOnUiThread(() -> {
-            if (motionLayoutController != null) {
-                if (searchMax)
-                    motionLayoutController.openSearch();
-                else
-                    motionLayoutController.closeSearch();
+            EditText searchText = findViewById(R.id.toolbar_edittext_search);
+            if (searchText != null) {
+                if (searchMax) {
+                    searchText.setVisibility(View.VISIBLE);
+                    searchText.requestFocus();
+                    toggleKeyboardView(getApplicationContext(), searchText, true);
+                } else {
+                    searchText.setVisibility(View.GONE);
+                    toggleKeyboardView(getApplicationContext(), searchText, false);
+                }
             }
         });
     }
@@ -539,11 +557,39 @@ public class MainActivity extends Activity implements MainContract.View,
     @Override
     public void setControlMax(boolean controlMax) {
         runOnUiThread(() -> {
-            if (motionLayoutController != null) {
-                if (controlMax)
-                    motionLayoutController.openControls();
-                else
-                    motionLayoutController.closeControls();
+            View content = findViewById(R.id.include_content_main);
+            View footer = findViewById(R.id.include_footer_main);
+            View footerFull = findViewById(R.id.include_footer_full_main);
+            if (content != null
+                    && footer != null
+                    && footerFull != null) {
+                if (controlMax) {
+                    footerFull.setVisibility(View.VISIBLE);
+                    footerFull.setTranslationY(footerFull.getHeight());
+                    footerFull.animate()
+                            .translationY(0)
+                            .setDuration(250)
+                            .setListener(new AnimatorListenerAdapter() {
+                                @Override
+                                public void onAnimationEnd(Animator animation) {
+                                    footer.setVisibility(View.GONE);
+                                    content.setVisibility(View.GONE);
+                                }
+                            });
+                } else {
+                    content.setVisibility(View.VISIBLE);
+                    footer.setVisibility(View.VISIBLE);
+                    footerFull.setTranslationY(0);
+                    footerFull.animate()
+                            .translationY(footerFull.getHeight())
+                            .setDuration(250)
+                            .setListener(new AnimatorListenerAdapter() {
+                                @Override
+                                public void onAnimationEnd(Animator animation) {
+                                    footerFull.setVisibility(View.GONE);
+                                }
+                            });
+                }
             }
         });
     }
@@ -565,8 +611,12 @@ public class MainActivity extends Activity implements MainContract.View,
     @Override
     public void showTrackContent() {
         runOnUiThread(() -> {
-            if (motionLayoutController != null) {
-                motionLayoutController.showTracks();
+            ListView tracks = findViewById(R.id.display_listview_tracks);
+            GridView playlists = findViewById(R.id.display_gridview_playlists);
+            if (tracks != null
+                    && playlists != null) {
+                tracks.setVisibility(View.VISIBLE);
+                playlists.setVisibility(View.GONE);
             }
         });
     }
@@ -574,8 +624,12 @@ public class MainActivity extends Activity implements MainContract.View,
     @Override
     public void showPlaylistContent() {
         runOnUiThread(() -> {
-            if (motionLayoutController != null) {
-                motionLayoutController.showPlaylists();
+            ListView tracks = findViewById(R.id.display_listview_tracks);
+            GridView playlists = findViewById(R.id.display_gridview_playlists);
+            if (tracks != null
+                    && playlists != null) {
+                tracks.setVisibility(View.GONE);
+                playlists.setVisibility(View.VISIBLE);
             }
         });
     }
@@ -608,7 +662,7 @@ public class MainActivity extends Activity implements MainContract.View,
                     new ContextMenu.ContextMenuListener() {
                         @Override
                         public void onAction(ContextMenu.Action action) {
-                            presenter.onMenuAction(index, action, menu);
+                            presenter.onMenuAction(index, action);
                         }
                     });
             popup.show();
@@ -631,7 +685,7 @@ public class MainActivity extends Activity implements MainContract.View,
                     new ContextMenu.ContextMenuListener() {
                         @Override
                         public void onAction(ContextMenu.Action action) {
-                            presenter.onMenuAction(index, action, menu);
+                            presenter.onMenuAction(index, action);
                         }
                     });
             popup.show();
@@ -649,7 +703,7 @@ public class MainActivity extends Activity implements MainContract.View,
                     new OptionsMenu.OptionsMenuListener() {
                         @Override
                         public void onAction(OptionsMenu.Action action) {
-                            presenter.onMenuAction(action, menu);
+                            presenter.onMenuAction(action);
                         }
                     });
             popup.show();
@@ -933,6 +987,11 @@ public class MainActivity extends Activity implements MainContract.View,
         imageButtons.add(findViewById(R.id.toolbar_button_menu));
         imageButtons.add(findViewById(R.id.display_button_floating_addto));
         imageButtons.add(findViewById(R.id.toolbar_button_nav));
+        imageButtons.add(findViewById(R.id.control_button_open));
+        imageButtons.add(findViewById(R.id.control_button_close));
+        imageButtons.add(findViewById(R.id.control_button_prev_full));
+        imageButtons.add(findViewById(R.id.control_button_play_full));
+        imageButtons.add(findViewById(R.id.control_button_next_full));
 
         for (ImageButton button : imageButtons) {
             button.setOnClickListener(this);
@@ -965,9 +1024,6 @@ public class MainActivity extends Activity implements MainContract.View,
         SeekBar staticSeekBar = findViewById(R.id.control_seekbar_progressstatic);
         staticSeekBar.setOnTouchListener((v, event) -> true);
 
-        MotionLayout motionLayout = findViewById(R.id.motion_layout_main);
-        motionLayoutController = new MainMotionLayoutController(this, presenter, motionLayout, searchText, listView, gridView);
-
         ProgressBar playbackLoad = findViewById(R.id.control_progressbar_playbackload);
         playbackLoad.setVisibility(View.GONE);
     }
@@ -999,6 +1055,11 @@ public class MainActivity extends Activity implements MainContract.View,
                 trackAdapter.notifyDataSetChanged();
                 playlistAdapter.setSelectionMode(value);
                 playlistAdapter.notifyDataSetChanged();
+
+                ImageButton btn = findViewById(R.id.display_button_floating_addto);
+                if (btn != null) {
+                    btn.setVisibility(value ? View.VISIBLE : View.GONE);
+                }
             }
         });
         contentViewModel.visibleTracks.addObserver(new Observable.Observer<List<AudioData>>() {
@@ -1086,6 +1147,10 @@ public class MainActivity extends Activity implements MainContract.View,
                 if (buf != null) {
                     buf.setVisibility(value ? View.VISIBLE : View.GONE);
                 }
+                ProgressBar bufFull = findViewById(R.id.control_progressbar_playbackload_full);
+                if (bufFull != null) {
+                    bufFull.setVisibility(value ? View.VISIBLE : View.GONE);
+                }
             }
         });
         playerStateViewModel.trackText.addObserver(new Observable.Observer<String>() {
@@ -1124,6 +1189,10 @@ public class MainActivity extends Activity implements MainContract.View,
                 ImageView cover = findViewById(R.id.control_imageview_cover);
                 if (cover != null) {
                     cover.setImageBitmap(value);
+                }
+                ImageView coverFull = findViewById(R.id.control_imageview_cover_full);
+                if (coverFull != null) {
+                    coverFull.setImageBitmap(value);
                 }
             }
         });
@@ -1180,6 +1249,14 @@ public class MainActivity extends Activity implements MainContract.View,
                         playbutton.setImageResource(R.drawable.main_btnpause);
                     else
                         playbutton.setImageResource(R.drawable.main_btnplay);
+                }
+
+                ImageButton playbuttonFull = findViewById(R.id.control_button_play_full);
+                if (playbuttonFull != null) {
+                    if (value)
+                        playbuttonFull.setImageResource(R.drawable.main_btnpause);
+                    else
+                        playbuttonFull.setImageResource(R.drawable.main_btnplay);
                 }
 
                 SeekBar seekBarDraggable = findViewById(R.id.control_seekbar_progressdynamic);

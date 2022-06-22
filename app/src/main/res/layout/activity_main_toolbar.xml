@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main_toolbar"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <com.phaseshifter.canora.ui.widgets.CustomImageView
+        android:id="@+id/toolbar_imageview_background"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:scaleType="?scaleTexToolbar"
+        android:src="?texToolbar"
+        app:automaticAnimation="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:elevation="-1dp"/>
+
+    <ImageButton
+        android:id="@+id/toolbar_button_nav"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:background="@drawable/ripple_oval_hp"
+        android:padding="8dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/baseline_menu_black_48dp"
+        android:tint="?onTexToolbar"
+        app:layout_constraintBottom_toBottomOf="@id/toolbar_imageview_background"
+        app:layout_constraintStart_toStartOf="@id/toolbar_imageview_background"
+        app:layout_constraintTop_toTopOf="@id/toolbar_imageview_background" />
+
+    <TextView
+        android:id="@+id/toolbar_textview_title"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:ellipsize="marquee"
+        android:gravity="center_vertical"
+        android:singleLine="true"
+        android:text="TITLE"
+        android:textColor="?onTexToolbar"
+        android:textSize="22sp"
+        app:layout_constraintEnd_toStartOf="@id/toolbar_progressbar_contentload"
+        app:layout_constraintStart_toEndOf="@id/toolbar_button_nav"
+        app:layout_constraintTop_toTopOf="@id/toolbar_imageview_background" />
+
+    <ProgressBar
+        android:id="@+id/toolbar_progressbar_contentload"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:indeterminate="true"
+        android:indeterminateTint="?colorSecondary"
+        android:indeterminateTintMode="src_atop"
+        android:padding="10dp"
+        app:layout_constraintEnd_toStartOf="@id/toolbar_button_search"
+        app:layout_constraintStart_toEndOf="@id/toolbar_textview_title"
+        app:layout_constraintTop_toTopOf="@id/toolbar_imageview_background" />
+
+    <ImageButton
+        android:id="@+id/toolbar_button_search"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:background="@drawable/ripple_oval_hp"
+        android:padding="8dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/action_search"
+        android:tint="?onTexToolbar"
+        app:layout_constraintEnd_toStartOf="@id/toolbar_button_menu"
+        app:layout_constraintStart_toEndOf="@id/toolbar_progressbar_contentload"
+        app:layout_constraintTop_toTopOf="@id/toolbar_imageview_background" />
+
+    <ImageButton
+        android:id="@+id/toolbar_button_menu"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:background="@drawable/ripple_oval_hp"
+        android:padding="8dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_menu_moreoverflow_normal_holo_dark"
+        android:tint="?onTexToolbar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/toolbar_button_search"
+        app:layout_constraintTop_toTopOf="@id/toolbar_imageview_background" />
+
+    <View
+        android:id="@+id/toolbar_view_menuanchor"
+        android:layout_width="1dp"
+        android:layout_height="1dp"
+        app:layout_constraintBottom_toBottomOf="@id/toolbar_button_menu"
+        app:layout_constraintEnd_toEndOf="@id/toolbar_button_menu"
+        app:layout_constraintStart_toStartOf="@id/toolbar_button_menu"
+        app:layout_constraintTop_toTopOf="@id/toolbar_button_menu" />
+
+    <EditText
+        android:id="@+id/toolbar_edittext_search"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:background="?texToolbar"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:hint="@string/main_placeholder0search"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:textColor="?onTexBackground"
+        android:textColorHint="?onTexBackground_60"
+        android:textCursorDrawable="@null"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="@id/toolbar_imageview_background"
+        app:layout_constraintEnd_toEndOf="@id/toolbar_imageview_background"
+        app:layout_constraintTop_toBottomOf="@id/toolbar_imageview_background"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+</androidx.constraintlayout.widget.ConstraintLayout>

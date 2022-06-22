@@ -37,6 +37,10 @@ public class Observable<T> {
 
     public synchronized void set(T newValue) {
         value = newValue;
+        notifyObservers();
+    }
+
+    public synchronized void notifyObservers() {
         for (Observer<T> observer : observers) {
             observer.update(this, value);
         }

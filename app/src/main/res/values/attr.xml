@@ -16,7 +16,6 @@
 
     <attr name="texToolbar" format="reference|color"/>
     <attr name="texBackground" format="reference|color"/>
-    <attr name="texBackgroundContent" format="reference|color"/>
     <attr name="texControl" format="reference|color"/>
     <attr name="texControlFull" format="reference|color"/>
     <attr name="texNotification" format="reference|color"/>
@@ -26,9 +25,8 @@
 
     <attr name="onTexToolbar" format="color"/>
     <attr name="onTexBackground" format="color"/>
-    <attr name="onTexBackgroundContent" format="color"/>
-    <attr name="onTexBackgroundContent_20" format="color"/>
-    <attr name="onTexBackgroundContent_60" format="color"/>
+    <attr name="onTexBackground_20" format="color"/>
+    <attr name="onTexBackground_60" format="color"/>
     <attr name="onTexControl" format="color"/>
     <attr name="onTexControlFull" format="color"/>
     <attr name="onTexNotification" format="color"/>

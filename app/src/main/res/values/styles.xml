@@ -20,7 +20,6 @@
 
         <item name="texToolbar">?colorDebugUnset</item>
         <item name="texBackground">?colorDebugUnset</item>
-        <item name="texBackgroundContent">?colorDebugUnset</item>
         <item name="texControl">?colorDebugUnset</item>
         <item name="texControlFull">?colorDebugUnset</item>
         <item name="texNotification">?colorDebugUnset</item>
@@ -30,9 +29,8 @@
 
         <item name="onTexToolbar">?colorDebugUnset</item>
         <item name="onTexBackground">?colorDebugUnset</item>
-        <item name="onTexBackgroundContent">?colorDebugUnset</item>
-        <item name="onTexBackgroundContent_20">?colorDebugUnset</item>
-        <item name="onTexBackgroundContent_60">?colorDebugUnset</item>
+        <item name="onTexBackground_20">?colorDebugUnset</item>
+        <item name="onTexBackground_60">?colorDebugUnset</item>
         <item name="onTexControl">?colorDebugUnset</item>
         <item name="onTexControlFull">?colorDebugUnset</item>
         <item name="onTexNotification">?colorDebugUnset</item>
@@ -55,8 +53,6 @@
 
         <!-- Debug -->
         <item name="colorDebugUnset">#ff00ff</item>
-
-        <item name="motionSceneMain">@xml/motionscene_main</item>
 
         <!-- Android Attributes -->
         <!-- ListView Overscroll -->
@@ -87,7 +83,6 @@
 
         <item name="texToolbar">?colorPrimaryAlt</item>
         <item name="texBackground">?colorPrimary</item>
-        <item name="texBackgroundContent">@android:color/transparent</item>
         <item name="texControl">?colorPrimaryAlt</item>
         <item name="texControlFull">?colorPrimaryAlt</item>
         <item name="texNotification">?colorDebugUnset</item>
@@ -97,9 +92,8 @@
 
         <item name="onTexToolbar">#fff</item>
         <item name="onTexBackground">#fff</item>
-        <item name="onTexBackgroundContent">#fff</item>
-        <item name="onTexBackgroundContent_20">#33FFFFFF</item>
-        <item name="onTexBackgroundContent_60">#99FFFFFF</item>
+        <item name="onTexBackground_20">#33FFFFFF</item>
+        <item name="onTexBackground_60">#99FFFFFF</item>
         <item name="onTexControl">#fff</item>
         <item name="onTexControlFull">#fff</item>
         <item name="onTexNotification">?colorDebugUnset</item>
@@ -130,7 +124,6 @@
 
         <item name="texToolbar">@drawable/line_bottom</item>
         <item name="texBackground">@drawable/texture_camo_1</item>
-        <item name="texBackgroundContent">@android:color/transparent</item>
         <item name="texControl">@android:color/transparent</item>
         <item name="texControlFull">@android:color/transparent</item>
         <item name="texNotification">?colorDebugUnset</item>
@@ -144,9 +137,8 @@
 
         <item name="onTexToolbar">#fff</item>
         <item name="onTexBackground">#fff</item>
-        <item name="onTexBackgroundContent">#fff</item>
-        <item name="onTexBackgroundContent_20">#33FFFFFF</item>
-        <item name="onTexBackgroundContent_60">#99FFFFFF</item>
+        <item name="onTexBackground_20">#33FFFFFF</item>
+        <item name="onTexBackground_60">#99FFFFFF</item>
         <item name="onTexControl">#fff</item>
         <item name="onTexControlFull">#fff</item>
         <item name="onTexNotification">?colorDebugUnset</item>
@@ -177,7 +169,6 @@
 
         <item name="texToolbar">?colorPrimaryAlt</item>
         <item name="texBackground">?colorPrimary</item>
-        <item name="texBackgroundContent">@android:color/transparent</item>
         <item name="texControl">?colorPrimaryAlt</item>
         <item name="texControlFull">?colorPrimaryAlt</item>
         <item name="texNotification">?colorDebugUnset</item>
@@ -187,9 +178,8 @@
 
         <item name="onTexToolbar">#fff</item>
         <item name="onTexBackground">#fff</item>
-        <item name="onTexBackgroundContent">#fff</item>
-        <item name="onTexBackgroundContent_20">#33FFFFFF</item>
-        <item name="onTexBackgroundContent_60">#99FFFFFF</item>
+        <item name="onTexBackground_20">#33FFFFFF</item>
+        <item name="onTexBackground_60">#99FFFFFF</item>
         <item name="onTexControl">#fff</item>
         <item name="onTexControlFull">#fff</item>
         <item name="onTexNotification">#fff</item>
@@ -220,7 +210,6 @@
 
         <item name="texToolbar">?colorPrimaryAlt</item>
         <item name="texBackground">?colorPrimary</item>
-        <item name="texBackgroundContent">@android:color/transparent</item>
         <item name="texControl">?colorPrimaryAlt</item>
         <item name="texControlFull">?colorPrimaryAlt</item>
         <item name="texNotification">?colorDebugUnset</item>
@@ -230,9 +219,8 @@
 
         <item name="onTexToolbar">?onColorPrimary</item>
         <item name="onTexBackground">?onColorPrimary</item>
-        <item name="onTexBackgroundContent">?onColorPrimary</item>
-        <item name="onTexBackgroundContent_20">?onColorPrimary_20</item>
-        <item name="onTexBackgroundContent_60">?onColorPrimary_60</item>
+        <item name="onTexBackground_20">?onColorPrimary_20</item>
+        <item name="onTexBackground_60">?onColorPrimary_60</item>
         <item name="onTexControl">?onColorPrimaryAlt</item>
         <item name="onTexControlFull">?onColorPrimary</item>
         <item name="onTexNotification">?colorDebugUnset</item>

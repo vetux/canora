@@ -151,7 +151,7 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
                 || !Objects.equals(updatedState.isControlsMaximized(), lastState.isControlsMaximized()))
             view.setControlMax(updatedState.isControlsMaximized());
 
-        if (lastState == null || lastState.getUiIndicator() != updatedState.getUiIndicator()) {
+        if (themeChange || lastState == null || lastState.getUiIndicator() != updatedState.getUiIndicator()) {
             if (updatedState.getUiIndicator().isPlaylistView()) {
                 view.showPlaylistContent();
             } else {
@@ -436,7 +436,7 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
     }
 
     @Override
-    public void onMenuAction(OptionsMenu.Action action, OptionsMenu menu) {
+    public void onMenuAction(OptionsMenu.Action action) {
         MainStateImmutable currentState = store.getState();
         switch (action) {
             case OPEN_SETTINGS:
@@ -652,7 +652,7 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
     }
 
     @Override
-    public void onMenuAction(int index, ContextMenu.Action action, ContextMenu menu) {
+    public void onMenuAction(int index, ContextMenu.Action action) {
         MainStateImmutable currentState = store.getState();
         switch (action) {
             case SELECT:
@@ -795,11 +795,6 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
     @Override
     public void onTransportControlChange(boolean controlMax) {
         store.dispatch(actionCreator.getChangeControlMax(controlMax));
-    }
-
-    @Override
-    public void onSearchChange(boolean searching) {
-        store.dispatch(actionCreator.getChangeFilterState(searching));
     }
 
     @Override

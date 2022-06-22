@@ -96,7 +96,7 @@ public class AudioPlaylistArrayAdapter extends ArrayAdapter<AudioPlaylist> imple
         if (listItem == null || listItem.findViewById(R.id.subMenuTitle) == null)
             listItem = LayoutInflater.from(C).inflate(R.layout.grid_item_playlist, parent, false);
         //Get Relevant Views
-        CustomImageView background = listItem.findViewById(R.id.main_imageview_background);
+        CustomImageView background = listItem.findViewById(R.id.grid_item_background);
         TextView subTitle = listItem.findViewById(R.id.subMenuTitle);
         TextView subCount = listItem.findViewById(R.id.subMenuTracks);
         ImageView plImg = listItem.findViewById(R.id.playlistImage);
