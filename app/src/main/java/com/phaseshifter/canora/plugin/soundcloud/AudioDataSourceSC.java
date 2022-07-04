@@ -35,7 +35,7 @@ public class AudioDataSourceSC implements AudioDataSource, Serializable {
     private static CountDownLatch latch = new CountDownLatch(0);
 
     private final List<SCV2Track.MediaTranscoding> codings = new ArrayList<>();
-    private final List<Pair<SCV2StreamProtocol, String>> streams = new ArrayList<>();
+    private transient final List<Pair<SCV2StreamProtocol, String>> streams = new ArrayList<>();
 
     private SCV2Client getClient() {
         if (client == null) {
