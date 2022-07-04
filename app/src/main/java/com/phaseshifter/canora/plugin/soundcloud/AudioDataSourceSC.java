@@ -10,12 +10,17 @@ import com.google.android.exoplayer2.source.hls.HlsMediaSource;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.phaseshifter.canora.data.media.audio.source.AudioDataSource;
+import com.phaseshifter.canora.plugin.soundcloud.api.exceptions.SCConnectionException;
+import com.phaseshifter.canora.plugin.soundcloud.api.exceptions.SCParsingException;
 import com.phaseshifter.canora.plugin.soundcloud.api_v2.client.SCV2Client;
 import com.phaseshifter.canora.plugin.soundcloud.api_v2.data.SCV2StreamProtocol;
 import com.phaseshifter.canora.plugin.soundcloud.api_v2.data.SCV2Track;
 import com.phaseshifter.canora.plugin.soundcloud.api_v2.data.SCV2TrackStreamData;
 import com.phaseshifter.canora.utils.Pair;
 
+import org.json.JSONException;
+
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -63,6 +68,14 @@ public class AudioDataSourceSC implements AudioDataSource, Serializable {
         }
     }
 
+    private void loadStreams() throws SCConnectionException, SCParsingException, JSONException, IOException {
+        SCV2Client client = getClient();
+        streams.clear();
+        for (SCV2TrackStreamData data : client.getTemporaryStreamUrls(codings)) {
+            streams.add(new Pair<>(data.protocol, data.url));
+        }
+    }
+
     public AudioDataSourceSC(List<SCV2Track.MediaTranscoding> codings) {
         this.codings.addAll(codings);
     }
@@ -74,13 +87,16 @@ public class AudioDataSourceSC implements AudioDataSource, Serializable {
             latch = new CountDownLatch(1);
             pool.submit(() -> {
                 try {
-                    SCV2Client client = getClient();
-                    streams.clear();
-                    for (SCV2TrackStreamData data : client.getTemporaryStreamUrls(codings)) {
-                        streams.add(new Pair<>(data.protocol, data.url));
-                    }
+                    loadStreams();
                 } catch (Exception e) {
                     e.printStackTrace();
+                    updateClientId();
+                    try{
+                        loadStreams();
+                    } catch (Exception ex){
+                        streams.clear();
+                        ex.printStackTrace();
+                    }
                 }
                 latch.countDown();
             });
