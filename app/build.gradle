@@ -6,8 +6,8 @@ android {
         applicationId "com.phaseshifter.canora"
         minSdkVersion 23
         targetSdkVersion 32
-        versionCode 3228
-        versionName "0.10.5"
+        versionCode 3229
+        versionName "0.10.6"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }
