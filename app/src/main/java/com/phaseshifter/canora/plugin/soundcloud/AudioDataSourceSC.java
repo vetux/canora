@@ -41,7 +41,7 @@ public class AudioDataSourceSC implements AudioDataSource, Serializable {
     private static CountDownLatch latch = new CountDownLatch(0);
 
     private final List<SCV2Track.MediaTranscoding> codings = new ArrayList<>();
-    private transient List<Pair<SCV2StreamProtocol, String>> streams = new ArrayList<>();
+    private transient List<Pair<SCV2StreamProtocol, String>> streams = null;
 
     private SCV2Client getClient() {
         if (client == null) {
@@ -71,10 +71,18 @@ public class AudioDataSourceSC implements AudioDataSource, Serializable {
 
     private void loadStreams() throws SCConnectionException, SCParsingException, JSONException, IOException {
         SCV2Client client = getClient();
-        streams.clear();
+        getStreams().clear();
         for (SCV2TrackStreamData data : client.getTemporaryStreamUrls(codings)) {
-            streams.add(new Pair<>(data.protocol, data.url));
+            getStreams().add(new Pair<>(data.protocol, data.url));
         }
+    }
+
+    private List<Pair<SCV2StreamProtocol, String>> getStreams() {
+        // Transient members are initialized to nada and readObject is not called for magical reason so we nullcheck.
+        if (streams == null) {
+            streams = new ArrayList<>();
+        }
+        return streams;
     }
 
     public AudioDataSourceSC(List<SCV2Track.MediaTranscoding> codings) {
@@ -84,7 +92,7 @@ public class AudioDataSourceSC implements AudioDataSource, Serializable {
     @Override
     public void prepare() {
         syncWithPool();
-        if (streams.isEmpty()) {
+        if (getStreams().isEmpty()) {
             latch = new CountDownLatch(1);
             pool.submit(() -> {
                 try {
@@ -92,10 +100,10 @@ public class AudioDataSourceSC implements AudioDataSource, Serializable {
                 } catch (Exception e) {
                     e.printStackTrace();
                     updateClientId();
-                    try{
+                    try {
                         loadStreams();
-                    } catch (Exception ex){
-                        streams.clear();
+                    } catch (Exception ex) {
+                        getStreams().clear();
                         ex.printStackTrace();
                     }
                 }
@@ -108,12 +116,12 @@ public class AudioDataSourceSC implements AudioDataSource, Serializable {
     public List<MediaSource> getExoPlayerSources(Context context) {
         prepare();
         syncWithPool();
-        if (streams.isEmpty()) {
+        if (getStreams().isEmpty()) {
             throw new RuntimeException("Failed to retrieve stream data for track " + codings);
         }
         List<MediaSource> ret = new ArrayList<>();
         DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(context, "clank");
-        for (Pair<SCV2StreamProtocol, String> stream : streams) {
+        for (Pair<SCV2StreamProtocol, String> stream : getStreams()) {
             switch (stream.first) {
                 case HLS:
                     ret.add(new HlsMediaSource.Factory(dataSourceFactory).createMediaSource(MediaItem.fromUri(Uri.parse(stream.second))));
@@ -144,10 +152,5 @@ public class AudioDataSourceSC implements AudioDataSource, Serializable {
         return "AudioDataSourceUri{" +
                 "codings=" + codings +
                 '}';
-    }
-
-    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        in.defaultReadObject();
-        streams = new ArrayList<>();
     }
 }
