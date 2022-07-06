@@ -21,6 +21,7 @@ import com.phaseshifter.canora.utils.Pair;
 import org.json.JSONException;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +41,7 @@ public class AudioDataSourceSC implements AudioDataSource, Serializable {
     private static CountDownLatch latch = new CountDownLatch(0);
 
     private final List<SCV2Track.MediaTranscoding> codings = new ArrayList<>();
-    private transient final List<Pair<SCV2StreamProtocol, String>> streams = new ArrayList<>();
+    private transient List<Pair<SCV2StreamProtocol, String>> streams = new ArrayList<>();
 
     private SCV2Client getClient() {
         if (client == null) {
@@ -143,5 +144,10 @@ public class AudioDataSourceSC implements AudioDataSource, Serializable {
         return "AudioDataSourceUri{" +
                 "codings=" + codings +
                 '}';
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        streams = new ArrayList<>();
     }
 }
