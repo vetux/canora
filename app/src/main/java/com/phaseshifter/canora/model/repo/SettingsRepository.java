@@ -1,36 +1,77 @@
 package com.phaseshifter.canora.model.repo;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import com.phaseshifter.canora.data.settings.*;
 
 import java.util.Map;
 import java.util.Set;
 
-public interface SettingsRepository {
-    void reset();
+/**
+ * Settings ( SharedPreferences )
+ */
+public class SettingsRepository {
+    public final String SHARED_PREFS_NAME = "com.phaseshifter.canora#PREFS";
 
-    Map<String, ?> getAll();
+    private final SharedPreferences prefs;
 
-    boolean getBoolean(BooleanSetting setting);
+    public SettingsRepository(Context c) {
+        prefs = c.getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE);
+    }
 
-    void putBoolean(BooleanSetting setting, boolean value);
+    public void reset() {
+        prefs.edit().clear().commit();
+    }
 
-    float getFloat(FloatSetting setting);
+    public Map<String, ?> getAll() {
+        return prefs.getAll();
+    }
 
-    void putFloat(FloatSetting setting, float value);
+    public boolean getBoolean(BooleanSetting setting) {
+        return prefs.getBoolean(setting.key, setting.defaultValue);
+    }
 
-    int getInt(IntegerSetting setting);
+    public void putBoolean(BooleanSetting setting, boolean value) {
+        prefs.edit().putBoolean(setting.key, value).commit();
+    }
 
-    void putInt(IntegerSetting setting, int value);
+    public float getFloat(FloatSetting setting) {
+        return prefs.getFloat(setting.key, setting.defaultValue);
+    }
 
-    long getLong(LongSetting setting);
+    public void putFloat(FloatSetting setting, float value) {
+        prefs.edit().putFloat(setting.key, value).commit();
+    }
 
-    void putLong(LongSetting setting, long value);
+    public int getInt(IntegerSetting setting) {
+        return prefs.getInt(setting.key, setting.defaultValue);
+    }
 
-    Set<String> getStringSet(StringSetSetting setting);
+    public void putInt(IntegerSetting setting, int value) {
+        prefs.edit().putInt(setting.key, value).commit();
+    }
 
-    void putStringSet(StringSetSetting setting, Set<String> value);
+    public long getLong(LongSetting setting) {
+        return prefs.getLong(setting.key, setting.defaultValue);
+    }
 
-    String getString(StringSetting setting);
+    public void putLong(LongSetting setting, long value) {
+        prefs.edit().putLong(setting.key, value).commit();
+    }
 
-    void putString(StringSetting setting, String value);
+    public Set<String> getStringSet(StringSetSetting setting) {
+        return prefs.getStringSet(setting.key, setting.defaultValue);
+    }
+
+    public void putStringSet(StringSetSetting setting, Set<String> value) {
+        prefs.edit().putStringSet(setting.key, value).commit();
+    }
+
+    public String getString(StringSetting setting) {
+        return prefs.getString(setting.key, setting.defaultValue);
+    }
+
+    public void putString(StringSetting setting, String value) {
+        prefs.edit().putString(setting.key, value).commit();
+    }
 }

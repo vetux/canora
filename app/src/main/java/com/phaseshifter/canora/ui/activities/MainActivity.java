@@ -5,7 +5,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.RecoverableSecurityException;
 import android.content.Intent;
@@ -42,15 +41,14 @@ import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
 import com.phaseshifter.canora.data.theme.AppTheme;
 import com.phaseshifter.canora.model.editor.AudioMetadataMask;
 import com.phaseshifter.canora.model.editor.JaudioTaggerEditor;
-import com.phaseshifter.canora.model.repo.SettingsRepo;
-import com.phaseshifter.canora.model.repo.ThemeRepo;
+import com.phaseshifter.canora.model.repo.SettingsRepository;
+import com.phaseshifter.canora.model.repo.ThemeRepository;
 import com.phaseshifter.canora.service.wrapper.AutoBindingServiceWrapper;
 import com.phaseshifter.canora.ui.activities.editors.AudioDataEditorActivity;
 import com.phaseshifter.canora.ui.activities.editors.AudioPlaylistEditorActivity;
 import com.phaseshifter.canora.ui.arrayadapters.AudioDataArrayAdapter;
 import com.phaseshifter.canora.ui.arrayadapters.AudioPlaylistArrayAdapter;
 import com.phaseshifter.canora.ui.contracts.MainContract;
-import com.phaseshifter.canora.ui.data.AudioContentSelector;
 import com.phaseshifter.canora.ui.data.constants.NavigationItem;
 import com.phaseshifter.canora.ui.data.formatting.FilterOptions;
 import com.phaseshifter.canora.ui.data.formatting.SortingOptions;
@@ -150,8 +148,8 @@ public class MainActivity extends Activity implements MainContract.View,
                 serviceWrapper,
                 application.getAudioDataRepo(),
                 application.getAudioPlaylistRepository(),
-                new SettingsRepo(this),
-                new ThemeRepo(),
+                new SettingsRepository(this),
+                new ThemeRepository(),
                 application.getScAudioRepository(),
                 new JaudioTaggerEditor(this),
                 this::runOnUiThread,

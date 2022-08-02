@@ -14,8 +14,8 @@ import androidx.viewpager.widget.ViewPager;
 import com.phaseshifter.canora.R;
 import com.phaseshifter.canora.application.MainApplication;
 import com.phaseshifter.canora.data.theme.AppTheme;
-import com.phaseshifter.canora.model.repo.SettingsRepo;
-import com.phaseshifter.canora.model.repo.ThemeRepo;
+import com.phaseshifter.canora.model.repo.SettingsRepository;
+import com.phaseshifter.canora.model.repo.ThemeRepository;
 import com.phaseshifter.canora.service.wrapper.AutoBindingServiceWrapper;
 import com.phaseshifter.canora.ui.arrayadapters.SettingAdapterItem;
 import com.phaseshifter.canora.ui.arrayadapters.SettingArrayAdapter;
@@ -65,8 +65,8 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
         setContentView(R.layout.activity_default);
         service = new AutoBindingServiceWrapper(this);
         presenter = new SettingsPresenter(this,
-                new SettingsRepo(this),
-                new ThemeRepo(),
+                new SettingsRepository(this),
+                new ThemeRepository(),
                 ((MainApplication) getApplication()).getAudioPlaylistRepository(),
                 service,
                 savedInstanceState == null ? null : savedInstanceState.getSerializable(BUNDLE_PRESENTERSTATE));

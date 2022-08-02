@@ -1,11 +1,11 @@
-package com.phaseshifter.canora.ui.utils.selectors;
+package com.phaseshifter.canora.ui.selectors;
 
 import com.phaseshifter.canora.data.media.audio.AudioData;
 import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
 import com.phaseshifter.canora.model.formatting.ListSorter;
-import com.phaseshifter.canora.model.repo.AudioDataRepository;
-import com.phaseshifter.canora.model.repo.AudioPlaylistRepository;
+import com.phaseshifter.canora.model.repo.DeviceAudioRepository;
 import com.phaseshifter.canora.model.repo.SCAudioDataRepo;
+import com.phaseshifter.canora.model.repo.UserPlaylistRepository;
 import com.phaseshifter.canora.ui.data.AudioContentSelector;
 import com.phaseshifter.canora.ui.data.formatting.SortingOptions;
 import com.phaseshifter.canora.ui.data.misc.SelectionIndicator;
@@ -13,7 +13,7 @@ import com.phaseshifter.canora.ui.data.misc.SelectionIndicator;
 import java.util.List;
 
 public abstract class MainSelector {
-    public static String getPlaylistTitle(SelectionIndicator indicator, AudioDataRepository audioDataRepository, AudioPlaylistRepository audioPlaylistRepository, SCAudioDataRepo scAudioDataRepo) {
+    public static String getPlaylistTitle(SelectionIndicator indicator, DeviceAudioRepository audioDataRepository, UserPlaylistRepository audioPlaylistRepository, SCAudioDataRepo scAudioDataRepo) {
         AudioPlaylist playlist = null;
         switch (indicator.getSelector()) {
             case PLAYLISTS:
@@ -40,8 +40,8 @@ public abstract class MainSelector {
 
     public static List<AudioData> getTracksForIndicator(SelectionIndicator indicator,
                                                         SortingOptions sortOpt,
-                                                        AudioDataRepository audioDataRepository,
-                                                        AudioPlaylistRepository audioPlaylistRepository,
+                                                        DeviceAudioRepository audioDataRepository,
+                                                        UserPlaylistRepository audioPlaylistRepository,
                                                         SCAudioDataRepo scAudioDataRepo) {
         switch (indicator.getSelector()) {
             case TRACKS:
@@ -63,7 +63,7 @@ public abstract class MainSelector {
         }
     }
 
-    public static AudioPlaylist getPlaylistForIndicator(SelectionIndicator indicator, AudioDataRepository audioDataRepository, AudioPlaylistRepository audioPlaylistRepository) {
+    public static AudioPlaylist getPlaylistForIndicator(SelectionIndicator indicator, DeviceAudioRepository audioDataRepository, UserPlaylistRepository audioPlaylistRepository) {
         switch (indicator.getSelector()) {
             case TRACKS:
                 return null;
@@ -86,8 +86,8 @@ public abstract class MainSelector {
 
     public static List<AudioPlaylist> getPlaylistsForSelector(AudioContentSelector selector,
                                                               SortingOptions sortOpt,
-                                                              AudioDataRepository audioDataRepository,
-                                                              AudioPlaylistRepository audioPlaylistRepository) {
+                                                              DeviceAudioRepository audioDataRepository,
+                                                              UserPlaylistRepository audioPlaylistRepository) {
         switch (selector) {
             case TRACKS:
                 return null;

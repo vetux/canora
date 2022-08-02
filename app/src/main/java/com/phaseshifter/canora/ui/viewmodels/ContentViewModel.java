@@ -5,20 +5,17 @@ import android.content.Context;
 import com.phaseshifter.canora.R;
 import com.phaseshifter.canora.data.media.audio.AudioData;
 import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
-import com.phaseshifter.canora.model.repo.AudioDataRepo;
-import com.phaseshifter.canora.model.repo.AudioDataRepository;
-import com.phaseshifter.canora.model.repo.AudioPlaylistRepository;
+import com.phaseshifter.canora.model.repo.DeviceAudioRepository;
 import com.phaseshifter.canora.model.repo.SCAudioDataRepo;
+import com.phaseshifter.canora.model.repo.UserPlaylistRepository;
 import com.phaseshifter.canora.ui.data.AudioContentSelector;
 import com.phaseshifter.canora.ui.data.misc.SelectionIndicator;
 import com.phaseshifter.canora.utils.Observable;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 
-import static com.phaseshifter.canora.ui.utils.selectors.MainSelector.getPlaylistTitle;
+import static com.phaseshifter.canora.ui.selectors.MainSelector.getPlaylistTitle;
 
 public class ContentViewModel {
     public final Observable<SelectionIndicator> contentSelector = new Observable<>(new SelectionIndicator(AudioContentSelector.TRACKS, null));
@@ -43,8 +40,8 @@ public class ContentViewModel {
 
     private String getContentName(SelectionIndicator uiIndicator,
                                   Context context,
-                                  AudioDataRepository audioDataRepository,
-                                  AudioPlaylistRepository audioPlaylistRepository,
+                                  DeviceAudioRepository audioDataRepository,
+                                  UserPlaylistRepository audioPlaylistRepository,
                                   SCAudioDataRepo scAudioDataRepo) {
         if (uiIndicator.isPlaylistView()) {
             return getSelectorName(uiIndicator.getSelector(), context);
@@ -74,8 +71,8 @@ public class ContentViewModel {
 
     private String getIndicatorName(SelectionIndicator indicator,
                                     Context context,
-                                    AudioDataRepository audioDataRepository,
-                                    AudioPlaylistRepository audioPlaylistRepository,
+                                    DeviceAudioRepository audioDataRepository,
+                                    UserPlaylistRepository audioPlaylistRepository,
                                     SCAudioDataRepo scAudioDataRepo) {
         String text = getPlaylistTitle(indicator, audioDataRepository, audioPlaylistRepository, scAudioDataRepo);
         switch (indicator.getSelector()) {

@@ -13,13 +13,8 @@ import com.phaseshifter.canora.data.settings.StringSetting;
 import com.phaseshifter.canora.model.editor.AudioMetadataEditor;
 import com.phaseshifter.canora.model.formatting.ListFilter;
 import com.phaseshifter.canora.model.formatting.ListSorter;
-import com.phaseshifter.canora.model.repo.AudioDataRepository;
-import com.phaseshifter.canora.model.repo.AudioPlaylistRepository;
 import com.phaseshifter.canora.model.repo.SCAudioDataRepo;
-import com.phaseshifter.canora.model.repo.SettingsRepository;
-import com.phaseshifter.canora.model.repo.ThemeRepository;
 import com.phaseshifter.canora.service.MediaPlayerService;
-import com.phaseshifter.canora.service.state.PlayerState;
 import com.phaseshifter.canora.ui.contracts.MainContract;
 import com.phaseshifter.canora.ui.data.AudioContentSelector;
 import com.phaseshifter.canora.ui.data.constants.NavigationItem;
@@ -31,7 +26,6 @@ import com.phaseshifter.canora.ui.menu.OptionsMenu;
 import com.phaseshifter.canora.ui.dialog.MainDialogFactory;
 import com.phaseshifter.canora.ui.viewmodels.ContentViewModel;
 import com.phaseshifter.canora.ui.viewmodels.PlayerStateViewModel;
-import com.phaseshifter.canora.utils.Observable;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -41,15 +35,14 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import static com.phaseshifter.canora.ui.utils.selectors.MainSelector.getPlaylistForIndicator;
+import static com.phaseshifter.canora.ui.selectors.MainSelector.getPlaylistForIndicator;
 
 public class MainPresenter implements MainContract.Presenter {
     private final String LOG_TAG = "MainPresenter";
     private final MainContract.View view;
-    private final Store<MainStateImmutable> store;
 
-    private final AudioDataRepository audioDataRepository;
-    private final AudioPlaylistRepository audioPlaylistRepository;
+    private final DeviceAudioRepository audioDataRepository;
+    private final UserPlaylistRepository audioPlaylistRepository;
     private final SettingsRepository settingsRepository;
     private final ThemeRepository themeRepository;
     private final SCAudioDataRepo scAudioDataRepo;
@@ -63,22 +56,13 @@ public class MainPresenter implements MainContract.Presenter {
     private final ContentViewModel contentViewModel;
     private final PlayerStateViewModel playerStateViewModel;
 
-    private final Observable.Observer<PlayerState> serviceStateObserver = new Observable.Observer<PlayerState>() {
-        @Override
-        public void update(Observable<PlayerState> o, PlayerState arg) {
-            store.dispatch(actionCreator.setPlaybackState(arg));
-        }
-    };
-
     private final AudioMetadataEditor metadataEditor;
-
-    private MainStateImmutable lastState = null;
 
     public MainPresenter(MainContract.View view,
                          Serializable savedState,
                          MediaPlayerService service,
-                         AudioDataRepository audioDataRepository,
-                         AudioPlaylistRepository audioPlaylistRepository,
+                         DeviceAudioRepository audioDataRepository,
+                         UserPlaylistRepository audioPlaylistRepository,
                          SettingsRepository settingsRepository,
                          ThemeRepository themeRepository,
                          SCAudioDataRepo scAudioDataRepo,

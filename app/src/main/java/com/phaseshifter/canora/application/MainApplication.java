@@ -3,10 +3,8 @@ package com.phaseshifter.canora.application;
 import android.app.Application;
 
 import com.phaseshifter.canora.model.provider.MediaStoreContentProvider;
-import com.phaseshifter.canora.model.repo.AudioDataRepo;
-import com.phaseshifter.canora.model.repo.AudioDataRepository;
-import com.phaseshifter.canora.model.repo.AudioPlaylistRepo;
-import com.phaseshifter.canora.model.repo.AudioPlaylistRepository;
+import com.phaseshifter.canora.model.repo.DeviceAudioRepository;
+import com.phaseshifter.canora.model.repo.UserPlaylistRepository;
 import com.phaseshifter.canora.model.repo.SCAudioDataRepo;
 import com.phaseshifter.canora.utils.android.ContentUriFactory;
 
@@ -14,8 +12,8 @@ import java.io.File;
 import java.util.HashMap;
 
 public class MainApplication extends Application {
-    private AudioDataRepository audioDataRepo;
-    private AudioPlaylistRepository audioPlaylistRepository;
+    private DeviceAudioRepository audioDataRepo;
+    private UserPlaylistRepository audioPlaylistRepository;
     private SCAudioDataRepo scAudioDataRepo;
 
     //Store objects passed between activities here as intent bundles cant hold more than 1MB
@@ -24,16 +22,16 @@ public class MainApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        audioDataRepo = new AudioDataRepo(new MediaStoreContentProvider(this, new ContentUriFactory()));
-        audioPlaylistRepository = new AudioPlaylistRepo(new File(getPlaylistPath()));
+        audioDataRepo = new DeviceAudioRepository(new MediaStoreContentProvider(this, new ContentUriFactory()));
+        audioPlaylistRepository = new UserPlaylistRepository(new File(getPlaylistPath()));
         scAudioDataRepo = new SCAudioDataRepo();
     }
 
-    public AudioDataRepository getAudioDataRepo() {
+    public DeviceAudioRepository getAudioDataRepo() {
         return audioDataRepo;
     }
 
-    public AudioPlaylistRepository getAudioPlaylistRepository() {
+    public UserPlaylistRepository getAudioPlaylistRepository() {
         return audioPlaylistRepository;
     }
 

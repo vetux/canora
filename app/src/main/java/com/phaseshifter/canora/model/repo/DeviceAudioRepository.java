@@ -14,9 +14,9 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Thread safe.
+ * Local device data ( MediaStore )
  */
-public class AudioDataRepo implements AudioDataRepository {
+public class DeviceAudioRepository {
     private final String LOG_TAG = "AudioDataRepository";
     private final IContentProvider contentProvider;
 
@@ -25,11 +25,11 @@ public class AudioDataRepo implements AudioDataRepository {
     private List<AudioPlaylist> albums;
     private List<AudioPlaylist> genres;
 
-    public AudioDataRepo(IContentProvider contentProvider,
-                         List<AudioData> tracks,
-                         List<AudioPlaylist> artists,
-                         List<AudioPlaylist> albums,
-                         List<AudioPlaylist> genres) {
+    public DeviceAudioRepository(IContentProvider contentProvider,
+                                 List<AudioData> tracks,
+                                 List<AudioPlaylist> artists,
+                                 List<AudioPlaylist> albums,
+                                 List<AudioPlaylist> genres) {
         this.contentProvider = contentProvider;
         this.tracks = tracks;
         this.artists = artists;
@@ -37,7 +37,7 @@ public class AudioDataRepo implements AudioDataRepository {
         this.genres = genres;
     }
 
-    public AudioDataRepo(IContentProvider contentProvider) {
+    public DeviceAudioRepository(IContentProvider contentProvider) {
         this(contentProvider,
                 new ArrayList<>(),
                 new ArrayList<>(),
@@ -46,7 +46,6 @@ public class AudioDataRepo implements AudioDataRepository {
         );
     }
 
-    @Override
     public void refresh() {
         Log.v(LOG_TAG, "refresh");
         List<AudioData> tracks = contentProvider.getTracks();
@@ -62,19 +61,16 @@ public class AudioDataRepo implements AudioDataRepository {
         Log.v(LOG_TAG, "refresh complete");
     }
 
-    @Override
     public synchronized List<AudioData> getTracks() {
         Log.v(LOG_TAG, "getTracks");
         return tracks;
     }
 
-    @Override
     public synchronized List<AudioPlaylist> getArtists() {
         Log.v(LOG_TAG, "getArtists");
         return artists;
     }
 
-    @Override
     public synchronized AudioPlaylist getArtist(UUID id) {
         Log.v(LOG_TAG, "getArtist " + id);
         for (AudioPlaylist pl : artists) {
@@ -85,13 +81,11 @@ public class AudioDataRepo implements AudioDataRepository {
         return null;
     }
 
-    @Override
     public synchronized List<AudioPlaylist> getAlbums() {
         Log.v(LOG_TAG, "getAlbums");
         return albums;
     }
 
-    @Override
     public synchronized AudioPlaylist getAlbum(UUID id) {
         Log.v(LOG_TAG, "getAlbum " + id);
         for (AudioPlaylist pl : albums) {
@@ -102,13 +96,11 @@ public class AudioDataRepo implements AudioDataRepository {
         return null;
     }
 
-    @Override
     public synchronized List<AudioPlaylist> getGenres() {
         Log.v(LOG_TAG, "getGenres");
         return genres;
     }
 
-    @Override
     public synchronized AudioPlaylist getGenre(UUID id) {
         Log.v(LOG_TAG, "getGenre " + id);
         for (AudioPlaylist pl : genres) {

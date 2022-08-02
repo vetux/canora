@@ -1,12 +1,10 @@
 package com.phaseshifter.canora.model.repo;
 
-import android.icu.util.Output;
 import android.util.Log;
 
 import com.phaseshifter.canora.data.media.audio.AudioData;
 import com.phaseshifter.canora.data.media.audio.metadata.AudioMetadata;
 import com.phaseshifter.canora.data.media.audio.metadata.AudioMetadataMemory;
-import com.phaseshifter.canora.data.media.image.ImageData;
 import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
 import com.phaseshifter.canora.data.media.playlist.metadata.PlaylistMetadataMemory;
 import com.phaseshifter.canora.model.compression.Gzip;
@@ -14,20 +12,19 @@ import com.phaseshifter.canora.utils.serialization.IObjectSerializer;
 import com.phaseshifter.canora.utils.serialization.ObjectSerializer;
 
 import java.io.*;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public class AudioPlaylistRepo implements AudioPlaylistRepository {
+public class UserPlaylistRepository {
     private final String LOG_TAG = "AudiPlaylistRepo";
     private final File playlistsDirectory;
     private final IObjectSerializer serializer;
     private final Map<UUID, AudioPlaylist> playlists = new HashMap<>();
 
-    public AudioPlaylistRepo(File playlistsDirectory) {
+    public UserPlaylistRepository(File playlistsDirectory) {
         if (playlistsDirectory == null)
             throw new IllegalArgumentException();
         serializer = new ObjectSerializer();
@@ -38,17 +35,14 @@ public class AudioPlaylistRepo implements AudioPlaylistRepository {
         playlists.putAll(readPlaylists());
     }
 
-    @Override
     public List<AudioPlaylist> getAll() {
         return new ArrayList<>(playlists.values());
     }
 
-    @Override
     public AudioPlaylist get(UUID key) {
         return playlists.get(key);
     }
 
-    @Override
     public AudioPlaylist set(UUID key, AudioPlaylist playlist) {
         Log.v(LOG_TAG, "Create Playlist " + key + " " + playlist);
 
@@ -71,7 +65,6 @@ public class AudioPlaylistRepo implements AudioPlaylistRepository {
         return generatedPlaylist;
     }
 
-    @Override
     public AudioPlaylist add(AudioPlaylist playlist) {
         Log.v(LOG_TAG, "Add Playlist " + playlist);
 
@@ -99,7 +92,6 @@ public class AudioPlaylistRepo implements AudioPlaylistRepository {
         return generatedPlaylist;
     }
 
-    @Override
     public void replace(UUID key, AudioPlaylist value) {
         Log.v(LOG_TAG, "Replace Playlist " + key + " " + value);
 
@@ -121,14 +113,12 @@ public class AudioPlaylistRepo implements AudioPlaylistRepository {
         }
     }
 
-    @Override
     public void remove(UUID key) {
         Log.v(LOG_TAG, "Remove Playlist " + key);
         playlists.remove(key);
         getPlaylistFile(key).delete();
     }
 
-    @Override
     public void remove(List<UUID> keys) {
         Log.v(LOG_TAG, "Remove Playlists " + keys);
         if (keys == null)
@@ -140,7 +130,6 @@ public class AudioPlaylistRepo implements AudioPlaylistRepository {
         }
     }
 
-    @Override
     public long getSize() {
         return playlists.values().size();
     }

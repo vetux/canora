@@ -5,9 +5,6 @@ import com.phaseshifter.canora.data.settings.BooleanSetting;
 import com.phaseshifter.canora.data.settings.FloatSetting;
 import com.phaseshifter.canora.data.settings.IntegerSetting;
 import com.phaseshifter.canora.data.theme.AppTheme;
-import com.phaseshifter.canora.model.repo.AudioPlaylistRepository;
-import com.phaseshifter.canora.model.repo.SettingsRepository;
-import com.phaseshifter.canora.model.repo.ThemeRepository;
 import com.phaseshifter.canora.service.MediaPlayerService;
 import com.phaseshifter.canora.ui.contracts.SettingsContract;
 import com.phaseshifter.canora.ui.data.constants.SettingsPage;
@@ -48,7 +45,7 @@ public class SettingsPresenter implements SettingsContract.Presenter {
 
     private final SettingsRepository settingsRepository;
     private final ThemeRepository themeRepository;
-    private final AudioPlaylistRepository audioPlaylistRepository;
+    private final UserPlaylistRepository audioPlaylistRepository;
     private final MediaPlayerService service;
 
     private final State state = new State();
@@ -56,7 +53,7 @@ public class SettingsPresenter implements SettingsContract.Presenter {
     public SettingsPresenter(SettingsContract.View view,
                              SettingsRepository settingsRepository,
                              ThemeRepository themeRepository,
-                             AudioPlaylistRepository audioPlaylistRepository,
+                             UserPlaylistRepository audioPlaylistRepository,
                              MediaPlayerService service,
                              State state) {
         this.view = view;
@@ -71,7 +68,7 @@ public class SettingsPresenter implements SettingsContract.Presenter {
     public SettingsPresenter(SettingsContract.View view,
                              SettingsRepository settingsRepository,
                              ThemeRepository themeRepository,
-                             AudioPlaylistRepository audioPlaylistRepository,
+                             UserPlaylistRepository audioPlaylistRepository,
                              MediaPlayerService service,
                              Serializable state) {
         this(view, settingsRepository, themeRepository, audioPlaylistRepository, service, (State) state);
