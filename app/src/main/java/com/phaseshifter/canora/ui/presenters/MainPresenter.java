@@ -10,6 +10,7 @@ import com.phaseshifter.canora.data.settings.BooleanSetting;
 import com.phaseshifter.canora.data.settings.FloatSetting;
 import com.phaseshifter.canora.data.settings.IntegerSetting;
 import com.phaseshifter.canora.data.settings.StringSetting;
+import com.phaseshifter.canora.data.theme.AppTheme;
 import com.phaseshifter.canora.model.editor.AudioMetadataEditor;
 import com.phaseshifter.canora.model.formatting.ListFilter;
 import com.phaseshifter.canora.model.formatting.ListSorter;
@@ -24,8 +25,10 @@ import com.phaseshifter.canora.ui.data.misc.SelectionIndicator;
 import com.phaseshifter.canora.ui.menu.ContextMenu;
 import com.phaseshifter.canora.ui.menu.OptionsMenu;
 import com.phaseshifter.canora.ui.dialog.MainDialogFactory;
+import com.phaseshifter.canora.ui.viewmodels.AppViewModel;
 import com.phaseshifter.canora.ui.viewmodels.ContentViewModel;
 import com.phaseshifter.canora.ui.viewmodels.PlayerStateViewModel;
+import com.phaseshifter.canora.model.repo.*;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -58,6 +61,14 @@ public class MainPresenter implements MainContract.Presenter {
 
     private final AudioMetadataEditor metadataEditor;
 
+    private class StateBundle {
+        AppTheme theme;
+        boolean devMode;
+        FilterOptions filterOptions;
+        SortingOptions sortingOptions;
+        SelectionIndicator indicator;
+    }
+
     public MainPresenter(MainContract.View view,
                          Serializable savedState,
                          MediaPlayerService service,
@@ -68,6 +79,7 @@ public class MainPresenter implements MainContract.Presenter {
                          SoundCloudAudioRepository scAudioDataRepo,
                          AudioMetadataEditor metadataEditor,
                          Executor mainThread,
+                         AppViewModel appViewModel,
                          ContentViewModel contentViewModel,
                          PlayerStateViewModel playerStateViewModel) {
         this.view = view;
@@ -79,60 +91,14 @@ public class MainPresenter implements MainContract.Presenter {
         this.scAudioDataRepo = scAudioDataRepo;
         this.metadataEditor = metadataEditor;
         this.mainThread = mainThread;
+        this.contentViewModel = contentViewModel;
+        this.playerStateViewModel = playerStateViewModel;
         scAudioDataRepo.setClientID(settingsRepository.getString(StringSetting.SC_CLIENTID));
         presExec = new ThreadPoolExecutor(1, 1, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
-        final MainState cachedState;
-        if (savedState instanceof MainState)
-            cachedState = (MainState) savedState;
-        else
-            cachedState = null;
-        store = new StoreFactory<MainStateImmutable>()
-                .setReducer(new MainReducer())
-                .setPreloadedState(cachedState)
-                .addMiddleware(new Thunk<>())
-                .addMiddleware(new ActionLogger<>())
-                .build();
-        store.subscribe(this);
-        for (StateListener<MainStateImmutable> listener : viewmodels) {
-            store.subscribe(listener);
+
+        if (savedState instanceof StateBundle) {
+            final StateBundle state = (StateBundle) savedState;
         }
-
-        this.actionCreator = new MainActionCreator(store, audioDataRepository, audioPlaylistRepository, settingsRepository, themeRepository, scAudioDataRepo, service, presExec, mainThread);
-    }
-
-    @Override
-    public void update(MainStateImmutable updatedState) {
-        Log.v(LOG_TAG, "State Update " + updatedState);
-        boolean themeChange = false;
-        if (updatedState.getTheme() != null) {
-            if (lastState == null
-                    || !updatedState.getTheme().equals(lastState.getTheme())) {
-                view.setTheme(updatedState.getTheme());
-                themeChange = true;
-            }
-        }
-
-        if (lastState == null || lastState.isDevMode() != updatedState.isDevMode())
-            view.setDebugDisplay(updatedState.isDevMode());
-
-        if (themeChange
-                || lastState == null
-                || !Objects.equals(updatedState.isFiltering(), lastState.isFiltering()))
-            view.setSearchMax(updatedState.isFiltering());
-
-        if (themeChange
-                || lastState == null
-                || !Objects.equals(updatedState.isControlsMaximized(), lastState.isControlsMaximized()))
-            view.setControlMax(updatedState.isControlsMaximized());
-
-        if (themeChange || lastState == null || lastState.getUiIndicator() != updatedState.getUiIndicator()) {
-            if (updatedState.getUiIndicator().isPlaylistView()) {
-                view.showPlaylistContent();
-            } else {
-                view.showTrackContent();
-            }
-        }
-        lastState = updatedState;
     }
 
     //START Presenter Interface

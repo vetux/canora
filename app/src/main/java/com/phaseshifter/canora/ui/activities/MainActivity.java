@@ -59,6 +59,7 @@ import com.phaseshifter.canora.ui.presenters.MainPresenter;
 import com.phaseshifter.canora.ui.utils.CustomNavigationDrawer;
 import com.phaseshifter.canora.ui.dialog.MainDialogFactory;
 import com.phaseshifter.canora.ui.popup.ListPopupFactory;
+import com.phaseshifter.canora.ui.viewmodels.AppViewModel;
 import com.phaseshifter.canora.ui.viewmodels.ContentViewModel;
 import com.phaseshifter.canora.ui.viewmodels.PlayerStateViewModel;
 import com.phaseshifter.canora.utils.Observable;
@@ -100,6 +101,7 @@ public class MainActivity extends Activity implements MainContract.View,
     private final AndroidFPSMeter fpsMeter = new AndroidFPSMeter();
     private final AndroidMemoryMeter memoryMeter = new AndroidMemoryMeter();
 
+    private AppViewModel appViewModel;
     private ContentViewModel contentViewModel;
     private PlayerStateViewModel playerStateViewModel;
 
@@ -140,6 +142,7 @@ public class MainActivity extends Activity implements MainContract.View,
                 : savedInstanceState.getSerializable(BUNDLE_PRESENTERSTATE);
         serviceWrapper = new AutoBindingServiceWrapper(this);
         MainApplication application = (MainApplication) getApplication();
+        appViewModel = new AppViewModel();
         contentViewModel = new ContentViewModel();
         playerStateViewModel = new PlayerStateViewModel();
         setViewModelListeners(contentViewModel, playerStateViewModel);
@@ -153,6 +156,7 @@ public class MainActivity extends Activity implements MainContract.View,
                 application.getScAudioRepository(),
                 new JaudioTaggerEditor(this),
                 this::runOnUiThread,
+                appViewModel,
                 contentViewModel,
                 playerStateViewModel
         );
@@ -528,25 +532,6 @@ public class MainActivity extends Activity implements MainContract.View,
     }
 
     @Override
-    public void setDebugDisplay(boolean debugDisplay) {
-        runOnUiThread(() -> {
-            fpsMeter.reset();
-            memoryMeter.reset();
-            ViewGroup view = findViewById(R.id.debugViews);
-            if (view != null) {
-                if (debugDisplay) {
-                    fpsMeter.startMeasure();
-                    view.setVisibility(View.VISIBLE);
-                    fpsMeter.startPrint(100, view.findViewById(R.id.debugTextFPS));
-                    memoryMeter.startPrint(100, view.findViewById(R.id.debugTextMemory), this);
-                } else {
-                    view.setVisibility(View.GONE);
-                }
-            }
-        });
-    }
-
-    @Override
     public void showContentContextMenu(int index,
                                        HashSet<ContextMenu.Action> actions,
                                        RunnableArg<ContextMenu.Action> onAction,
@@ -796,7 +781,25 @@ public class MainActivity extends Activity implements MainContract.View,
     }
 
     private void setViewModelListeners(ContentViewModel contentViewModel, PlayerStateViewModel playerStateViewModel) {
-        contentViewModel.contentSelector.addObserver(new Observable.Observer<SelectionIndicator>() {
+        appViewModel.devMode.addObserver(new Observable.Observer<Boolean>() {
+            @Override
+            public void update(Observable<Boolean> observable, Boolean value) {
+                fpsMeter.reset();
+                memoryMeter.reset();
+                ViewGroup view = findViewById(R.id.debugViews);
+                if (view != null) {
+                    if (value) {
+                        fpsMeter.startMeasure();
+                        view.setVisibility(View.VISIBLE);
+                        fpsMeter.startPrint(100, view.findViewById(R.id.debugTextFPS));
+                        memoryMeter.startPrint(100, view.findViewById(R.id.debugTextMemory), MainActivity.this);
+                    } else {
+                        view.setVisibility(View.GONE);
+                    }
+                }
+            }
+        });
+        appViewModel.contentSelector.addObserver(new Observable.Observer<SelectionIndicator>() {
             @Override
             public void update(Observable<SelectionIndicator> observable, SelectionIndicator value) {
                 ViewGroup drawerItems = findViewById(R.id.nav_content_root);
@@ -811,17 +814,7 @@ public class MainActivity extends Activity implements MainContract.View,
                 }
             }
         });
-        contentViewModel.contentName.addObserver(new Observable.Observer<String>() {
-            @Override
-            public void update(Observable<String> observable, String value) {
-                TextView title = findViewById(R.id.toolbar_textview_title);
-                if (title != null) {
-                    title.setText(value);
-                    title.setSelected(true);
-                }
-            }
-        });
-        contentViewModel.isContentLoading.addObserver(new Observable.Observer<Boolean>() {
+        appViewModel.isContentLoading.addObserver(new Observable.Observer<Boolean>() {
             @Override
             public void update(Observable<Boolean> observable, Boolean value) {
                 ProgressBar pb = findViewById(R.id.toolbar_progressbar_contentload);
@@ -830,7 +823,7 @@ public class MainActivity extends Activity implements MainContract.View,
                 }
             }
         });
-        contentViewModel.isSelecting.addObserver(new Observable.Observer<Boolean>() {
+        appViewModel.isSelecting.addObserver(new Observable.Observer<Boolean>() {
             @Override
             public void update(Observable<Boolean> observable, Boolean value) {
                 trackAdapter.setSelectionMode(value);
@@ -841,6 +834,57 @@ public class MainActivity extends Activity implements MainContract.View,
                 ImageButton btn = findViewById(R.id.display_button_floating_addto);
                 if (btn != null) {
                     btn.setVisibility(value ? View.VISIBLE : View.GONE);
+                }
+            }
+        });
+        appViewModel.isSearching.addObserver(new Observable.Observer<Boolean>() {
+            @Override
+            public void update(Observable<Boolean> observable, Boolean value) {
+                EditText searchText = findViewById(R.id.toolbar_edittext_search);
+                if (searchText != null) {
+                    if (value) {
+                        searchText.setVisibility(View.VISIBLE);
+                        searchText.requestFocus();
+                        toggleKeyboardView(getApplicationContext(), searchText, true);
+                    } else {
+                        searchText.setVisibility(View.GONE);
+                        toggleKeyboardView(getApplicationContext(), searchText, false);
+                    }
+                }
+            }
+        });
+        appViewModel.searchText.addObserver(new Observable.Observer<String>() {
+            @Override
+            public void update(Observable<String> observable, String value) {
+                EditText searchText = findViewById(R.id.toolbar_edittext_search);
+                if (searchText != null) {
+                    searchText.removeTextChangedListener(MainActivity.this);
+                    searchText.setText(value);
+                    searchText.addTextChangedListener(MainActivity.this);
+                    if (searchText.isFocused()) {
+                        searchText.setSelection(searchText.getText().length());
+                    }
+                }
+            }
+        });
+        appViewModel.notFoundText.addObserver(new Observable.Observer<String>() {
+            @Override
+            public void update(Observable<String> observable, String value) {
+                TextView notFoundText = findViewById(R.id.display_text_notfound);
+                if (notFoundText != null) {
+                    notFoundText.setVisibility(value == null ? View.GONE : View.VISIBLE);
+                    notFoundText.setText(value);
+                }
+            }
+        });
+
+        contentViewModel.contentName.addObserver(new Observable.Observer<String>() {
+            @Override
+            public void update(Observable<String> observable, String value) {
+                TextView title = findViewById(R.id.toolbar_textview_title);
+                if (title != null) {
+                    title.setText(value);
+                    title.setSelected(true);
                 }
             }
         });
@@ -888,46 +932,7 @@ public class MainActivity extends Activity implements MainContract.View,
                 playlistAdapter.notifyDataSetChanged();
             }
         });
-        contentViewModel.isSearching.addObserver(new Observable.Observer<Boolean>() {
-            @Override
-            public void update(Observable<Boolean> observable, Boolean value) {
-                EditText searchText = findViewById(R.id.toolbar_edittext_search);
-                if (searchText != null) {
-                    if (value) {
-                        searchText.setVisibility(View.VISIBLE);
-                        searchText.requestFocus();
-                        toggleKeyboardView(getApplicationContext(), searchText, true);
-                    } else {
-                        searchText.setVisibility(View.GONE);
-                        toggleKeyboardView(getApplicationContext(), searchText, false);
-                    }
-                }
-            }
-        });
-        contentViewModel.searchText.addObserver(new Observable.Observer<String>() {
-            @Override
-            public void update(Observable<String> observable, String value) {
-                EditText searchText = findViewById(R.id.toolbar_edittext_search);
-                if (searchText != null) {
-                    searchText.removeTextChangedListener(MainActivity.this);
-                    searchText.setText(value);
-                    searchText.addTextChangedListener(MainActivity.this);
-                    if (searchText.isFocused()) {
-                        searchText.setSelection(searchText.getText().length());
-                    }
-                }
-            }
-        });
-        contentViewModel.notFoundText.addObserver(new Observable.Observer<String>() {
-            @Override
-            public void update(Observable<String> observable, String value) {
-                TextView notFoundText = findViewById(R.id.display_text_notfound);
-                if (notFoundText != null) {
-                    notFoundText.setVisibility(value == null ? View.GONE : View.VISIBLE);
-                    notFoundText.setText(value);
-                }
-            }
-        });
+
         playerStateViewModel.buffering.addObserver(new Observable.Observer<Boolean>() {
             @Override
             public void update(Observable<Boolean> observable, Boolean value) {

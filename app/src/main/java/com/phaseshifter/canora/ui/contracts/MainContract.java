@@ -16,23 +16,7 @@ import java.util.HashSet;
 import java.util.List;
 
 /**
- * As before the basic architecture is MVP.
- * The presenter receives a list of StateListeners which it binds to its store object.
- * <p>
- * The presenter controls the view actions such as showDialog,
- * and the ViewModels are containers for state for the view such as a string.
- * <p>
- * Note that the presenter does not care or know anything about the ViewModels, all it sees is a list of StateListeners.
- * The ViewModels can therefore do whatever they want, they can reference android context, use the repos etc.
- * <p>
- * The actual logic that controls the store is still the presenter, the viewmodels simply
- * serve as a abstraction around the display and conversion of the resulting state.
- * <p>
- * The Presenter store state is therefore separated from the display.
- * We can add and remove state as we please and it is the responsibility of the ViewModels to transform that state into a meaningful representation for the view.
- * <p>
- * With this architecture we gain the stability and testability of MVP,
- * with the flexibility and scalability of MVVM.
+ * MVP Contract, Actions are methods and additionally there is MVVM style view-models for communicating simple state to the view
  */
 public interface MainContract {
     interface View {
@@ -41,8 +25,6 @@ public interface MainContract {
         void saveState(Serializable state);
 
         void setTheme(AppTheme theme);
-
-        void setDebugDisplay(boolean debugDisplay);
 
         void showContentContextMenu(int index,
                                     HashSet<ContextMenu.Action> actions,
