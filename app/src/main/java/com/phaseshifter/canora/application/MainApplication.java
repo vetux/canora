@@ -5,7 +5,7 @@ import android.app.Application;
 import com.phaseshifter.canora.model.provider.MediaStoreContentProvider;
 import com.phaseshifter.canora.model.repo.DeviceAudioRepository;
 import com.phaseshifter.canora.model.repo.UserPlaylistRepository;
-import com.phaseshifter.canora.model.repo.SCAudioDataRepo;
+import com.phaseshifter.canora.model.repo.SoundCloudAudioRepository;
 import com.phaseshifter.canora.utils.android.ContentUriFactory;
 
 import java.io.File;
@@ -14,7 +14,7 @@ import java.util.HashMap;
 public class MainApplication extends Application {
     private DeviceAudioRepository audioDataRepo;
     private UserPlaylistRepository audioPlaylistRepository;
-    private SCAudioDataRepo scAudioDataRepo;
+    private SoundCloudAudioRepository scAudioDataRepo;
 
     //Store objects passed between activities here as intent bundles cant hold more than 1MB
     private final HashMap<String, Object> bundle = new HashMap<>();
@@ -24,7 +24,7 @@ public class MainApplication extends Application {
         super.onCreate();
         audioDataRepo = new DeviceAudioRepository(new MediaStoreContentProvider(this, new ContentUriFactory()));
         audioPlaylistRepository = new UserPlaylistRepository(new File(getPlaylistPath()));
-        scAudioDataRepo = new SCAudioDataRepo();
+        scAudioDataRepo = new SoundCloudAudioRepository();
     }
 
     public DeviceAudioRepository getAudioDataRepo() {
@@ -35,7 +35,7 @@ public class MainApplication extends Application {
         return audioPlaylistRepository;
     }
 
-    public SCAudioDataRepo getScAudioRepository() {
+    public SoundCloudAudioRepository getScAudioRepository() {
         return scAudioDataRepo;
     }
 

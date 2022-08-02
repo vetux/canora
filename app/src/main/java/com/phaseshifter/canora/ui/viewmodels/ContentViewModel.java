@@ -6,7 +6,7 @@ import com.phaseshifter.canora.R;
 import com.phaseshifter.canora.data.media.audio.AudioData;
 import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
 import com.phaseshifter.canora.model.repo.DeviceAudioRepository;
-import com.phaseshifter.canora.model.repo.SCAudioDataRepo;
+import com.phaseshifter.canora.model.repo.SoundCloudAudioRepository;
 import com.phaseshifter.canora.model.repo.UserPlaylistRepository;
 import com.phaseshifter.canora.ui.data.AudioContentSelector;
 import com.phaseshifter.canora.ui.data.misc.SelectionIndicator;
@@ -42,7 +42,7 @@ public class ContentViewModel {
                                   Context context,
                                   DeviceAudioRepository audioDataRepository,
                                   UserPlaylistRepository audioPlaylistRepository,
-                                  SCAudioDataRepo scAudioDataRepo) {
+                                  SoundCloudAudioRepository scAudioDataRepo) {
         if (uiIndicator.isPlaylistView()) {
             return getSelectorName(uiIndicator.getSelector(), context);
         } else {
@@ -73,7 +73,7 @@ public class ContentViewModel {
                                     Context context,
                                     DeviceAudioRepository audioDataRepository,
                                     UserPlaylistRepository audioPlaylistRepository,
-                                    SCAudioDataRepo scAudioDataRepo) {
+                                    SoundCloudAudioRepository scAudioDataRepo) {
         String text = getPlaylistTitle(indicator, audioDataRepository, audioPlaylistRepository, scAudioDataRepo);
         switch (indicator.getSelector()) {
             case TRACKS:

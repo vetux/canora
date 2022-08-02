@@ -4,7 +4,7 @@ import com.phaseshifter.canora.data.media.audio.AudioData;
 import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
 import com.phaseshifter.canora.model.formatting.ListSorter;
 import com.phaseshifter.canora.model.repo.DeviceAudioRepository;
-import com.phaseshifter.canora.model.repo.SCAudioDataRepo;
+import com.phaseshifter.canora.model.repo.SoundCloudAudioRepository;
 import com.phaseshifter.canora.model.repo.UserPlaylistRepository;
 import com.phaseshifter.canora.ui.data.AudioContentSelector;
 import com.phaseshifter.canora.ui.data.formatting.SortingOptions;
@@ -13,7 +13,7 @@ import com.phaseshifter.canora.ui.data.misc.SelectionIndicator;
 import java.util.List;
 
 public abstract class MainSelector {
-    public static String getPlaylistTitle(SelectionIndicator indicator, DeviceAudioRepository audioDataRepository, UserPlaylistRepository audioPlaylistRepository, SCAudioDataRepo scAudioDataRepo) {
+    public static String getPlaylistTitle(SelectionIndicator indicator, DeviceAudioRepository audioDataRepository, UserPlaylistRepository audioPlaylistRepository, SoundCloudAudioRepository scAudioDataRepo) {
         AudioPlaylist playlist = null;
         switch (indicator.getSelector()) {
             case PLAYLISTS:
@@ -42,7 +42,7 @@ public abstract class MainSelector {
                                                         SortingOptions sortOpt,
                                                         DeviceAudioRepository audioDataRepository,
                                                         UserPlaylistRepository audioPlaylistRepository,
-                                                        SCAudioDataRepo scAudioDataRepo) {
+                                                        SoundCloudAudioRepository scAudioDataRepo) {
         switch (indicator.getSelector()) {
             case TRACKS:
                 return ListSorter.sortAudioData(audioDataRepository.getTracks(), sortOpt);

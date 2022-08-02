@@ -21,15 +21,14 @@ import com.phaseshifter.canora.plugin.soundcloud.api_v2.data.SCV2Track;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 
-public class SCAudioDataRepo {
+/**
+ * SoundCloud
+ */
+public class SoundCloudAudioRepository {
     private SCV2Client client = null;
 
     private final List<AudioData> searchResults = new ArrayList<>();
@@ -52,7 +51,7 @@ public class SCAudioDataRepo {
 
     private static final int resPerPage = 10;
 
-    public SCAudioDataRepo(String clientID) {
+    public SoundCloudAudioRepository(String clientID) {
         this.clientID = clientID;
         int i = 0;
         for (SCGenre genre : SCGenre.values()) {
@@ -65,7 +64,7 @@ public class SCAudioDataRepo {
         }
     }
 
-    public SCAudioDataRepo() {
+    public SoundCloudAudioRepository() {
         this(null);
     }
 

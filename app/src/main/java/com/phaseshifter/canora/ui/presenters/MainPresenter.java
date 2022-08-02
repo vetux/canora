@@ -13,7 +13,7 @@ import com.phaseshifter.canora.data.settings.StringSetting;
 import com.phaseshifter.canora.model.editor.AudioMetadataEditor;
 import com.phaseshifter.canora.model.formatting.ListFilter;
 import com.phaseshifter.canora.model.formatting.ListSorter;
-import com.phaseshifter.canora.model.repo.SCAudioDataRepo;
+import com.phaseshifter.canora.model.repo.SoundCloudAudioRepository;
 import com.phaseshifter.canora.service.MediaPlayerService;
 import com.phaseshifter.canora.ui.contracts.MainContract;
 import com.phaseshifter.canora.ui.data.AudioContentSelector;
@@ -45,7 +45,7 @@ public class MainPresenter implements MainContract.Presenter {
     private final UserPlaylistRepository audioPlaylistRepository;
     private final SettingsRepository settingsRepository;
     private final ThemeRepository themeRepository;
-    private final SCAudioDataRepo scAudioDataRepo;
+    private final SoundCloudAudioRepository scAudioDataRepo;
 
     private final MediaPlayerService service;
 
@@ -65,7 +65,7 @@ public class MainPresenter implements MainContract.Presenter {
                          UserPlaylistRepository audioPlaylistRepository,
                          SettingsRepository settingsRepository,
                          ThemeRepository themeRepository,
-                         SCAudioDataRepo scAudioDataRepo,
+                         SoundCloudAudioRepository scAudioDataRepo,
                          AudioMetadataEditor metadataEditor,
                          Executor mainThread,
                          ContentViewModel contentViewModel,
