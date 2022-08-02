@@ -4,16 +4,15 @@ import com.phaseshifter.canora.data.media.audio.AudioData;
 import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
 import com.phaseshifter.canora.data.theme.AppTheme;
 import com.phaseshifter.canora.model.editor.AudioMetadataMask;
-import com.phaseshifter.canora.ui.data.AudioContentSelector;
 import com.phaseshifter.canora.ui.data.constants.NavigationItem;
-import com.phaseshifter.canora.ui.data.formatting.FilterDef;
-import com.phaseshifter.canora.ui.data.formatting.SortDef;
-import com.phaseshifter.canora.ui.menu.AddToMenuListener;
+import com.phaseshifter.canora.ui.data.formatting.FilterOptions;
+import com.phaseshifter.canora.ui.data.formatting.SortingOptions;
 import com.phaseshifter.canora.ui.menu.ContextMenu;
 import com.phaseshifter.canora.ui.menu.OptionsMenu;
-import com.phaseshifter.canora.ui.utils.dialog.MainDialogFactory;
+import com.phaseshifter.canora.utils.RunnableArg;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -37,65 +36,51 @@ import java.util.List;
  */
 public interface MainContract {
     interface View {
+        void shutdown();
+
+        void saveState(Serializable state);
+
         void setTheme(AppTheme theme);
 
         void setDebugDisplay(boolean debugDisplay);
 
-        void setSearchMax(boolean searchMax);
+        void showContentContextMenu(int index,
+                                    HashSet<ContextMenu.Action> actions,
+                                    RunnableArg<ContextMenu.Action> onAction,
+                                    Runnable onCancel);
 
-        void setControlMax(boolean controlMax);
+        void showOptionsMenu(HashSet<OptionsMenu.Action> actions,
+                             RunnableArg<OptionsMenu.Action> onAction,
+                             Runnable onCancel);
 
-        void setNavigationMax(boolean navigationMax);
-
-        void showTrackContent();
-
-        void showPlaylistContent();
-
-        void showTrackContentDetails(int index);
-
-        void showPlaylistContentDetails(int index);
-
-        void showMenuTrackContent(int index, ContextMenu menu);
-
-        void showMenuPlaylistContent(int index, ContextMenu menu);
-
-        void showMenuOptions(OptionsMenu menu);
-
-        void showMenuAddSelectionToPlaylist(boolean showAddToNew, List<AudioPlaylist> existingPlaylists, AddToMenuListener listener);
+        void showAddSelectionMenu(List<AudioPlaylist> existingPlaylists,
+                                  Runnable onAddToNew,
+                                  RunnableArg<AudioPlaylist> onAddToPlaylist);
 
         void showMessage(String title, String text);
-
-        void showMessage_createdPlaylist(String playlistTitle, int playlistTracks);
-
-        void showMessage_deletedPlaylist(String title);
-
-        void showMessage_deletedPlaylists(int count);
-
-        void showMessage_deletedTracks(int count);
-
-        void showMessage_deletedTracksFrom(String playlistTitle, int count);
-
-        void showMessage_addedTracks(String playlistTarget, int count);
 
         void showWarning(String text);
 
         void showError(String text);
 
-        void showDialog_Exit();
+        void showDialog_FilterOptions(FilterOptions curDef,
+                                      RunnableArg<FilterOptions> onAccept);
 
-        void showDialog_FilterOptions(FilterDef curDef, MainDialogFactory.FilterOptionsListener listener);
+        void showDialog_SortOptions(SortingOptions curDef,
+                                    RunnableArg<SortingOptions> onAccept);
 
-        void showDialog_SortOptions(SortDef curDef, MainDialogFactory.SortingOptionsListener listener);
+        void showDialog_CreatePlaylist(List<AudioData> tracks,
+                                       RunnableArg<String> onCreate,
+                                       Runnable onCancel);
 
-        void showDialog_CreatePlaylist(List<AudioData> data, MainDialogFactory.PlaylistCreateListener listener);
+        void showDialog_DeletePlaylists(List<AudioPlaylist> playlists,
+                                        Runnable onAccept,
+                                        Runnable onCancel);
 
-        void showDialog_DeletePlaylists(List<AudioPlaylist> playlists, MainDialogFactory.DeletePlaylistsListener listener);
-
-        void showDialog_DeleteTracksFromPlaylist(AudioPlaylist playlist, List<AudioData> tracks, MainDialogFactory.DeleteTracksFromPlaylistListener listener);
-
-        void showDialog_error_permissions();
-
-        void showDialog_volume(float currentValue);
+        void showDialog_DeleteTracksFromPlaylist(AudioPlaylist playlist,
+                                                 List<AudioData> tracks,
+                                                 Runnable onAccept,
+                                                 Runnable onCancel);
 
         void startEditor(AudioData data, AudioMetadataMask mask, AppTheme theme);
 
@@ -141,13 +126,11 @@ public interface MainContract {
 
         void onSearchTextEditingFinished();
 
-        void onNavigationButtonClick();
-
         void onOptionsButtonClick();
 
         void onSearchButtonClick();
 
-        void onVolumeButtonClick();
+        void onFloatingAddToButtonClick();
 
         void onBackPress();
 
@@ -165,10 +148,6 @@ public interface MainContract {
 
         void onTrackContentScrollToBottom();
 
-        void onMenuAction(OptionsMenu.Action action);
-
-        void onMenuAction(int index, ContextMenu.Action action);
-
         void onMediaStoreDataChange();
 
         void onEditorResult(AudioData data, boolean error, boolean canceled, boolean deleted);
@@ -178,7 +157,5 @@ public interface MainContract {
         void onTransportControlChange(boolean controlMax);
 
         void onNavigationClick(NavigationItem item);
-
-        Serializable saveState();
     }
 }

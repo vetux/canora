@@ -1,4 +1,4 @@
-package com.phaseshifter.canora.ui.utils.popup;
+package com.phaseshifter.canora.ui.popup;
 
 import android.content.Context;
 import android.view.LayoutInflater;

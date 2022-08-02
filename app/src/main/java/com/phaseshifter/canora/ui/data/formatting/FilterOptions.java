@@ -3,7 +3,7 @@ package com.phaseshifter.canora.ui.data.formatting;
 import java.io.Serializable;
 import java.util.Objects;
 
-public class FilterDef implements Serializable {
+public class FilterOptions implements Serializable {
     //SearchBy
     public static final int FILTER_TITLE = 0;
     public static final int FILTER_ARTIST = 1;
@@ -16,16 +16,16 @@ public class FilterDef implements Serializable {
     public int filterBy;
     public String filterFor;
 
-    public FilterDef(int filterBy, String filterFor) {
+    public FilterOptions(int filterBy, String filterFor) {
         this.filterFor = filterFor;
         this.filterBy = filterBy;
     }
 
-    public FilterDef(FilterDef copy) {
+    public FilterOptions(FilterOptions copy) {
         this(copy.filterBy, copy.filterFor);
     }
 
-    public FilterDef() {
+    public FilterOptions() {
         this(0, "");
     }
 
@@ -33,7 +33,7 @@ public class FilterDef implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        FilterDef filterDef = (FilterDef) o;
+        FilterOptions filterDef = (FilterOptions) o;
         return filterBy == filterDef.filterBy &&
                 Objects.equals(filterFor, filterDef.filterFor);
     }

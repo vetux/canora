@@ -30,8 +30,6 @@ import android.widget.*;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.constraintlayout.motion.widget.MotionLayout;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
@@ -54,20 +52,19 @@ import com.phaseshifter.canora.ui.arrayadapters.AudioPlaylistArrayAdapter;
 import com.phaseshifter.canora.ui.contracts.MainContract;
 import com.phaseshifter.canora.ui.data.AudioContentSelector;
 import com.phaseshifter.canora.ui.data.constants.NavigationItem;
-import com.phaseshifter.canora.ui.data.formatting.FilterDef;
-import com.phaseshifter.canora.ui.data.formatting.SortDef;
-import com.phaseshifter.canora.ui.menu.AddToMenuListener;
+import com.phaseshifter.canora.ui.data.formatting.FilterOptions;
+import com.phaseshifter.canora.ui.data.formatting.SortingOptions;
+import com.phaseshifter.canora.ui.data.misc.SelectionIndicator;
 import com.phaseshifter.canora.ui.menu.ContextMenu;
 import com.phaseshifter.canora.ui.menu.OptionsMenu;
 import com.phaseshifter.canora.ui.presenters.MainPresenter;
-import com.phaseshifter.canora.ui.redux.core.StateListener;
-import com.phaseshifter.canora.ui.redux.state.MainStateImmutable;
 import com.phaseshifter.canora.ui.utils.CustomNavigationDrawer;
-import com.phaseshifter.canora.ui.utils.dialog.MainDialogFactory;
-import com.phaseshifter.canora.ui.utils.popup.ListPopupFactory;
+import com.phaseshifter.canora.ui.dialog.MainDialogFactory;
+import com.phaseshifter.canora.ui.popup.ListPopupFactory;
 import com.phaseshifter.canora.ui.viewmodels.ContentViewModel;
 import com.phaseshifter.canora.ui.viewmodels.PlayerStateViewModel;
 import com.phaseshifter.canora.utils.Observable;
+import com.phaseshifter.canora.utils.RunnableArg;
 import com.phaseshifter.canora.utils.android.AttributeConversion;
 import com.phaseshifter.canora.utils.android.metrics.AndroidFPSMeter;
 import com.phaseshifter.canora.utils.android.metrics.AndroidMemoryMeter;
@@ -131,6 +128,8 @@ public class MainActivity extends Activity implements MainContract.View,
 
     private boolean showingTracks = false;
 
+    private Serializable savedState = null;
+
     //START Android Interfaces
 
     @Override
@@ -143,12 +142,9 @@ public class MainActivity extends Activity implements MainContract.View,
                 : savedInstanceState.getSerializable(BUNDLE_PRESENTERSTATE);
         serviceWrapper = new AutoBindingServiceWrapper(this);
         MainApplication application = (MainApplication) getApplication();
-        contentViewModel = new ContentViewModel(this, application.getAudioDataRepo(), application.getAudioPlaylistRepository(), application.getScAudioRepository());
-        playerStateViewModel = new PlayerStateViewModel(this);
+        contentViewModel = new ContentViewModel();
+        playerStateViewModel = new PlayerStateViewModel();
         setViewModelListeners(contentViewModel, playerStateViewModel);
-        List<StateListener<MainStateImmutable>> viewModels = new ArrayList<>();
-        viewModels.add(contentViewModel);
-        viewModels.add(playerStateViewModel);
         presenter = new MainPresenter(this,
                 savedState,
                 serviceWrapper,
@@ -159,7 +155,8 @@ public class MainActivity extends Activity implements MainContract.View,
                 application.getScAudioRepository(),
                 new JaudioTaggerEditor(this),
                 this::runOnUiThread,
-                viewModels
+                contentViewModel,
+                playerStateViewModel
         );
         trackAdapter = new AudioDataArrayAdapter(this, new ArrayList<>());
         playlistAdapter = new AudioPlaylistArrayAdapter(this, new ArrayList<>());
@@ -244,7 +241,9 @@ public class MainActivity extends Activity implements MainContract.View,
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
-        outState.putSerializable(BUNDLE_PRESENTERSTATE, presenter.saveState());
+        if (savedState != null) {
+            outState.putSerializable(BUNDLE_PRESENTERSTATE, savedState);
+        }
         super.onSaveInstanceState(outState);
     }
 
@@ -443,7 +442,7 @@ public class MainActivity extends Activity implements MainContract.View,
                 presenter.onRepeatSwitch();
                 break;
             case R.id.toolbar_button_nav:
-                presenter.onNavigationButtonClick();
+                openNavigationDrawer();
                 break;
             case R.id.toolbar_button_menu:
                 presenter.onOptionsButtonClick();
@@ -452,7 +451,7 @@ public class MainActivity extends Activity implements MainContract.View,
                 presenter.onSearchButtonClick();
                 break;
             case R.id.control_button_volume:
-                presenter.onVolumeButtonClick();
+                showVolumeDialog(playerStateViewModel.volume.get());
                 break;
             case R.id.control_button_open:
                 presenter.onTransportControlChange(true);
@@ -463,7 +462,7 @@ public class MainActivity extends Activity implements MainContract.View,
                 setControlMax(false);
                 break;
             case R.id.display_button_floating_addto:
-                presenter.onMenuAction(OptionsMenu.Action.ADD_SELECTION);
+                presenter.onFloatingAddToButtonClick();
                 break;
         }
     }
@@ -510,6 +509,16 @@ public class MainActivity extends Activity implements MainContract.View,
     //START View interface
 
     @Override
+    public void shutdown() {
+        finish();
+    }
+
+    @Override
+    public void saveState(Serializable state) {
+        savedState = state;
+    }
+
+    @Override
     public void setTheme(AppTheme theme) {
         runOnUiThread(() -> {
             if (theme != null) {
@@ -540,279 +549,56 @@ public class MainActivity extends Activity implements MainContract.View,
     }
 
     @Override
-    public void setSearchMax(boolean searchMax) {
-        runOnUiThread(() -> {
-            EditText searchText = findViewById(R.id.toolbar_edittext_search);
-            if (searchText != null) {
-                if (searchMax) {
-                    searchText.setVisibility(View.VISIBLE);
-                    searchText.requestFocus();
-                    toggleKeyboardView(getApplicationContext(), searchText, true);
-                } else {
-                    searchText.setVisibility(View.GONE);
-                    toggleKeyboardView(getApplicationContext(), searchText, false);
-                }
-            }
-        });
+    public void showContentContextMenu(int index,
+                                       HashSet<ContextMenu.Action> actions,
+                                       RunnableArg<ContextMenu.Action> onAction,
+                                       Runnable onCancel) {
+        int[] topLeftPositionOfItemView = new int[2];
+        lastItemLongClickView.getLocationOnScreen(topLeftPositionOfItemView);
+        int offsetx = lastTouchCoords[0] - topLeftPositionOfItemView[0];
+        int offsety = (lastTouchCoords[1] - topLeftPositionOfItemView[1]) - lastItemLongClickView.getHeight();
+        ListPopupWindow popup = ListPopupFactory.getContextMenu(
+                this,
+                lastItemLongClickView,
+                offsetx,
+                offsety,
+                actions,
+                onAction,
+                onCancel);
+        popup.show();
     }
 
     @Override
-    public void setControlMax(boolean controlMax) {
-        runOnUiThread(() -> {
-            View content = findViewById(R.id.include_content_main);
-            View footer = findViewById(R.id.include_footer_main);
-            View footerFull = findViewById(R.id.include_footer_full_main);
-            if (content != null
-                    && footer != null
-                    && footerFull != null) {
-                if (controlMax) {
-                    footerFull.setVisibility(View.VISIBLE);
-                    footerFull.setTranslationY(footerFull.getHeight());
-                    footerFull.animate()
-                            .translationY(0)
-                            .setDuration(250)
-                            .setListener(new AnimatorListenerAdapter() {
-                                @Override
-                                public void onAnimationEnd(Animator animation) {
-                                    footer.setVisibility(View.GONE);
-                                    content.setVisibility(View.GONE);
-                                }
-                            });
-                } else {
-                    content.setVisibility(View.VISIBLE);
-                    footer.setVisibility(View.VISIBLE);
-                    footerFull.setTranslationY(0);
-                    footerFull.animate()
-                            .translationY(footerFull.getHeight())
-                            .setDuration(250)
-                            .setListener(new AnimatorListenerAdapter() {
-                                @Override
-                                public void onAnimationEnd(Animator animation) {
-                                    footerFull.setVisibility(View.GONE);
-                                }
-                            });
-                }
-            }
-        });
+    public void showOptionsMenu(HashSet<OptionsMenu.Action> actions,
+                                RunnableArg<OptionsMenu.Action> onAction,
+                                Runnable onCancel) {
+        ListPopupWindow popup = ListPopupFactory.getOptionsMenu(this,
+                findViewById(R.id.toolbar_view_menuanchor),
+                25,
+                -25,
+                actions,
+                onAction,
+                onCancel);
+        popup.show();
     }
 
     @Override
-    public void setNavigationMax(boolean navigationMax) {
-        runOnUiThread(() -> {
-            DrawerLayout view = findViewById(R.id.drawerLayout);
-            if (view != null) {
-                if (navigationMax) {
-                    view.openDrawer(GravityCompat.START);
-                } else {
-                    view.closeDrawer(GravityCompat.START);
-                }
-            }
-        });
-    }
-
-    @Override
-    public void showTrackContent() {
-        runOnUiThread(() -> {
-            showingTracks = true;
-            ListView tracks = findViewById(R.id.display_listview_tracks);
-            GridView playlists = findViewById(R.id.display_gridview_playlists);
-
-            if (tracks != null
-                    && playlists != null) {
-                tracks.setVisibility(View.VISIBLE);
-                playlists.animate()
-                        .translationX(-playlists.getWidth())
-                        .setDuration(250)
-                        .setListener(new AnimatorListenerAdapter() {
-                            @Override
-                            public void onAnimationEnd(Animator animation) {
-                                if (showingTracks) {
-                                    playlists.setVisibility(View.GONE);
-                                }
-                            }
-                        });
-                tracks.animate()
-                        .translationX(0)
-                        .setDuration(250);
-            }
-        });
-    }
-
-    @Override
-    public void showPlaylistContent() {
-        runOnUiThread(() -> {
-            showingTracks = false;
-            ListView tracks = findViewById(R.id.display_listview_tracks);
-            GridView playlists = findViewById(R.id.display_gridview_playlists);
-            if (tracks != null
-                    && playlists != null) {
-                playlists.setVisibility(View.VISIBLE);
-                playlists.setTranslationX(-playlists.getWidth());
-                tracks.animate()
-                        .translationX(tracks.getWidth())
-                        .setDuration(250)
-                        .setListener(new AnimatorListenerAdapter() {
-                            @Override
-                            public void onAnimationEnd(Animator animation) {
-                                if (!showingTracks) {
-                                    tracks.setVisibility(View.GONE);
-                                }
-                            }
-                        });
-                playlists.animate()
-                        .translationX(0)
-                        .setDuration(250);
-            }
-        });
-    }
-
-    @Override
-    public void showTrackContentDetails(int index) {
-        runOnUiThread(() -> {
-        });
-    }
-
-    @Override
-    public void showPlaylistContentDetails(int index) {
-        runOnUiThread(() -> {
-        });
-    }
-
-    @Override
-    public void showMenuTrackContent(int index, ContextMenu menu) {
-        runOnUiThread(() -> {
-            int[] topLeftPositionOfItemView = new int[2];
-            lastItemLongClickView.getLocationOnScreen(topLeftPositionOfItemView);
-            int offsetx = lastTouchCoords[0] - topLeftPositionOfItemView[0];
-            int offsety = (lastTouchCoords[1] - topLeftPositionOfItemView[1]) - lastItemLongClickView.getHeight();
-            ListPopupWindow popup = ListPopupFactory.getContextMenu(
-                    this,
-                    lastItemLongClickView,
-                    offsetx,
-                    offsety,
-                    menu,
-                    new ContextMenu.ContextMenuListener() {
-                        @Override
-                        public void onAction(ContextMenu.Action action) {
-                            presenter.onMenuAction(index, action);
-                        }
-                    });
-            popup.show();
-        });
-    }
-
-    @Override
-    public void showMenuPlaylistContent(int index, ContextMenu menu) {
-        runOnUiThread(() -> {
-            int[] topLeftPositionOfItemView = new int[2];
-            lastItemLongClickView.getLocationOnScreen(topLeftPositionOfItemView);
-            int offsetx = lastTouchCoords[0] - topLeftPositionOfItemView[0];
-            int offsety = (lastTouchCoords[1] - topLeftPositionOfItemView[1]) - lastItemLongClickView.getHeight();
-            ListPopupWindow popup = ListPopupFactory.getContextMenu(
-                    this,
-                    lastItemLongClickView,
-                    offsetx,
-                    offsety,
-                    menu,
-                    new ContextMenu.ContextMenuListener() {
-                        @Override
-                        public void onAction(ContextMenu.Action action) {
-                            presenter.onMenuAction(index, action);
-                        }
-                    });
-            popup.show();
-        });
-    }
-
-    @Override
-    public void showMenuOptions(OptionsMenu menu) {
-        runOnUiThread(() -> {
-            ListPopupWindow popup = ListPopupFactory.getOptionsMenu(this,
-                    findViewById(R.id.toolbar_view_menuanchor),
-                    25,
-                    -25,
-                    menu,
-                    new OptionsMenu.OptionsMenuListener() {
-                        @Override
-                        public void onAction(OptionsMenu.Action action) {
-                            presenter.onMenuAction(action);
-                        }
-                    });
-            popup.show();
-        });
-    }
-
-    @Override
-    public void showMenuAddSelectionToPlaylist(boolean showCreateNew, List<AudioPlaylist> existingPlaylists, AddToMenuListener listener) {
-        runOnUiThread(() -> {
-            showAddToPlaylistMenu(findViewById(R.id.toolbar_view_menuanchor),
-                    25,
-                    -25,
-                    0,
-                    showCreateNew,
-                    existingPlaylists,
-                    new AdapterView.OnItemClickListener() {
-                        @Override
-                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                            if (showCreateNew) {
-                                if (position == 0)
-                                    listener.onAddToNew();
-                                else
-                                    listener.onAddToExisting(position - 1);
-                            } else {
-                                listener.onAddToExisting(position);
-                            }
-                        }
-                    });
-        });
+    public void showAddSelectionMenu(List<AudioPlaylist> existingPlaylists,
+                                     Runnable onAddToNew,
+                                     RunnableArg<AudioPlaylist> onAddToPlaylist) {
+        showAddToPlaylistMenu(findViewById(R.id.toolbar_view_menuanchor),
+                25,
+                -25,
+                0,
+                existingPlaylists,
+                onAddToNew,
+                onAddToPlaylist);
     }
 
     @Override
     public void showMessage(String title, String text) {
         runOnUiThread(() -> {
             Toast.makeText(this, title + " : " + text, Toast.LENGTH_LONG).show();
-        });
-    }
-
-    @Override
-    public void showMessage_createdPlaylist(String playlistTitle, int playlistTracks) {
-        runOnUiThread(() -> {
-            Toast.makeText(this, getString(R.string.main_toast_text0createdPlaylist, playlistTitle, playlistTracks), Toast.LENGTH_LONG).show();
-        });
-    }
-
-    @Override
-    public void showMessage_deletedPlaylist(String title) {
-        runOnUiThread(() -> {
-            Toast.makeText(this, getString(R.string.main_toast_text0deletedPlaylist, title), Toast.LENGTH_LONG).show();
-        });
-    }
-
-    @Override
-    public void showMessage_deletedPlaylists(int count) {
-        runOnUiThread(() -> {
-            Toast.makeText(this, getString(R.string.main_toast_text0deletedPlaylists, count), Toast.LENGTH_LONG).show();
-        });
-    }
-
-    @Override
-    public void showMessage_deletedTracks(int count) {
-        runOnUiThread(() -> {
-            Toast.makeText(this, getString(R.string.main_toast_text0deletedItems, count), Toast.LENGTH_LONG).show();
-        });
-    }
-
-    @Override
-    public void showMessage_deletedTracksFrom(String playlistTitle, int count) {
-        runOnUiThread(() -> {
-            Toast.makeText(this, getString(R.string.main_toast_text0deletedItemsFrom, count, playlistTitle), Toast.LENGTH_LONG).show();
-        });
-    }
-
-    @Override
-    public void showMessage_addedTracks(String playlistTarget, int count) {
-        runOnUiThread(() -> {
-            Toast.makeText(this, getString(R.string.main_toast_text0addedItems, count, playlistTarget), Toast.LENGTH_LONG).show();
         });
     }
 
@@ -831,96 +617,47 @@ public class MainActivity extends Activity implements MainContract.View,
     }
 
     @Override
-    public void showDialog_error_permissions() {
+    public void showDialog_FilterOptions(FilterOptions curDef,
+                                         RunnableArg<FilterOptions> onAccept) {
         runOnUiThread(() -> {
-            AlertDialog.Builder ab = new AlertDialog.Builder(this);
-            ab.setTitle(getString(R.string.main_dialog_error_title0error));
-            ab.setMessage(getString(R.string.main_dialog_error_text0permissionDenied));
-            ab.setPositiveButton(getString(android.R.string.ok), null);
-            AlertDialog ad = ab.create();
-            ad.show();
-        });
-    }
-
-    @Override
-    public void showDialog_Exit() {
-        runOnUiThread(() -> {
-            Dialog dia = MainDialogFactory.getExitConfirmation(this, new MainDialogFactory.ExitConfirmationListener() {
-                @Override
-                public void onRequestMinimize() {
-                    moveTaskToBack(true);
-                }
-
-                @Override
-                public void onRequestExit() {
-                    serviceWrapper.shutdown();
-                    finish();
-                }
-
-                @Override
-                public void onCancel() {
-                }
-            });
+            Dialog dia = MainDialogFactory.getFilterOptions(this, curDef, onAccept);
             dia.show();
         });
     }
 
     @Override
-    public void showDialog_FilterOptions(FilterDef curDef, MainDialogFactory.FilterOptionsListener listener) {
+    public void showDialog_SortOptions(SortingOptions curDef,
+                                       RunnableArg<SortingOptions> onAccept) {
         runOnUiThread(() -> {
-            Dialog dia = MainDialogFactory.getFilterOptions(this, listener, curDef);
+            Dialog dia = MainDialogFactory.getSortingOptions(this, curDef, onAccept);
             dia.show();
         });
     }
 
     @Override
-    public void showDialog_SortOptions(SortDef curDef, MainDialogFactory.SortingOptionsListener listener) {
+    public void showDialog_CreatePlaylist(List<AudioData> data,
+                                          RunnableArg<String> onCreate,
+                                          Runnable onCancel) {
         runOnUiThread(() -> {
-            Dialog dia = MainDialogFactory.getSortingOptions(this, listener, curDef);
+            Dialog dia = MainDialogFactory.getPlaylistCreate(this, data, onCreate, onCancel);
             dia.show();
         });
     }
 
     @Override
-    public void showDialog_CreatePlaylist(List<AudioData> data, MainDialogFactory.PlaylistCreateListener listener) {
-        runOnUiThread(() -> {
-            Dialog dia = MainDialogFactory.getPlaylistCreate(this, listener, data);
-            dia.show();
-        });
-    }
-
-    @Override
-    public void showDialog_DeletePlaylists(List<AudioPlaylist> playlists, MainDialogFactory.DeletePlaylistsListener listener) {
-        Dialog dia = MainDialogFactory.getPlaylistsDelete(this, listener, playlists.size());
+    public void showDialog_DeletePlaylists(List<AudioPlaylist> playlists,
+                                           Runnable onAccept,
+                                           Runnable onCancel) {
+        Dialog dia = MainDialogFactory.getPlaylistsDelete(this, playlists, onAccept, onCancel);
         dia.show();
     }
 
     @Override
-    public void showDialog_DeleteTracksFromPlaylist(AudioPlaylist playlist, List<AudioData> tracks, MainDialogFactory.DeleteTracksFromPlaylistListener listener) {
-        Dialog dia = MainDialogFactory.getTracksDeleteFromPlaylist(this, listener, tracks.size());
-        dia.show();
-    }
-
-    @Override
-    public void showDialog_volume(float currentValue) {
-        Dialog dia = MainDialogFactory.getVolumeSettings(this, new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (fromUser) {
-                    presenter.onVolumeSeek((float) progress / seekBar.getMax());
-                }
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
-        }, currentValue);
+    public void showDialog_DeleteTracksFromPlaylist(AudioPlaylist playlist,
+                                                    List<AudioData> tracks,
+                                                    Runnable onAccept,
+                                                    Runnable onCancel) {
+        Dialog dia = MainDialogFactory.getTracksDeleteFromPlaylist(this, playlist, tracks, onAccept, onCancel);
         dia.show();
     }
 
@@ -1061,6 +798,21 @@ public class MainActivity extends Activity implements MainContract.View,
     }
 
     private void setViewModelListeners(ContentViewModel contentViewModel, PlayerStateViewModel playerStateViewModel) {
+        contentViewModel.contentSelector.addObserver(new Observable.Observer<SelectionIndicator>() {
+            @Override
+            public void update(Observable<SelectionIndicator> observable, SelectionIndicator value) {
+                ViewGroup drawerItems = findViewById(R.id.nav_content_root);
+                if (drawerItems != null) {
+                    CustomNavigationDrawer drawer = new CustomNavigationDrawer(drawerItems);
+                    drawer.setCheckedSelector(value.getSelector());
+                }
+                if (value.isPlaylistView()) {
+                    showPlaylistContent();
+                } else {
+                    showTrackContent();
+                }
+            }
+        });
         contentViewModel.contentName.addObserver(new Observable.Observer<String>() {
             @Override
             public void update(Observable<String> observable, String value) {
@@ -1102,7 +854,7 @@ public class MainActivity extends Activity implements MainContract.View,
                 trackAdapter.notifyDataSetChanged();
             }
         });
-        contentViewModel.contentTracksHighlight.addObserver(new Observable.Observer<Integer>() {
+        contentViewModel.visibleTracksHighlightedIndex.addObserver(new Observable.Observer<Integer>() {
             @Override
             public void update(Observable<Integer> observable, Integer value) {
                 trackAdapter.setHighlightedIndex(value);
@@ -1138,13 +890,19 @@ public class MainActivity extends Activity implements MainContract.View,
                 playlistAdapter.notifyDataSetChanged();
             }
         });
-        contentViewModel.navigationHighlightPosition.addObserver(new Observable.Observer<AudioContentSelector>() {
+        contentViewModel.isSearching.addObserver(new Observable.Observer<Boolean>() {
             @Override
-            public void update(Observable<AudioContentSelector> observable, AudioContentSelector value) {
-                ViewGroup drawerItems = findViewById(R.id.nav_content_root);
-                if (drawerItems != null) {
-                    CustomNavigationDrawer drawer = new CustomNavigationDrawer(drawerItems);
-                    drawer.setCheckedSelector(value);
+            public void update(Observable<Boolean> observable, Boolean value) {
+                EditText searchText = findViewById(R.id.toolbar_edittext_search);
+                if (searchText != null) {
+                    if (value) {
+                        searchText.setVisibility(View.VISIBLE);
+                        searchText.requestFocus();
+                        toggleKeyboardView(getApplicationContext(), searchText, true);
+                    } else {
+                        searchText.setVisibility(View.GONE);
+                        toggleKeyboardView(getApplicationContext(), searchText, false);
+                    }
                 }
             }
         });
@@ -1418,15 +1176,131 @@ public class MainActivity extends Activity implements MainContract.View,
                                        int offsetx,
                                        int offsety,
                                        int marginDP,
-                                       boolean showAddToNew,
                                        List<AudioPlaylist> existingPlaylists,
-                                       AdapterView.OnItemClickListener listener) {
+                                       Runnable onAddToNew,
+                                       RunnableArg<AudioPlaylist> onAddToPlaylist) {
         View prompt = View.inflate(this, R.layout.popupitem, null);
         ((TextView) prompt.findViewById(R.id.title)).setText(getString(R.string.main_popup_addto_prompt0addTo));
         prompt.findViewById(R.id.subArrow).setVisibility(View.GONE);
         prompt.findViewById(R.id.root).setBackgroundColor(AttributeConversion.getColorForAtt(R.attr.colorPrimaryAlt, this));
         prompt.findViewById(R.id.rippleBackground).setBackground(null);
-        ListPopupWindow popupWindow = ListPopupFactory.getAddToPlaylistMenu(this, anchor, prompt, offsetx, offsety, marginDP, showAddToNew, existingPlaylists, listener);
+        ListPopupWindow popupWindow = ListPopupFactory.getAddToPlaylistMenu(this, anchor, prompt, offsetx, offsety, marginDP, existingPlaylists, onAddToNew, onAddToPlaylist);
         popupWindow.show();
+    }
+
+    private void showTrackContent() {
+        showingTracks = true;
+        ListView tracks = findViewById(R.id.display_listview_tracks);
+        GridView playlists = findViewById(R.id.display_gridview_playlists);
+
+        if (tracks != null
+                && playlists != null) {
+            tracks.setVisibility(View.VISIBLE);
+            playlists.animate()
+                    .translationX(-playlists.getWidth())
+                    .setDuration(250)
+                    .setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            if (showingTracks) {
+                                playlists.setVisibility(View.GONE);
+                            }
+                        }
+                    });
+            tracks.animate()
+                    .translationX(0)
+                    .setDuration(250);
+        }
+    }
+
+    private void showPlaylistContent() {
+        showingTracks = false;
+        ListView tracks = findViewById(R.id.display_listview_tracks);
+        GridView playlists = findViewById(R.id.display_gridview_playlists);
+        if (tracks != null
+                && playlists != null) {
+            playlists.setVisibility(View.VISIBLE);
+            playlists.setTranslationX(-playlists.getWidth());
+            tracks.animate()
+                    .translationX(tracks.getWidth())
+                    .setDuration(250)
+                    .setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            if (!showingTracks) {
+                                tracks.setVisibility(View.GONE);
+                            }
+                        }
+                    });
+            playlists.animate()
+                    .translationX(0)
+                    .setDuration(250);
+        }
+    }
+
+    private void openNavigationDrawer() {
+        DrawerLayout view = findViewById(R.id.drawerLayout);
+        if (view != null) {
+            view.openDrawer(GravityCompat.START);
+        }
+    }
+
+    private void setControlMax(boolean controlMax) {
+        View content = findViewById(R.id.include_content_main);
+        View footer = findViewById(R.id.include_footer_main);
+        View footerFull = findViewById(R.id.include_footer_full_main);
+        if (content != null
+                && footer != null
+                && footerFull != null) {
+            if (controlMax) {
+                footerFull.setVisibility(View.VISIBLE);
+                footerFull.setTranslationY(footerFull.getHeight());
+                footerFull.animate()
+                        .translationY(0)
+                        .setDuration(250)
+                        .setListener(new AnimatorListenerAdapter() {
+                            @Override
+                            public void onAnimationEnd(Animator animation) {
+                                footer.setVisibility(View.GONE);
+                                content.setVisibility(View.GONE);
+                            }
+                        });
+            } else {
+                content.setVisibility(View.VISIBLE);
+                footer.setVisibility(View.VISIBLE);
+                footerFull.setTranslationY(0);
+                footerFull.animate()
+                        .translationY(footerFull.getHeight())
+                        .setDuration(250)
+                        .setListener(new AnimatorListenerAdapter() {
+                            @Override
+                            public void onAnimationEnd(Animator animation) {
+                                footerFull.setVisibility(View.GONE);
+                            }
+                        });
+            }
+        }
+    }
+
+    private void showVolumeDialog(float currentValue) {
+        Dialog dia = MainDialogFactory.getVolumeSettings(this, new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser) {
+                    presenter.onVolumeSeek((float) progress / seekBar.getMax());
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        }, currentValue);
+        dia.show();
     }
 }

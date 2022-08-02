@@ -23,25 +23,14 @@ import com.phaseshifter.canora.service.state.PlayerState;
 import com.phaseshifter.canora.ui.contracts.MainContract;
 import com.phaseshifter.canora.ui.data.AudioContentSelector;
 import com.phaseshifter.canora.ui.data.constants.NavigationItem;
-import com.phaseshifter.canora.ui.data.formatting.FilterDef;
-import com.phaseshifter.canora.ui.data.formatting.SortDef;
+import com.phaseshifter.canora.ui.data.formatting.FilterOptions;
+import com.phaseshifter.canora.ui.data.formatting.SortingOptions;
 import com.phaseshifter.canora.ui.data.misc.SelectionIndicator;
-import com.phaseshifter.canora.ui.menu.AddToMenuListener;
 import com.phaseshifter.canora.ui.menu.ContextMenu;
 import com.phaseshifter.canora.ui.menu.OptionsMenu;
-import com.phaseshifter.canora.ui.redux.actions.main.MainAction;
-import com.phaseshifter.canora.ui.redux.actions.main.MainActionCreator;
-import com.phaseshifter.canora.ui.redux.actions.main.MainActionType;
-import com.phaseshifter.canora.ui.redux.core.StateListener;
-import com.phaseshifter.canora.ui.redux.core.Store;
-import com.phaseshifter.canora.ui.redux.core.StoreFactory;
-import com.phaseshifter.canora.ui.redux.middlewares.ActionLogger;
-import com.phaseshifter.canora.ui.redux.middlewares.Thunk;
-import com.phaseshifter.canora.ui.redux.reducers.MainReducer;
-import com.phaseshifter.canora.ui.redux.state.MainState;
-import com.phaseshifter.canora.ui.redux.state.MainStateImmutable;
-import com.phaseshifter.canora.ui.utils.dialog.MainDialogFactory;
-import com.phaseshifter.canora.ui.utils.selectors.MainSelector;
+import com.phaseshifter.canora.ui.dialog.MainDialogFactory;
+import com.phaseshifter.canora.ui.viewmodels.ContentViewModel;
+import com.phaseshifter.canora.ui.viewmodels.PlayerStateViewModel;
 import com.phaseshifter.canora.utils.Observable;
 
 import java.io.IOException;
@@ -53,9 +42,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import static com.phaseshifter.canora.ui.utils.selectors.MainSelector.getPlaylistForIndicator;
-import static com.phaseshifter.canora.ui.utils.selectors.MainSelector.getPlaylistTitle;
 
-public class MainPresenter implements MainContract.Presenter, StateListener<MainStateImmutable> {
+public class MainPresenter implements MainContract.Presenter {
     private final String LOG_TAG = "MainPresenter";
     private final MainContract.View view;
     private final Store<MainStateImmutable> store;
@@ -72,7 +60,8 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
 
     private final ThreadPoolExecutor presExec;
 
-    private final MainActionCreator actionCreator;
+    private final ContentViewModel contentViewModel;
+    private final PlayerStateViewModel playerStateViewModel;
 
     private final Observable.Observer<PlayerState> serviceStateObserver = new Observable.Observer<PlayerState>() {
         @Override
@@ -95,7 +84,8 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
                          SCAudioDataRepo scAudioDataRepo,
                          AudioMetadataEditor metadataEditor,
                          Executor mainThread,
-                         List<StateListener<MainStateImmutable>> viewmodels) {
+                         ContentViewModel contentViewModel,
+                         PlayerStateViewModel playerStateViewModel) {
         this.view = view;
         this.service = service;
         this.audioDataRepository = audioDataRepository;
@@ -280,7 +270,7 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
             }
         }
         OptionsMenu menu = new OptionsMenu(actions);
-        view.showMenuOptions(menu);
+        view.showOptionsMenu(menu);
     }
 
     @Override
@@ -445,7 +435,7 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
             case OPEN_SORTOPTIONS:
                 view.showDialog_SortOptions(currentState.getSortingDefinition(), new MainDialogFactory.SortingOptionsListener() {
                     @Override
-                    public void onApply(SortDef updatedData) {
+                    public void onApply(SortingOptions updatedData) {
                         settingsRepository.putInt(IntegerSetting.SORT_BY, updatedData.sortby);
                         settingsRepository.putInt(IntegerSetting.SORT_DIR, updatedData.sortdir);
                         settingsRepository.putInt(IntegerSetting.SORT_TECH, updatedData.sorttech);
@@ -456,7 +446,7 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
             case OPEN_FILTEROPTIONS:
                 view.showDialog_FilterOptions(currentState.getFilterDefinition(), new MainDialogFactory.FilterOptionsListener() {
                     @Override
-                    public void onApply(FilterDef updatedData) {
+                    public void onApply(FilterOptions updatedData) {
                         MainStateImmutable currentState = store.getState();
                         settingsRepository.putInt(IntegerSetting.FILTER_BY, updatedData.filterBy);
                         store.dispatch(actionCreator.getChangeFilterState(currentState.isFiltering(), updatedData));
@@ -464,7 +454,7 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
                 });
                 break;
             case ADD_SELECTION:
-                view.showMenuAddSelectionToPlaylist(true,
+                view.showAddSelectionMenu(true,
                         ListSorter.sortAudioPlaylist(audioPlaylistRepository.getAll(), currentState.getSortingDefinition()),
                         new AddToMenuListener() {
                             @Override
@@ -677,7 +667,7 @@ public class MainPresenter implements MainContract.Presenter, StateListener<Main
                 if (currentState.getUiIndicator().isPlaylistView())
                     view.showPlaylistContentDetails(index);
                 else
-                    view.showTrackContentDetails(index);
+                    view.showContentMenu(index);
                 break;
             case EDIT:
                 if (currentState.getUiIndicator().isPlaylistView()) {

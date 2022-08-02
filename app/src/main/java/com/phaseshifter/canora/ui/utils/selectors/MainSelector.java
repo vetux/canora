@@ -7,11 +7,9 @@ import com.phaseshifter.canora.model.repo.AudioDataRepository;
 import com.phaseshifter.canora.model.repo.AudioPlaylistRepository;
 import com.phaseshifter.canora.model.repo.SCAudioDataRepo;
 import com.phaseshifter.canora.ui.data.AudioContentSelector;
+import com.phaseshifter.canora.ui.data.formatting.SortingOptions;
 import com.phaseshifter.canora.ui.data.misc.SelectionIndicator;
-import com.phaseshifter.canora.ui.redux.state.MainState;
-import com.phaseshifter.canora.ui.redux.state.MainStateImmutable;
 
-import java.util.Enumeration;
 import java.util.List;
 
 public abstract class MainSelector {
@@ -41,21 +39,21 @@ public abstract class MainSelector {
     }
 
     public static List<AudioData> getTracksForIndicator(SelectionIndicator indicator,
-                                                        MainStateImmutable currentState,
+                                                        SortingOptions sortOpt,
                                                         AudioDataRepository audioDataRepository,
                                                         AudioPlaylistRepository audioPlaylistRepository,
                                                         SCAudioDataRepo scAudioDataRepo) {
         switch (indicator.getSelector()) {
             case TRACKS:
-                return ListSorter.sortAudioData(audioDataRepository.getTracks(), currentState.getSortingDefinition());
+                return ListSorter.sortAudioData(audioDataRepository.getTracks(), sortOpt);
             case PLAYLISTS:
-                return ListSorter.sortAudioData(audioPlaylistRepository.get(indicator.getUuid()).getData(), currentState.getSortingDefinition());
+                return ListSorter.sortAudioData(audioPlaylistRepository.get(indicator.getUuid()).getData(), sortOpt);
             case ARTISTS:
-                return ListSorter.sortAudioData(audioDataRepository.getArtist(indicator.getUuid()).getData(), currentState.getSortingDefinition());
+                return ListSorter.sortAudioData(audioDataRepository.getArtist(indicator.getUuid()).getData(), sortOpt);
             case ALBUMS:
-                return ListSorter.sortAudioData(audioDataRepository.getAlbum(indicator.getUuid()).getData(), currentState.getSortingDefinition());
+                return ListSorter.sortAudioData(audioDataRepository.getAlbum(indicator.getUuid()).getData(), sortOpt);
             case GENRES:
-                return ListSorter.sortAudioData(audioDataRepository.getGenre(indicator.getUuid()).getData(), currentState.getSortingDefinition());
+                return ListSorter.sortAudioData(audioDataRepository.getGenre(indicator.getUuid()).getData(), sortOpt);
             case SOUNDCLOUD_SEARCH:
                 return scAudioDataRepo.getSearchResults();
             case SOUNDCLOUD_CHARTS:
@@ -87,40 +85,22 @@ public abstract class MainSelector {
     }
 
     public static List<AudioPlaylist> getPlaylistsForSelector(AudioContentSelector selector,
-                                                              MainStateImmutable currentState,
+                                                              SortingOptions sortOpt,
                                                               AudioDataRepository audioDataRepository,
                                                               AudioPlaylistRepository audioPlaylistRepository) {
         switch (selector) {
             case TRACKS:
                 return null;
             case PLAYLISTS:
-                return ListSorter.sortAudioPlaylist(audioPlaylistRepository.getAll(), currentState.getSortingDefinition());
+                return ListSorter.sortAudioPlaylist(audioPlaylistRepository.getAll(), sortOpt);
             case ARTISTS:
-                return ListSorter.sortAudioPlaylist(audioDataRepository.getArtists(), currentState.getSortingDefinition());
+                return ListSorter.sortAudioPlaylist(audioDataRepository.getArtists(), sortOpt);
             case ALBUMS:
-                return ListSorter.sortAudioPlaylist(audioDataRepository.getAlbums(), currentState.getSortingDefinition());
+                return ListSorter.sortAudioPlaylist(audioDataRepository.getAlbums(), sortOpt);
             case GENRES:
-                return ListSorter.sortAudioPlaylist(audioDataRepository.getGenres(), currentState.getSortingDefinition());
+                return ListSorter.sortAudioPlaylist(audioDataRepository.getGenres(), sortOpt);
             default:
                 throw new RuntimeException("INVALID SELECTOR: " + selector);
-        }
-    }
-
-    public static int getUnfilteredIndex(MainStateImmutable currentState, AudioDataRepository audioDataRepository, AudioPlaylistRepository audioPlaylistRepository, SCAudioDataRepo scAudioDataRepo, int indexFiltered) {
-        if (currentState.getUiIndicator().isPlaylistView()) {
-            AudioPlaylist selectedPlaylist = currentState.getContentPlaylists().get(indexFiltered);
-            List<AudioPlaylist> unfilteredContent = getPlaylistsForSelector(currentState.getUiIndicator().getSelector(), currentState, audioDataRepository, audioPlaylistRepository);
-            if (unfilteredContent != null)
-                return unfilteredContent.indexOf(selectedPlaylist);
-            else
-                return -1;
-        } else {
-            AudioData selectedTrack = currentState.getContentTracks().get(indexFiltered);
-            List<AudioData> unfilteredContent = getTracksForIndicator(currentState.getUiIndicator(), currentState, audioDataRepository, audioPlaylistRepository, scAudioDataRepo);
-            if (unfilteredContent != null)
-                return unfilteredContent.indexOf(selectedTrack);
-            else
-                return -1;
         }
     }
 }

@@ -1,4 +1,4 @@
-package com.phaseshifter.canora.ui.utils.dialog;
+package com.phaseshifter.canora.ui.dialog;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -8,20 +8,19 @@ import android.view.Window;
 import android.widget.*;
 import com.phaseshifter.canora.R;
 import com.phaseshifter.canora.data.media.audio.AudioData;
-import com.phaseshifter.canora.ui.data.formatting.FilterDef;
-import com.phaseshifter.canora.ui.data.formatting.SortDef;
+import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
+import com.phaseshifter.canora.ui.data.formatting.FilterOptions;
+import com.phaseshifter.canora.ui.data.formatting.SortingOptions;
+import com.phaseshifter.canora.utils.RunnableArg;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainDialogFactory {
-    public interface PlaylistCreateListener {
-        void onCreate(String title, List<AudioData> data);
-
-        void onCancel();
-    }
-
-    public static Dialog getPlaylistCreate(Activity host, PlaylistCreateListener listener, List<AudioData> data) {
+    public static Dialog getPlaylistCreate(Activity host,
+                                           List<AudioData> data,
+                                           RunnableArg<String> onCreate,
+                                           Runnable onCancel) {
         Dialog ret = new Dialog(host);
         ret.requestWindowFeature(Window.FEATURE_NO_TITLE);
         ret.setContentView(R.layout.dialog_playlist_create);
@@ -35,23 +34,20 @@ public class MainDialogFactory {
         EditText playlistNameInput = ret.findViewById(R.id.plname);
         ret.findViewById(R.id.btnPos).setOnClickListener(v -> {
             ret.dismiss();
-            listener.onCreate(playlistNameInput.getText().toString(), data);
+            onCreate.run(playlistNameInput.getText().toString());
         });
         ret.findViewById(R.id.btnNeg).setOnClickListener(v -> {
             ret.dismiss();
-            listener.onCancel();
+            onCancel.run();
         });
         ret.setOnShowListener(dialog -> playlistNameInput.requestFocus());
         return ret;
     }
 
-    public interface DeletePlaylistsListener {
-        void onDelete();
-
-        void onCancel();
-    }
-
-    public static Dialog getPlaylistsDelete(Activity host, DeletePlaylistsListener onClickListener, int count) {
+    public static Dialog getPlaylistsDelete(Activity host,
+                                            List<AudioPlaylist> playlists,
+                                            Runnable onAccept,
+                                            Runnable onCancel) {
         Dialog ret = new Dialog(host);
         ret.requestWindowFeature(Window.FEATURE_NO_TITLE);
         ret.setContentView(R.layout.dialog_simple_yn);
@@ -63,26 +59,24 @@ public class MainDialogFactory {
         titleView.setText(R.string.main_dialog_deletepl_title0deletePlaylists);
 
         TextView textView = ret.findViewById(R.id.text);
-        textView.setText(host.getString(R.string.main_dialog_deletepl_text0deleteConfirmation, count));
+        textView.setText(host.getString(R.string.main_dialog_deletepl_text0deleteConfirmation, playlists.size()));
 
         ret.findViewById(R.id.btnPos).setOnClickListener(v -> {
             ret.dismiss();
-            onClickListener.onDelete();
+            onAccept.run();
         });
         ret.findViewById(R.id.btnNeg).setOnClickListener(v -> {
             ret.dismiss();
-            onClickListener.onCancel();
+            onCancel.run();
         });
         return ret;
     }
 
-    public interface DeleteTracksFromPlaylistListener {
-        void onDelete();
-
-        void onCancel();
-    }
-
-    public static Dialog getTracksDeleteFromPlaylist(Activity host, DeleteTracksFromPlaylistListener onClickListener, int count) {
+    public static Dialog getTracksDeleteFromPlaylist(Activity host,
+                                                     AudioPlaylist playlist,
+                                                     List<AudioData> tracks,
+                                                     Runnable onAccept,
+                                                     Runnable onCancel) {
         Dialog ret = new Dialog(host);
         ret.requestWindowFeature(Window.FEATURE_NO_TITLE);
         ret.setContentView(R.layout.dialog_simple_yn);
@@ -94,25 +88,23 @@ public class MainDialogFactory {
         titleView.setText(R.string.main_dialog_delfpl_title0deleteFilesFromPlaylist);
 
         TextView textView = ret.findViewById(R.id.text);
-        textView.setText(host.getString(R.string.main_dialog_delfpl_text0deleteFilesFromPlaylistConfirmation, count));
+        textView.setText(host.getString(R.string.main_dialog_delfpl_text0deleteFilesFromPlaylistConfirmation, tracks.size()));
 
         ret.findViewById(R.id.btnPos).setOnClickListener(v -> {
             ret.dismiss();
-            onClickListener.onDelete();
+            onAccept.run();
         });
         ret.findViewById(R.id.btnNeg).setOnClickListener(v -> {
             ret.dismiss();
-            onClickListener.onCancel();
+            onCancel.run();
         });
         return ret;
     }
 
-    public interface SortingOptionsListener {
-        void onApply(SortDef updatedData);
-    }
-
-    public static Dialog getSortingOptions(Activity host, SortingOptionsListener listener, SortDef initialValues) {
-        SortDef output = new SortDef(initialValues);
+    public static Dialog getSortingOptions(Activity host,
+                                           SortingOptions curDef,
+                                           RunnableArg<SortingOptions> onAccept) {
+        SortingOptions output = new SortingOptions(curDef);
 
         Dialog ret = new Dialog(host);
         ret.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -133,10 +125,10 @@ public class MainDialogFactory {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 switch (position) {
                     case 0:
-                        output.sortby = SortDef.SORT_TITLE;
+                        output.sortby = SortingOptions.SORT_TITLE;
                         break;
                     case 1:
-                        output.sortby = SortDef.SORT_ARTIST;
+                        output.sortby = SortingOptions.SORT_ARTIST;
                         break;
                 }
             }
@@ -159,10 +151,10 @@ public class MainDialogFactory {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 switch (position) {
                     case 0:
-                        output.sortdir = SortDef.SORT_DIR_DOWN;
+                        output.sortdir = SortingOptions.SORT_DIR_DOWN;
                         break;
                     case 1:
-                        output.sortdir = SortDef.SORT_DIR_UP;
+                        output.sortdir = SortingOptions.SORT_DIR_UP;
                         break;
                 }
             }
@@ -185,10 +177,10 @@ public class MainDialogFactory {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 switch (position) {
                     case 0:
-                        output.sorttech = SortDef.SORT_TECH_ALPHA;
+                        output.sorttech = SortingOptions.SORT_TECH_ALPHA;
                         break;
                     case 1:
-                        output.sorttech = SortDef.SORT_TECH_NUM;
+                        output.sorttech = SortingOptions.SORT_TECH_NUM;
                         break;
                 }
             }
@@ -199,31 +191,31 @@ public class MainDialogFactory {
         });
         sortTechSpinner.setAdapter(sortTechAdapter);
 
-        switch (initialValues.sortby) {
-            case SortDef.SORT_TITLE:
+        switch (curDef.sortby) {
+            case SortingOptions.SORT_TITLE:
                 sortBySpinner.setSelection(0);
                 break;
-            case SortDef.SORT_ARTIST:
+            case SortingOptions.SORT_ARTIST:
                 sortBySpinner.setSelection(1);
                 break;
             default:
                 throw new RuntimeException("Invalid Setting Value for SORT_BY");
         }
-        switch (initialValues.sortdir) {
-            case SortDef.SORT_DIR_DOWN:
+        switch (curDef.sortdir) {
+            case SortingOptions.SORT_DIR_DOWN:
                 sortDirSpinner.setSelection(0);
                 break;
-            case SortDef.SORT_DIR_UP:
+            case SortingOptions.SORT_DIR_UP:
                 sortDirSpinner.setSelection(1);
                 break;
             default:
                 throw new RuntimeException("Invalid Setting Value for SORT_DIR");
         }
-        switch (initialValues.sorttech) {
-            case SortDef.SORT_TECH_ALPHA:
+        switch (curDef.sorttech) {
+            case SortingOptions.SORT_TECH_ALPHA:
                 sortTechSpinner.setSelection(0);
                 break;
-            case SortDef.SORT_TECH_NUM:
+            case SortingOptions.SORT_TECH_NUM:
                 sortTechSpinner.setSelection(1);
                 break;
             default:
@@ -232,18 +224,16 @@ public class MainDialogFactory {
 
         ret.findViewById(R.id.okbtn).setOnClickListener(v -> {
             ret.dismiss();
-            listener.onApply(output);
+            onAccept.run(output);
         });
 
         return ret;
     }
 
-    public interface FilterOptionsListener {
-        void onApply(FilterDef updatedData);
-    }
-
-    public static Dialog getFilterOptions(Activity host, FilterOptionsListener listener, FilterDef initialValues) {
-        FilterDef output = new FilterDef(initialValues);
+    public static Dialog getFilterOptions(Activity host,
+                                          FilterOptions curDef,
+                                          RunnableArg<FilterOptions> onAccept) {
+        FilterOptions output = new FilterOptions(curDef);
         Dialog ret = new Dialog(host);
         ret.requestWindowFeature(Window.FEATURE_NO_TITLE);
         ret.setContentView(R.layout.dialog_searchoptions);
@@ -264,16 +254,16 @@ public class MainDialogFactory {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 switch (position) {
                     case 0:
-                        output.filterBy = FilterDef.FILTER_TITLE;
+                        output.filterBy = FilterOptions.FILTER_TITLE;
                         break;
                     case 1:
-                        output.filterBy = FilterDef.FILTER_ARTIST;
+                        output.filterBy = FilterOptions.FILTER_ARTIST;
                         break;
                     case 2:
-                        output.filterBy = FilterDef.FILTER_TITLE_ARTIST;
+                        output.filterBy = FilterOptions.FILTER_TITLE_ARTIST;
                         break;
                     case 3:
-                        output.filterBy = FilterDef.FILTER_ANY;
+                        output.filterBy = FilterOptions.FILTER_ANY;
                         break;
                 }
             }
@@ -284,17 +274,17 @@ public class MainDialogFactory {
         });
         searchBySpinner.setAdapter(sortTechAdapter);
 
-        switch (initialValues.filterBy) {
-            case FilterDef.FILTER_TITLE:
+        switch (curDef.filterBy) {
+            case FilterOptions.FILTER_TITLE:
                 searchBySpinner.setSelection(0);
                 break;
-            case FilterDef.FILTER_ARTIST:
+            case FilterOptions.FILTER_ARTIST:
                 searchBySpinner.setSelection(1);
                 break;
-            case FilterDef.FILTER_TITLE_ARTIST:
+            case FilterOptions.FILTER_TITLE_ARTIST:
                 searchBySpinner.setSelection(2);
                 break;
-            case FilterDef.FILTER_ANY:
+            case FilterOptions.FILTER_ANY:
                 searchBySpinner.setSelection(3);
                 break;
             default:
@@ -303,7 +293,7 @@ public class MainDialogFactory {
 
         ret.findViewById(R.id.okbtn).setOnClickListener(v -> {
             ret.dismiss();
-            listener.onApply(output);
+            onAccept.run(output);
         });
 
         return ret;
@@ -320,51 +310,6 @@ public class MainDialogFactory {
         SeekBar volBar = ret.findViewById(R.id.volBar);
         volBar.setOnSeekBarChangeListener(volumeListener);
         volBar.setProgress((int) (volBar.getMax() * initalValue));
-        return ret;
-    }
-
-    public interface ExitConfirmationListener {
-        void onRequestMinimize();
-
-        void onRequestExit();
-
-        void onCancel();
-    }
-
-    public static Dialog getExitConfirmation(Activity host, ExitConfirmationListener listener) {
-        Dialog ret = new Dialog(host);
-        ret.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        ret.setContentView(R.layout.dialog_exit);
-        if (ret.getWindow() == null)
-            throw new NullPointerException("Dialog Window is null");
-        ret.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-
-        Button btnMin = ret.findViewById(R.id.btnNeut);
-        btnMin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ret.dismiss();
-                listener.onRequestMinimize();
-            }
-        });
-
-        Button btnNeg = ret.findViewById(R.id.btnNeg);
-        btnNeg.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ret.dismiss();
-                listener.onCancel();
-            }
-        });
-
-        Button btnPos = ret.findViewById(R.id.btnPos);
-        btnPos.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ret.dismiss();
-                listener.onRequestExit();
-            }
-        });
         return ret;
     }
 }

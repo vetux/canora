@@ -1,4 +1,4 @@
-package com.phaseshifter.canora.ui.utils.popup;
+package com.phaseshifter.canora.ui.popup;
 
 public interface OnListPopupItemClick {
     void onItemClick(int position, ListPopupItem item);

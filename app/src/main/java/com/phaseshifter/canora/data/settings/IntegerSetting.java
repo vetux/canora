@@ -1,7 +1,7 @@
 package com.phaseshifter.canora.data.settings;
 
-import static com.phaseshifter.canora.ui.data.formatting.FilterDef.FILTER_TITLE;
-import static com.phaseshifter.canora.ui.data.formatting.SortDef.*;
+import static com.phaseshifter.canora.ui.data.formatting.FilterOptions.FILTER_TITLE;
+import static com.phaseshifter.canora.ui.data.formatting.SortingOptions.*;
 
 public enum IntegerSetting {
     FILTER_BY("INT_FLTR_BY", FILTER_TITLE),

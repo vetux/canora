@@ -3,19 +3,19 @@ package com.phaseshifter.canora.model.formatting;
 import android.util.Log;
 import com.phaseshifter.canora.data.media.audio.AudioData;
 import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
-import com.phaseshifter.canora.ui.data.formatting.SortDef;
+import com.phaseshifter.canora.ui.data.formatting.SortingOptions;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import static com.phaseshifter.canora.ui.data.formatting.SortDef.*;
+import static com.phaseshifter.canora.ui.data.formatting.SortingOptions.*;
 
 public class ListSorter {
     private static final String LOG_TAG = "ListSorter";
 
-    public static List<AudioData> sortAudioData(List<AudioData> input, SortDef def) {
+    public static List<AudioData> sortAudioData(List<AudioData> input, SortingOptions def) {
         if (input == null)
             return null;
         Log.v(LOG_TAG, "sortAudioData");
@@ -81,7 +81,7 @@ public class ListSorter {
         return ret;
     }
 
-    public static List<AudioPlaylist> sortAudioPlaylist(List<AudioPlaylist> input, SortDef def) {
+    public static List<AudioPlaylist> sortAudioPlaylist(List<AudioPlaylist> input, SortingOptions def) {
         if (input == null)
             return null;
         Log.v(LOG_TAG, "sortAudioPlaylist");

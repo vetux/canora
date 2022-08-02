@@ -1,4 +1,4 @@
-package com.phaseshifter.canora.ui.utils.popup;
+package com.phaseshifter.canora.ui.popup;
 
 import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
@@ -8,13 +8,16 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ListPopupWindow;
+
 import com.phaseshifter.canora.R;
 import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
 import com.phaseshifter.canora.ui.menu.ContextMenu;
 import com.phaseshifter.canora.ui.menu.OptionsMenu;
+import com.phaseshifter.canora.utils.RunnableArg;
 import com.phaseshifter.canora.utils.android.AttributeConversion;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 public class ListPopupFactory {
@@ -22,48 +25,49 @@ public class ListPopupFactory {
                                                  View anchor,
                                                  int offsetX,
                                                  int offsetY,
-                                                 OptionsMenu menu,
-                                                 OptionsMenu.OptionsMenuListener listener) {
+                                                 HashSet<OptionsMenu.Action> actions,
+                                                 RunnableArg<OptionsMenu.Action> onAction,
+                                                 Runnable onCancel) {
         List<OptionsMenu.Action> actionMapping = new ArrayList<>();
         List<ListPopupItem> popupItems = new ArrayList<>();
 
-        if (menu.getActions().contains(OptionsMenu.Action.OPEN_SETTINGS)) {
+        if (actions.contains(OptionsMenu.Action.OPEN_SETTINGS)) {
             popupItems.add(new ListPopupItem(context.getString(R.string.main_popup_options_item0settings)));
             actionMapping.add(OptionsMenu.Action.OPEN_SETTINGS);
         }
-        if (menu.getActions().contains(OptionsMenu.Action.OPEN_SORTOPTIONS)) {
+        if (actions.contains(OptionsMenu.Action.OPEN_SORTOPTIONS)) {
             popupItems.add(new ListPopupItem(context.getString(R.string.main_popup_options_item0sort)));
             actionMapping.add(OptionsMenu.Action.OPEN_SORTOPTIONS);
         }
-        if (menu.getActions().contains(OptionsMenu.Action.OPEN_FILTEROPTIONS)) {
+        if (actions.contains(OptionsMenu.Action.OPEN_FILTEROPTIONS)) {
             popupItems.add(new ListPopupItem(context.getString(R.string.main_popup_options_item0filteroptions)));
             actionMapping.add(OptionsMenu.Action.OPEN_FILTEROPTIONS);
         }
-        if (menu.getActions().contains(OptionsMenu.Action.EDIT_PLAYLIST)) {
+        if (actions.contains(OptionsMenu.Action.EDIT_PLAYLIST)) {
             popupItems.add(new ListPopupItem(context.getString(R.string.main_popup_options_item0editplaylist)));
             actionMapping.add(OptionsMenu.Action.EDIT_PLAYLIST);
         }
-        if (menu.getActions().contains(OptionsMenu.Action.DELETE)) {
+        if (actions.contains(OptionsMenu.Action.DELETE)) {
             popupItems.add(new ListPopupItem(context.getString(R.string.main_popup_options_item0delete)));
             actionMapping.add(OptionsMenu.Action.DELETE);
         }
-        if (menu.getActions().contains(OptionsMenu.Action.ADD_SELECTION)) {
+        if (actions.contains(OptionsMenu.Action.ADD_SELECTION)) {
             popupItems.add(new ListPopupItem(context.getString(R.string.main_popup_options_item0addTo)));
             actionMapping.add(OptionsMenu.Action.ADD_SELECTION);
         }
-        if (menu.getActions().contains(OptionsMenu.Action.SELECT_ALL)) {
+        if (actions.contains(OptionsMenu.Action.SELECT_ALL)) {
             popupItems.add(new ListPopupItem(context.getString(R.string.main_popup_options_item0selectAll)));
             actionMapping.add(OptionsMenu.Action.SELECT_ALL);
         }
-        if (menu.getActions().contains(OptionsMenu.Action.DESELECT_ALL)) {
+        if (actions.contains(OptionsMenu.Action.DESELECT_ALL)) {
             popupItems.add(new ListPopupItem(context.getString(R.string.main_popup_options_item0deselectAll)));
             actionMapping.add(OptionsMenu.Action.DESELECT_ALL);
         }
-        if (menu.getActions().contains(OptionsMenu.Action.SELECT_STOP)) {
+        if (actions.contains(OptionsMenu.Action.SELECT_STOP)) {
             popupItems.add(new ListPopupItem(context.getString(R.string.main_popup_options_item0cancelSelect)));
             actionMapping.add(OptionsMenu.Action.SELECT_STOP);
         }
-        if (menu.getActions().contains(OptionsMenu.Action.SELECT_START)) {
+        if (actions.contains(OptionsMenu.Action.SELECT_START)) {
             popupItems.add(new ListPopupItem(context.getString(R.string.main_popup_options_item0select)));
             actionMapping.add(OptionsMenu.Action.SELECT_START);
         }
@@ -88,10 +92,11 @@ public class ListPopupFactory {
         popupWindow.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                listener.onAction(actionMapping.get(position));
+                onAction.run(actionMapping.get(position));
                 popupWindow.dismiss();
             }
         });
+        popupWindow.setOnDismissListener(onCancel::run);
         return popupWindow;
     }
 
@@ -101,13 +106,12 @@ public class ListPopupFactory {
                                                        int offsetX,
                                                        int offsetY,
                                                        int marginDP,
-                                                       boolean showAddToNew,
                                                        List<AudioPlaylist> playlists,
-                                                       AdapterView.OnItemClickListener listener) {
+                                                       Runnable onAddToNew,
+                                                       RunnableArg<AudioPlaylist> onAddToPlaylist) {
         List<ListPopupItem> popupItems = new ArrayList<>();
 
-        if (showAddToNew)
-            popupItems.add(new ListPopupItem(context.getString(R.string.main_popup_addto_item0newPlaylist)));
+        popupItems.add(new ListPopupItem(context.getString(R.string.main_popup_addto_item0newPlaylist)));
 
         for (AudioPlaylist playlist : playlists) {
             popupItems.add(new ListPopupItem(playlist.getMetadata().getTitle()));
@@ -133,7 +137,12 @@ public class ListPopupFactory {
         popupWindow.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                listener.onItemClick(parent, view, position, id);
+                assert (position >= 0);
+                if (position == 0) {
+                    onAddToNew.run();
+                } else {
+                    onAddToPlaylist.run(playlists.get(position - 1));
+                }
                 smoothHideListPopupWindowWithPrompt(context, parent, popupWindow);
             }
         });
@@ -144,24 +153,25 @@ public class ListPopupFactory {
                                                  View anchor,
                                                  int offsetx,
                                                  int offsety,
-                                                 ContextMenu menu,
-                                                 ContextMenu.ContextMenuListener listener) {
+                                                 HashSet<ContextMenu.Action> actions,
+                                                 RunnableArg<ContextMenu.Action> onAction,
+                                                 Runnable onCancel) {
         List<ContextMenu.Action> actionMapping = new ArrayList<>();
         List<ListPopupItem> popupItems = new ArrayList<>();
 
-        if (menu.getActions().contains(ContextMenu.Action.INFO)) {
+        if (actions.contains(ContextMenu.Action.INFO)) {
             popupItems.add(new ListPopupItem(context.getString(R.string.main_popup_context_item0info)));
             actionMapping.add(ContextMenu.Action.INFO);
         }
-        if (menu.getActions().contains(ContextMenu.Action.SELECT)) {
+        if (actions.contains(ContextMenu.Action.SELECT)) {
             popupItems.add(new ListPopupItem(context.getString(R.string.main_popup_context_item0select)));
             actionMapping.add(ContextMenu.Action.SELECT);
         }
-        if (menu.getActions().contains(ContextMenu.Action.EDIT)) {
+        if (actions.contains(ContextMenu.Action.EDIT)) {
             popupItems.add(new ListPopupItem(context.getString(R.string.main_popup_context_item0edit)));
             actionMapping.add(ContextMenu.Action.EDIT);
         }
-        if (menu.getActions().contains(ContextMenu.Action.DELETE)) {
+        if (actions.contains(ContextMenu.Action.DELETE)) {
             popupItems.add(new ListPopupItem(context.getString(R.string.main_popup_context_item0delete)));
             actionMapping.add(ContextMenu.Action.DELETE);
         }
@@ -181,10 +191,11 @@ public class ListPopupFactory {
         popupWindow.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                listener.onAction(actionMapping.get(position));
+                onAction.run(actionMapping.get(position));
                 popupWindow.dismiss();
             }
         });
+        popupWindow.setOnDismissListener(onCancel::run);
         return popupWindow;
     }
 

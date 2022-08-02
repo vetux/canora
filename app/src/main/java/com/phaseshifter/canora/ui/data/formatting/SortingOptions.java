@@ -5,7 +5,7 @@ import com.phaseshifter.canora.data.settings.IntegerSetting;
 import java.io.Serializable;
 import java.util.Objects;
 
-public class SortDef implements Serializable {
+public class SortingOptions implements Serializable {
     //SortBy
     public static final int SORT_TITLE = 0;
     public static final int SORT_ARTIST = 1;
@@ -22,17 +22,17 @@ public class SortDef implements Serializable {
     public int sortdir;
     public int sorttech;
 
-    public SortDef(int SortBy, int SortDir, int SortTech) {
+    public SortingOptions(int SortBy, int SortDir, int SortTech) {
         sortby = SortBy;
         sortdir = SortDir;
         sorttech = SortTech;
     }
 
-    public SortDef() {
+    public SortingOptions() {
         this(IntegerSetting.SORT_BY.defaultValue, IntegerSetting.SORT_DIR.defaultValue, IntegerSetting.SORT_TECH.defaultValue);
     }
 
-    public SortDef(SortDef copy) {
+    public SortingOptions(SortingOptions copy) {
         this(copy.sortby, copy.sortdir, copy.sorttech);
     }
 
@@ -40,7 +40,7 @@ public class SortDef implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        SortDef sortDef = (SortDef) o;
+        SortingOptions sortDef = (SortingOptions) o;
         return sortby == sortDef.sortby &&
                 sortdir == sortDef.sortdir &&
                 sorttech == sortDef.sorttech;
