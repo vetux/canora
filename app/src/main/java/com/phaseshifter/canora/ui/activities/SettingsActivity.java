@@ -26,7 +26,7 @@ import com.phaseshifter.canora.ui.pageradapters.SettingsPagerAdapter;
 import com.phaseshifter.canora.ui.presenters.SettingsPresenter;
 import com.phaseshifter.canora.ui.utils.motionlayout.SettingsMotionLayoutController;
 import com.phaseshifter.canora.utils.Observable;
-import com.phaseshifter.canora.utils.Observable.Observer;
+import com.phaseshifter.canora.utils.Observer;
 import com.phaseshifter.canora.utils.Pair;
 
 import java.util.ArrayList;
@@ -335,7 +335,7 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
                 SeekBar seekBar = tab.findViewById(R.id.volBar);
                 seekBar.setOnSeekBarChangeListener(this);
                 seekBar.setProgress((int) (seekBar.getMax() * volume.get()));
-                Observable.Observer<Float> volumeObserver = new Observable.Observer<Float>() {
+                Observer<Float> volumeObserver = new Observer<Float>() {
                     @Override
                     public void update(Observable<Float> o, Float arg) {
                         seekBar.setProgress((int) (seekBar.getMax() * (Float) arg));

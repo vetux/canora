@@ -3,6 +3,7 @@ package com.phaseshifter.canora.ui.viewmodels;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+
 import com.phaseshifter.canora.R;
 import com.phaseshifter.canora.data.media.audio.AudioData;
 import com.phaseshifter.canora.data.media.audio.metadata.AudioMetadata;
@@ -16,15 +17,33 @@ import java.util.Objects;
 public class PlayerStateViewModel {
     public final Observable<Boolean> buffering = new Observable<>();
 
-    public final Observable<String> trackText = new Observable<>();
     public final Observable<String> trackTitle = new Observable<>();
     public final Observable<String> trackArtist = new Observable<>();
-    public final Observable<Bitmap> trackArtwork = new Observable<>();
+    public final Observable<ImageData> trackArtwork = new Observable<>();
+
     public final Observable<Long> trackLength = new Observable<>(0L);
     public final Observable<Long> trackPosition = new Observable<>(0L);
 
     public final Observable<Boolean> isPlaying = new Observable<>(false);
     public final Observable<Boolean> isShuffling = new Observable<>(false);
     public final Observable<Boolean> isRepeating = new Observable<>(false);
+
     public final Observable<Float> volume = new Observable<>(0f);
+
+    public void applyPlayerState(PlayerState state) {
+        buffering.setIfNotEqual(state.getPlaybackState() == PlaybackState.STATE_BUFFERING);
+
+        trackTitle.setIfNotEqual(state.getCurrentTrack().getMetadata().getTitle());
+        trackArtist.setIfNotEqual(state.getCurrentTrack().getMetadata().getArtist());
+        trackArtwork.setIfNotEqual(state.getCurrentTrack().getMetadata().getArtwork());
+
+        trackLength.setIfNotEqual(state.getCurrentTrack().getMetadata().getLength());
+        trackPosition.setIfNotEqual(state.getPlayerPosition());
+
+        isPlaying.setIfNotEqual(state.isPlaying());
+        isShuffling.setIfNotEqual(state.isShuffling());
+        isRepeating.setIfNotEqual(state.isRepeating());
+
+        volume.setIfNotEqual(state.getVolume());
+    }
 }

@@ -200,6 +200,10 @@ public class SoundCloudAudioRepository {
         return charts;
     }
 
+    public AudioPlaylist getChartsPlaylist(UUID uuid){
+        return charts.get(getChartsIndex(uuid));
+    }
+
     private void updateClientId() {
         try {
             clientID = client.getNewClientID();

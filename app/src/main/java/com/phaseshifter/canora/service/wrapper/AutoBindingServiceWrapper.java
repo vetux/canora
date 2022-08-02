@@ -13,6 +13,7 @@ import com.phaseshifter.canora.service.MediaPlayerService;
 import com.phaseshifter.canora.service.state.PlayerState;
 import com.phaseshifter.canora.ui.utils.ServiceBinder;
 import com.phaseshifter.canora.utils.Observable;
+import com.phaseshifter.canora.utils.Observer;
 
 import java.util.List;
 import java.util.UUID;
@@ -39,7 +40,7 @@ public class AutoBindingServiceWrapper implements ServiceConnection, MediaPlayer
 
     private final Observable<PlayerState> stateProxy;
 
-    private final Observable.Observer<PlayerState> proxyObserver = new Observable.Observer<PlayerState>() {
+    private final Observer<PlayerState> proxyObserver = new Observer<PlayerState>() {
         @Override
         public void update(Observable<PlayerState> o, PlayerState arg) {
             stateProxy.set(arg);
@@ -362,7 +363,7 @@ public class AutoBindingServiceWrapper implements ServiceConnection, MediaPlayer
         CountDownLatch bindFlag = new CountDownLatch(1);
         mainHandler.post(() -> {
             if (serviceRef.get() == null) {
-                serviceRef.addObserver(new Observable.Observer<ExoPlayerService>() {
+                serviceRef.addObserver(new Observer<ExoPlayerService>() {
                     @Override
                     public void update(Observable<ExoPlayerService> o, ExoPlayerService arg) {
                         serviceRef.removeObserver(this);

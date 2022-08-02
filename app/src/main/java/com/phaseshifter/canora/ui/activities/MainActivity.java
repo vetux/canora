@@ -13,6 +13,7 @@ import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -29,6 +30,7 @@ import android.widget.*;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
@@ -37,6 +39,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import com.phaseshifter.canora.R;
 import com.phaseshifter.canora.application.MainApplication;
 import com.phaseshifter.canora.data.media.audio.AudioData;
+import com.phaseshifter.canora.data.media.image.ImageData;
 import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
 import com.phaseshifter.canora.data.theme.AppTheme;
 import com.phaseshifter.canora.model.editor.AudioMetadataMask;
@@ -63,6 +66,7 @@ import com.phaseshifter.canora.ui.viewmodels.AppViewModel;
 import com.phaseshifter.canora.ui.viewmodels.ContentViewModel;
 import com.phaseshifter.canora.ui.viewmodels.PlayerStateViewModel;
 import com.phaseshifter.canora.utils.Observable;
+import com.phaseshifter.canora.utils.Observer;
 import com.phaseshifter.canora.utils.RunnableArg;
 import com.phaseshifter.canora.utils.android.AttributeConversion;
 import com.phaseshifter.canora.utils.android.metrics.AndroidFPSMeter;
@@ -781,7 +785,7 @@ public class MainActivity extends Activity implements MainContract.View,
     }
 
     private void setViewModelListeners(ContentViewModel contentViewModel, PlayerStateViewModel playerStateViewModel) {
-        appViewModel.devMode.addObserver(new Observable.Observer<Boolean>() {
+        appViewModel.devMode.addObserver(new Observer<Boolean>() {
             @Override
             public void update(Observable<Boolean> observable, Boolean value) {
                 fpsMeter.reset();
@@ -799,7 +803,7 @@ public class MainActivity extends Activity implements MainContract.View,
                 }
             }
         });
-        appViewModel.contentSelector.addObserver(new Observable.Observer<SelectionIndicator>() {
+        appViewModel.contentSelector.addObserver(new Observer<SelectionIndicator>() {
             @Override
             public void update(Observable<SelectionIndicator> observable, SelectionIndicator value) {
                 ViewGroup drawerItems = findViewById(R.id.nav_content_root);
@@ -814,7 +818,7 @@ public class MainActivity extends Activity implements MainContract.View,
                 }
             }
         });
-        appViewModel.isContentLoading.addObserver(new Observable.Observer<Boolean>() {
+        appViewModel.isContentLoading.addObserver(new Observer<Boolean>() {
             @Override
             public void update(Observable<Boolean> observable, Boolean value) {
                 ProgressBar pb = findViewById(R.id.toolbar_progressbar_contentload);
@@ -823,7 +827,7 @@ public class MainActivity extends Activity implements MainContract.View,
                 }
             }
         });
-        appViewModel.isSelecting.addObserver(new Observable.Observer<Boolean>() {
+        appViewModel.isSelecting.addObserver(new Observer<Boolean>() {
             @Override
             public void update(Observable<Boolean> observable, Boolean value) {
                 trackAdapter.setSelectionMode(value);
@@ -837,7 +841,7 @@ public class MainActivity extends Activity implements MainContract.View,
                 }
             }
         });
-        appViewModel.isSearching.addObserver(new Observable.Observer<Boolean>() {
+        appViewModel.isSearching.addObserver(new Observer<Boolean>() {
             @Override
             public void update(Observable<Boolean> observable, Boolean value) {
                 EditText searchText = findViewById(R.id.toolbar_edittext_search);
@@ -853,7 +857,7 @@ public class MainActivity extends Activity implements MainContract.View,
                 }
             }
         });
-        appViewModel.searchText.addObserver(new Observable.Observer<String>() {
+        appViewModel.searchText.addObserver(new Observer<String>() {
             @Override
             public void update(Observable<String> observable, String value) {
                 EditText searchText = findViewById(R.id.toolbar_edittext_search);
@@ -867,7 +871,7 @@ public class MainActivity extends Activity implements MainContract.View,
                 }
             }
         });
-        appViewModel.notFoundText.addObserver(new Observable.Observer<String>() {
+        appViewModel.notFoundText.addObserver(new Observer<String>() {
             @Override
             public void update(Observable<String> observable, String value) {
                 TextView notFoundText = findViewById(R.id.display_text_notfound);
@@ -878,7 +882,7 @@ public class MainActivity extends Activity implements MainContract.View,
             }
         });
 
-        contentViewModel.contentName.addObserver(new Observable.Observer<String>() {
+        contentViewModel.contentName.addObserver(new Observer<String>() {
             @Override
             public void update(Observable<String> observable, String value) {
                 TextView title = findViewById(R.id.toolbar_textview_title);
@@ -888,7 +892,7 @@ public class MainActivity extends Activity implements MainContract.View,
                 }
             }
         });
-        contentViewModel.visibleTracks.addObserver(new Observable.Observer<List<AudioData>>() {
+        contentViewModel.visibleTracks.addObserver(new Observer<List<AudioData>>() {
             @Override
             public void update(Observable<List<AudioData>> observable, List<AudioData> value) {
                 trackAdapter.getContentRef().clear();
@@ -896,21 +900,21 @@ public class MainActivity extends Activity implements MainContract.View,
                 trackAdapter.notifyDataSetChanged();
             }
         });
-        contentViewModel.visibleTracksHighlightedIndex.addObserver(new Observable.Observer<Integer>() {
+        contentViewModel.visibleTracksHighlightedIndex.addObserver(new Observer<Integer>() {
             @Override
             public void update(Observable<Integer> observable, Integer value) {
                 trackAdapter.setHighlightedIndex(value);
                 trackAdapter.notifyDataSetChanged();
             }
         });
-        contentViewModel.contentTracksSelection.addObserver(new Observable.Observer<HashSet<Integer>>() {
+        contentViewModel.contentTracksSelection.addObserver(new Observer<HashSet<Integer>>() {
             @Override
             public void update(Observable<HashSet<Integer>> observable, HashSet<Integer> value) {
                 trackAdapter.setSelectionIndex(value);
                 trackAdapter.notifyDataSetChanged();
             }
         });
-        contentViewModel.visiblePlaylists.addObserver(new Observable.Observer<List<AudioPlaylist>>() {
+        contentViewModel.visiblePlaylists.addObserver(new Observer<List<AudioPlaylist>>() {
             @Override
             public void update(Observable<List<AudioPlaylist>> observable, List<AudioPlaylist> value) {
                 playlistAdapter.getContentRef().clear();
@@ -918,14 +922,14 @@ public class MainActivity extends Activity implements MainContract.View,
                 playlistAdapter.notifyDataSetChanged();
             }
         });
-        contentViewModel.contentPlaylistHighlight.addObserver(new Observable.Observer<Integer>() {
+        contentViewModel.contentPlaylistHighlight.addObserver(new Observer<Integer>() {
             @Override
             public void update(Observable<Integer> observable, Integer value) {
                 playlistAdapter.setHighlightedIndex(value);
                 playlistAdapter.notifyDataSetChanged();
             }
         });
-        contentViewModel.contentPlaylistsSelection.addObserver(new Observable.Observer<HashSet<Integer>>() {
+        contentViewModel.contentPlaylistsSelection.addObserver(new Observer<HashSet<Integer>>() {
             @Override
             public void update(Observable<HashSet<Integer>> observable, HashSet<Integer> value) {
                 playlistAdapter.setSelectionIndex(value);
@@ -933,7 +937,7 @@ public class MainActivity extends Activity implements MainContract.View,
             }
         });
 
-        playerStateViewModel.buffering.addObserver(new Observable.Observer<Boolean>() {
+        playerStateViewModel.buffering.addObserver(new Observer<Boolean>() {
             @Override
             public void update(Observable<Boolean> observable, Boolean value) {
                 ProgressBar buf = findViewById(R.id.control_progressbar_playbackload);
@@ -946,17 +950,7 @@ public class MainActivity extends Activity implements MainContract.View,
                 }
             }
         });
-        playerStateViewModel.trackText.addObserver(new Observable.Observer<String>() {
-            @Override
-            public void update(Observable<String> observable, String value) {
-                TextView text = findViewById(R.id.control_text_songtext);
-                if (text != null) {
-                    text.setText(value);
-                    text.setSelected(true);
-                }
-            }
-        });
-        playerStateViewModel.trackTitle.addObserver(new Observable.Observer<String>() {
+        playerStateViewModel.trackTitle.addObserver(new Observer<String>() {
             @Override
             public void update(Observable<String> observable, String value) {
                 TextView text = findViewById(R.id.control_text_title);
@@ -964,9 +958,16 @@ public class MainActivity extends Activity implements MainContract.View,
                     text.setText(value);
                     text.setSelected(true);
                 }
+
+                String fullString = getString(R.string.main_text0controlsBy, playerStateViewModel.trackTitle.get(), playerStateViewModel.trackArtist.get());
+                TextView fullText = findViewById(R.id.control_text_songtext);
+                if (fullText != null) {
+                    fullText.setText(fullString);
+                    fullText.setSelected(true);
+                }
             }
         });
-        playerStateViewModel.trackArtist.addObserver(new Observable.Observer<String>() {
+        playerStateViewModel.trackArtist.addObserver(new Observer<String>() {
             @Override
             public void update(Observable<String> observable, String value) {
                 TextView text = findViewById(R.id.control_text_artist);
@@ -974,22 +975,37 @@ public class MainActivity extends Activity implements MainContract.View,
                     text.setText(value);
                     text.setSelected(true);
                 }
+
+                String fullString = getString(R.string.main_text0controlsBy, playerStateViewModel.trackTitle.get(), playerStateViewModel.trackArtist.get());
+                TextView fullText = findViewById(R.id.control_text_songtext);
+                if (fullText != null) {
+                    fullText.setText(fullString);
+                    fullText.setSelected(true);
+                }
             }
         });
-        playerStateViewModel.trackArtwork.addObserver(new Observable.Observer<Bitmap>() {
+        playerStateViewModel.trackArtwork.addObserver(new Observer<ImageData>() {
             @Override
-            public void update(Observable<Bitmap> observable, Bitmap value) {
+            public void update(Observable<ImageData> observable, ImageData value) {
                 ImageView cover = findViewById(R.id.control_imageview_cover);
                 if (cover != null) {
-                    cover.setImageBitmap(value);
+                    try {
+                        cover.setImageDrawable(Drawable.createFromStream(value.getDataSource().getStream(MainActivity.this), null));
+                    } catch (Exception e) {
+                        cover.setImageDrawable(AppCompatResources.getDrawable(MainActivity.this, R.drawable.artwork_unset));
+                    }
                 }
                 ImageView coverFull = findViewById(R.id.control_imageview_cover_full);
                 if (coverFull != null) {
-                    coverFull.setImageBitmap(value);
+                    try{
+                        coverFull.setImageDrawable(Drawable.createFromStream(value.getDataSource().getStream(MainActivity.this), null));
+                    } catch(Exception e){
+                        coverFull.setImageDrawable(AppCompatResources.getDrawable(MainActivity.this, R.drawable.artwork_unset));
+                    }
                 }
             }
         });
-        playerStateViewModel.trackLength.addObserver(new Observable.Observer<Long>() {
+        playerStateViewModel.trackLength.addObserver(new Observer<Long>() {
             @Override
             public void update(Observable<Long> observable, Long value) {
                 SeekBar seekBarDraggable = findViewById(R.id.control_seekbar_progressdynamic);
@@ -1011,7 +1027,7 @@ public class MainActivity extends Activity implements MainContract.View,
                             digit1);
             }
         });
-        playerStateViewModel.trackPosition.addObserver(new Observable.Observer<Long>() {
+        playerStateViewModel.trackPosition.addObserver(new Observer<Long>() {
             @Override
             public void update(Observable<Long> observable, Long value) {
                 SeekBar seekBarDraggable = findViewById(R.id.control_seekbar_progressdynamic);
@@ -1033,7 +1049,7 @@ public class MainActivity extends Activity implements MainContract.View,
                             digit1);
             }
         });
-        playerStateViewModel.isPlaying.addObserver(new Observable.Observer<Boolean>() {
+        playerStateViewModel.isPlaying.addObserver(new Observer<Boolean>() {
             @Override
             public void update(Observable<Boolean> observable, Boolean value) {
                 ImageButton playbutton = findViewById(R.id.control_button_play);
@@ -1077,7 +1093,7 @@ public class MainActivity extends Activity implements MainContract.View,
                             digit1);
             }
         });
-        playerStateViewModel.isShuffling.addObserver(new Observable.Observer<Boolean>() {
+        playerStateViewModel.isShuffling.addObserver(new Observer<Boolean>() {
             @Override
             public void update(Observable<Boolean> observable, Boolean value) {
                 ImageButton shuffleButton = findViewById(R.id.control_button_shuffle);
@@ -1096,7 +1112,7 @@ public class MainActivity extends Activity implements MainContract.View,
                 }
             }
         });
-        playerStateViewModel.isRepeating.addObserver(new Observable.Observer<Boolean>() {
+        playerStateViewModel.isRepeating.addObserver(new Observer<Boolean>() {
             @Override
             public void update(Observable<Boolean> observable, Boolean value) {
                 ImageButton repeatButton = findViewById(R.id.control_button_repeat);
@@ -1115,7 +1131,7 @@ public class MainActivity extends Activity implements MainContract.View,
                 }
             }
         });
-        playerStateViewModel.volume.addObserver(new Observable.Observer<Float>() {
+        playerStateViewModel.volume.addObserver(new Observer<Float>() {
             @Override
             public void update(Observable<Float> observable, Float value) {
             }

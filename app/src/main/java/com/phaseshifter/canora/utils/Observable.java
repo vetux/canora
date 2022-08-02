@@ -3,10 +3,6 @@ package com.phaseshifter.canora.utils;
 import java.util.HashSet;
 
 public class Observable<T> {
-    public interface Observer<Y> {
-        void update(Observable<Y> observable, Y value);
-    }
-
     private final HashSet<Observer<T>> observers = new HashSet<>();
 
     private T value;
@@ -19,28 +15,35 @@ public class Observable<T> {
         this(null);
     }
 
-    public synchronized void addObserver(Observer<T> observer) {
+    public void addObserver(Observer<T> observer) {
         observers.add(observer);
     }
 
-    public synchronized void removeObserver(Observer<T> observer) {
+    public void removeObserver(Observer<T> observer) {
         observers.remove(observer);
     }
 
-    public synchronized void removeAllObservers() {
+    public void removeAllObservers() {
         observers.clear();
     }
 
-    public synchronized T get() {
+    public T get() {
         return value;
     }
 
-    public synchronized void set(T newValue) {
+    public void set(T newValue) {
         value = newValue;
         notifyObservers();
     }
 
-    public synchronized void notifyObservers() {
+    public void setIfNotEqual(T newValue) {
+        if (!value.equals(newValue)) {
+            value = newValue;
+            notifyObservers();
+        }
+    }
+
+    public void notifyObservers() {
         for (Observer<T> observer : observers) {
             observer.update(this, value);
         }

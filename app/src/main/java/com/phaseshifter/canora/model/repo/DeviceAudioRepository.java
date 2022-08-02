@@ -1,6 +1,7 @@
 package com.phaseshifter.canora.model.repo;
 
 import android.util.Log;
+
 import com.phaseshifter.canora.data.media.audio.AudioData;
 import com.phaseshifter.canora.data.media.audio.metadata.AudioMetadataMemory;
 import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
@@ -14,7 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Local device data ( MediaStore )
+ * Local device data ( IContentProvider )
  */
 public class DeviceAudioRepository {
     private final String LOG_TAG = "AudioDataRepository";
@@ -52,26 +53,24 @@ public class DeviceAudioRepository {
         List<AudioPlaylist> artists = contentProvider.getArtists(tracks);
         List<AudioPlaylist> albums = contentProvider.getAlbums(tracks);
         List<AudioPlaylist> genres = contentProvider.getGenres();
-        synchronized (this) {
-            this.tracks = smartUpdateAudioData(this.tracks, tracks);
-            this.artists = smartUpdateAudioPlaylist(this.artists, artists);
-            this.albums = smartUpdateAudioPlaylist(this.albums, albums);
-            this.genres = smartUpdateAudioPlaylist(this.genres, genres);
-        }
+        this.tracks = updateAudioData(this.tracks, tracks);
+        this.artists = updateAudioPlaylists(this.artists, artists);
+        this.albums = updateAudioPlaylists(this.albums, albums);
+        this.genres = updateAudioPlaylists(this.genres, genres);
         Log.v(LOG_TAG, "refresh complete");
     }
 
-    public synchronized List<AudioData> getTracks() {
+    public List<AudioData> getTracks() {
         Log.v(LOG_TAG, "getTracks");
         return tracks;
     }
 
-    public synchronized List<AudioPlaylist> getArtists() {
+    public List<AudioPlaylist> getArtists() {
         Log.v(LOG_TAG, "getArtists");
         return artists;
     }
 
-    public synchronized AudioPlaylist getArtist(UUID id) {
+    public AudioPlaylist getArtist(UUID id) {
         Log.v(LOG_TAG, "getArtist " + id);
         for (AudioPlaylist pl : artists) {
             if (pl.getMetadata().getId().equals(id)) {
@@ -81,12 +80,12 @@ public class DeviceAudioRepository {
         return null;
     }
 
-    public synchronized List<AudioPlaylist> getAlbums() {
+    public List<AudioPlaylist> getAlbums() {
         Log.v(LOG_TAG, "getAlbums");
         return albums;
     }
 
-    public synchronized AudioPlaylist getAlbum(UUID id) {
+    public AudioPlaylist getAlbum(UUID id) {
         Log.v(LOG_TAG, "getAlbum " + id);
         for (AudioPlaylist pl : albums) {
             if (pl.getMetadata().getId().equals(id)) {
@@ -96,12 +95,12 @@ public class DeviceAudioRepository {
         return null;
     }
 
-    public synchronized List<AudioPlaylist> getGenres() {
+    public List<AudioPlaylist> getGenres() {
         Log.v(LOG_TAG, "getGenres");
         return genres;
     }
 
-    public synchronized AudioPlaylist getGenre(UUID id) {
+    public AudioPlaylist getGenre(UUID id) {
         Log.v(LOG_TAG, "getGenre " + id);
         for (AudioPlaylist pl : genres) {
             if (pl.getMetadata().getId().equals(id)) {
@@ -119,7 +118,7 @@ public class DeviceAudioRepository {
      * @param newData The updated data
      * @return The patched data, non null
      */
-    private List<AudioData> smartUpdateAudioData(List<AudioData> oldData, List<AudioData> newData) {
+    private List<AudioData> updateAudioData(List<AudioData> oldData, List<AudioData> newData) {
         List<AudioData> ret = new ArrayList<>();
         for (AudioData track : newData) {
             boolean foundOld = false;
@@ -138,7 +137,7 @@ public class DeviceAudioRepository {
         return ret;
     }
 
-    private List<AudioPlaylist> smartUpdateAudioPlaylist(List<AudioPlaylist> oldData, List<AudioPlaylist> newData) {
+    private List<AudioPlaylist> updateAudioPlaylists(List<AudioPlaylist> oldData, List<AudioPlaylist> newData) {
         List<AudioPlaylist> ret = new ArrayList<>();
         for (AudioPlaylist playlist : newData) {
             boolean foundOld = false;
@@ -146,7 +145,7 @@ public class DeviceAudioRepository {
                 if (AudioPlaylistComparison.isEqualPermissive(playlist, oldPlaylist)) {
                     PlaylistMetadataMemory patchedMetadata = new PlaylistMetadataMemory(playlist.getMetadata());
                     patchedMetadata.setId(oldPlaylist.getMetadata().getId());
-                    ret.add(new AudioPlaylist(patchedMetadata, smartUpdateAudioData(oldPlaylist.getData(), playlist.getData())));
+                    ret.add(new AudioPlaylist(patchedMetadata, updateAudioData(oldPlaylist.getData(), playlist.getData())));
                     foundOld = true;
                     break;
                 }
