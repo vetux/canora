@@ -159,10 +159,6 @@ public class ListPopupFactory {
         List<ContextMenu.Action> actionMapping = new ArrayList<>();
         List<ListPopupItem> popupItems = new ArrayList<>();
 
-        if (actions.contains(ContextMenu.Action.INFO)) {
-            popupItems.add(new ListPopupItem(context.getString(R.string.main_popup_context_item0info)));
-            actionMapping.add(ContextMenu.Action.INFO);
-        }
         if (actions.contains(ContextMenu.Action.SELECT)) {
             popupItems.add(new ListPopupItem(context.getString(R.string.main_popup_context_item0select)));
             actionMapping.add(ContextMenu.Action.SELECT);

@@ -12,7 +12,6 @@ import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.database.ContentObserver;
-import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -461,11 +460,11 @@ public class MainActivity extends Activity implements MainContract.View,
                 break;
             case R.id.control_button_open:
                 presenter.onTransportControlChange(true);
-                setControlMax(true);
+                setTransportControlMax(true);
                 break;
             case R.id.control_button_close:
                 presenter.onTransportControlChange(false);
-                setControlMax(false);
+                setTransportControlMax(false);
                 break;
             case R.id.display_button_floating_addto:
                 presenter.onFloatingAddToButtonClick();
@@ -724,6 +723,60 @@ public class MainActivity extends Activity implements MainContract.View,
                 } catch (IntentSender.SendIntentException e0) {
                     e0.printStackTrace();
                     scopedStorageCallback = null;
+                }
+            }
+        });
+    }
+
+    @Override
+    public void setTransportControlMax(boolean controlMax) {
+        runOnUiThread(() -> {
+            View content = findViewById(R.id.include_content_main);
+            View footer = findViewById(R.id.include_footer_main);
+            View footerFull = findViewById(R.id.include_footer_full_main);
+            if (content != null
+                    && footer != null
+                    && footerFull != null) {
+                if (controlMax) {
+                    footerFull.setVisibility(View.VISIBLE);
+                    footerFull.setTranslationY(footerFull.getHeight());
+                    footerFull.animate()
+                            .translationY(0)
+                            .setDuration(250)
+                            .setListener(new AnimatorListenerAdapter() {
+                                @Override
+                                public void onAnimationEnd(Animator animation) {
+                                    footer.setVisibility(View.GONE);
+                                    content.setVisibility(View.GONE);
+                                }
+                            });
+                } else {
+                    content.setVisibility(View.VISIBLE);
+                    footer.setVisibility(View.VISIBLE);
+                    footerFull.setTranslationY(0);
+                    footerFull.animate()
+                            .translationY(footerFull.getHeight())
+                            .setDuration(250)
+                            .setListener(new AnimatorListenerAdapter() {
+                                @Override
+                                public void onAnimationEnd(Animator animation) {
+                                    footerFull.setVisibility(View.GONE);
+                                }
+                            });
+                }
+            }
+        });
+    }
+
+    @Override
+    public void setNavigationMax(boolean maxNav) {
+        runOnUiThread(() -> {
+            DrawerLayout view = findViewById(R.id.drawerLayout);
+            if (view != null) {
+                if (maxNav) {
+                    view.openDrawer(GravityCompat.START);
+                } else {
+                    view.closeDrawer(GravityCompat.START);
                 }
             }
         });
@@ -997,9 +1050,9 @@ public class MainActivity extends Activity implements MainContract.View,
                 }
                 ImageView coverFull = findViewById(R.id.control_imageview_cover_full);
                 if (coverFull != null) {
-                    try{
+                    try {
                         coverFull.setImageDrawable(Drawable.createFromStream(value.getDataSource().getStream(MainActivity.this), null));
-                    } catch(Exception e){
+                    } catch (Exception e) {
                         coverFull.setImageDrawable(AppCompatResources.getDrawable(MainActivity.this, R.drawable.artwork_unset));
                     }
                 }
@@ -1261,43 +1314,6 @@ public class MainActivity extends Activity implements MainContract.View,
         DrawerLayout view = findViewById(R.id.drawerLayout);
         if (view != null) {
             view.openDrawer(GravityCompat.START);
-        }
-    }
-
-    private void setControlMax(boolean controlMax) {
-        View content = findViewById(R.id.include_content_main);
-        View footer = findViewById(R.id.include_footer_main);
-        View footerFull = findViewById(R.id.include_footer_full_main);
-        if (content != null
-                && footer != null
-                && footerFull != null) {
-            if (controlMax) {
-                footerFull.setVisibility(View.VISIBLE);
-                footerFull.setTranslationY(footerFull.getHeight());
-                footerFull.animate()
-                        .translationY(0)
-                        .setDuration(250)
-                        .setListener(new AnimatorListenerAdapter() {
-                            @Override
-                            public void onAnimationEnd(Animator animation) {
-                                footer.setVisibility(View.GONE);
-                                content.setVisibility(View.GONE);
-                            }
-                        });
-            } else {
-                content.setVisibility(View.VISIBLE);
-                footer.setVisibility(View.VISIBLE);
-                footerFull.setTranslationY(0);
-                footerFull.animate()
-                        .translationY(footerFull.getHeight())
-                        .setDuration(250)
-                        .setListener(new AnimatorListenerAdapter() {
-                            @Override
-                            public void onAnimationEnd(Animator animation) {
-                                footerFull.setVisibility(View.GONE);
-                            }
-                        });
-            }
         }
     }
 

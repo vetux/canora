@@ -5,11 +5,12 @@ import com.phaseshifter.canora.ui.data.formatting.FilterOptions;
 import com.phaseshifter.canora.ui.data.formatting.SortingOptions;
 import com.phaseshifter.canora.ui.data.misc.SelectionIndicator;
 
+import java.io.Serializable;
+
 /**
- * The set of state saved in the view.
- * Modified by presenter and settings.
+ * The set of presenter state saved in the view.
  */
-public class StateBundle {
+public class StateBundle implements Serializable {
     public AppTheme theme;
     public boolean devMode;
     public FilterOptions filterOptions;

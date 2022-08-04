@@ -79,6 +79,10 @@ public interface MainContract {
         void requestPermissions();
 
         void handleSecurityException(SecurityException exception, Runnable onSuccess);
+
+        void setTransportControlMax(boolean maxControls);
+
+        void setNavigationMax(boolean maxNav);
     }
 
     interface Presenter {
