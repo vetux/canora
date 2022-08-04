@@ -15,18 +15,16 @@ import com.phaseshifter.canora.model.editor.AudioMetadataEditor;
 import com.phaseshifter.canora.model.formatting.ListFilter;
 import com.phaseshifter.canora.model.formatting.ListSorter;
 import com.phaseshifter.canora.model.repo.SoundCloudAudioRepository;
-import com.phaseshifter.canora.service.MediaPlayerService;
 import com.phaseshifter.canora.service.state.PlayerState;
+import com.phaseshifter.canora.service.wrapper.AutoBindingServiceWrapper;
 import com.phaseshifter.canora.ui.contracts.MainContract;
 import com.phaseshifter.canora.ui.data.AudioContentSelector;
-import com.phaseshifter.canora.ui.data.StateBundle;
 import com.phaseshifter.canora.ui.data.constants.NavigationItem;
 import com.phaseshifter.canora.ui.data.formatting.FilterOptions;
 import com.phaseshifter.canora.ui.data.formatting.SortingOptions;
 import com.phaseshifter.canora.ui.data.misc.SelectionIndicator;
 import com.phaseshifter.canora.ui.menu.ContextMenu;
 import com.phaseshifter.canora.ui.menu.OptionsMenu;
-import com.phaseshifter.canora.ui.dialog.MainDialogFactory;
 import com.phaseshifter.canora.ui.selectors.MainSelector;
 import com.phaseshifter.canora.ui.viewmodels.AppViewModel;
 import com.phaseshifter.canora.ui.viewmodels.ContentViewModel;
@@ -55,7 +53,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
     private final ThemeRepository themeRepository;
     private final SoundCloudAudioRepository scAudioDataRepo;
 
-    private final MediaPlayerService service;
+    private final AutoBindingServiceWrapper service;
 
     private final Executor mainThread;
 
@@ -67,8 +65,8 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
 
     private final AudioMetadataEditor metadataEditor;
 
-    private FilterOptions filterOptions;
-    private SortingOptions sortingOptions;
+    private FilterOptions filterOptions = new FilterOptions();
+    private SortingOptions sortingOptions = new SortingOptions();
 
     private SelectionIndicator uiIndicator = new SelectionIndicator(AudioContentSelector.TRACKS, null);
     private SelectionIndicator contentIndicator = null;
@@ -86,7 +84,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
 
     public MainPresenter(MainContract.View view,
                          Serializable savedState,
-                         MediaPlayerService service,
+                         AutoBindingServiceWrapper service,
                          DeviceAudioRepository audioDataRepository,
                          UserPlaylistRepository audioPlaylistRepository,
                          SettingsRepository settingsRepository,
@@ -109,21 +107,27 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
         this.appViewModel = appViewModel;
         this.contentViewModel = contentViewModel;
         this.playerStateViewModel = playerStateViewModel;
+        this.presExec = new ThreadPoolExecutor(1, 1, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
+
         scAudioDataRepo.setClientID(settingsRepository.getString(StringSetting.SC_CLIENTID));
-        presExec = new ThreadPoolExecutor(1, 1, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
 
-        if (savedState instanceof StateBundle) {
-            final StateBundle state = (StateBundle) savedState;
+        theme = themeRepository.get(settingsRepository.getInt(IntegerSetting.THEME));
 
-            view.setTheme(state.theme);
-            appViewModel.devMode.set(state.devMode);
+        sortingOptions.sortby = settingsRepository.getInt(IntegerSetting.SORT_BY);
+        sortingOptions.sortdir = settingsRepository.getInt(IntegerSetting.SORT_DIR);
+        sortingOptions.sorttech = settingsRepository.getInt(IntegerSetting.SORT_TECH);
 
-            filterOptions = state.filterOptions;
-            sortingOptions = state.sortingOptions;
+        filterOptions.filterBy = settingsRepository.getInt(IntegerSetting.FILTER_BY);
 
+        view.setTheme(theme);
+
+        appViewModel.devMode.set(settingsRepository.getBoolean(BooleanSetting.DEVELOPERMODE));
+
+        if (savedState instanceof MainPresenterState) {
+            final MainPresenterState state = (MainPresenterState) savedState;
             // Repositories are stored application wide so the saved indicator uuid should be valid.
-            uiIndicator = state.indicator;
-            contentIndicator = state.indicator;
+            uiIndicator = state.uiIndicator;
+            contentIndicator = state.uiIndicator;
         }
     }
 
@@ -133,15 +137,17 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
         presExec.submit(() -> {
             task.run();
             if (--presenterTasks == 0) {
-                appViewModel.isContentLoading.set(false);
+                mainThread.execute(() -> {
+                    appViewModel.isContentLoading.set(false);
+                });
             }
         });
     }
 
     private void updateVisibleContent() {
         // TODO: Preformat content
-        List<AudioData> formattedTracks = null;
-        List<AudioPlaylist> formattedPlaylists = null;
+        List<AudioData> formattedTracks = new ArrayList<>();
+        List<AudioPlaylist> formattedPlaylists = new ArrayList<>();
         if (uiIndicator.isPlaylistView()) {
             switch (uiIndicator.getSelector()) {
                 case PLAYLISTS:
@@ -189,13 +195,12 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
             }
             if (uiIndicator.getSelector() != AudioContentSelector.SOUNDCLOUD_SEARCH) {
                 formattedTracks = ListFilter.filterAudioData(sortedTracks, filterOptions);
+            } else {
+                formattedTracks = sortedTracks;
             }
         }
         contentViewModel.visibleTracks.set(formattedTracks);
         contentViewModel.visiblePlaylists.set(formattedPlaylists);
-        if (--presenterTasks == 0) {
-            appViewModel.isContentLoading.set(false);
-        }
     }
 
     @Override
@@ -207,12 +212,20 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
 
     @Override
     public synchronized void start() {
-        playerStateViewModel.applyPlayerState(service.getState().get());
+        service.bind();
+        PlayerState playerState = service.getState().get();
+        if (playerState != null)
+            playerStateViewModel.applyPlayerState(service.getState().get());
         service.getState().addObserver(this);
         view.checkPermissions();
         runPresenterTask(() -> {
             deviceAudioRepository.refresh();
-            mainThread.execute(this::updateVisibleContent);
+            mainThread.execute(() -> {
+                appViewModel.notifyObservers();
+                contentViewModel.notifyObservers();
+                playerStateViewModel.notifyObservers();
+                updateVisibleContent();
+            });
         });
     }
 
@@ -220,7 +233,9 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
     public synchronized void stop() {
         settingsRepository.putString(StringSetting.SC_CLIENTID, scAudioDataRepo.getClientID());
 
-        StateBundle savedState = new StateBundle();
+        MainPresenterState savedState = new MainPresenterState();
+        savedState.uiIndicator = uiIndicator;
+        savedState.contentIndicator = contentIndicator;
         view.saveState(savedState);
 
         service.getState().removeObserver(this);

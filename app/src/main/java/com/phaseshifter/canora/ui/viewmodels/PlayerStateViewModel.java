@@ -15,11 +15,11 @@ import com.phaseshifter.canora.utils.Observable;
 import java.util.Objects;
 
 public class PlayerStateViewModel {
-    public final Observable<Boolean> buffering = new Observable<>();
+    public final Observable<Boolean> buffering = new Observable<>(false);
 
-    public final Observable<String> trackTitle = new Observable<>();
-    public final Observable<String> trackArtist = new Observable<>();
-    public final Observable<ImageData> trackArtwork = new Observable<>();
+    public final Observable<String> trackTitle = new Observable<>("");
+    public final Observable<String> trackArtist = new Observable<>("");
+    public final Observable<ImageData> trackArtwork = new Observable<>(null);
 
     public final Observable<Long> trackLength = new Observable<>(0L);
     public final Observable<Long> trackPosition = new Observable<>(0L);
@@ -33,11 +33,18 @@ public class PlayerStateViewModel {
     public void applyPlayerState(PlayerState state) {
         buffering.setIfNotEqual(state.getPlaybackState() == PlaybackState.STATE_BUFFERING);
 
-        trackTitle.setIfNotEqual(state.getCurrentTrack().getMetadata().getTitle());
-        trackArtist.setIfNotEqual(state.getCurrentTrack().getMetadata().getArtist());
-        trackArtwork.setIfNotEqual(state.getCurrentTrack().getMetadata().getArtwork());
+        if (state.getCurrentTrack() == null){
+            trackTitle.setIfNotEqual("");
+            trackArtist.setIfNotEqual("");
+            trackArtwork.setIfNotEqual(null);
+            trackLength.setIfNotEqual(0L);
+        } else {
+            trackTitle.setIfNotEqual(state.getCurrentTrack().getMetadata().getTitle());
+            trackArtist.setIfNotEqual(state.getCurrentTrack().getMetadata().getArtist());
+            trackArtwork.setIfNotEqual(state.getCurrentTrack().getMetadata().getArtwork());
+            trackLength.setIfNotEqual(state.getCurrentTrack().getMetadata().getLength());
+        }
 
-        trackLength.setIfNotEqual(state.getCurrentTrack().getMetadata().getLength());
         trackPosition.setIfNotEqual(state.getPlayerPosition());
 
         isPlaying.setIfNotEqual(state.isPlaying());
@@ -45,5 +52,22 @@ public class PlayerStateViewModel {
         isRepeating.setIfNotEqual(state.isRepeating());
 
         volume.setIfNotEqual(state.getVolume());
+    }
+
+    public void notifyObservers() {
+        buffering.notifyObservers();
+
+        trackTitle.notifyObservers();
+        trackArtist.notifyObservers();
+        trackArtwork.notifyObservers();
+
+        trackLength.notifyObservers();
+        trackPosition.notifyObservers();
+
+        isPlaying.notifyObservers();
+        isShuffling.notifyObservers();
+        isRepeating.notifyObservers();
+
+        volume.notifyObservers();
     }
 }

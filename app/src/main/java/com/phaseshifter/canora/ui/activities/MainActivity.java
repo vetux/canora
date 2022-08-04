@@ -1012,10 +1012,14 @@ public class MainActivity extends Activity implements MainContract.View,
                     text.setSelected(true);
                 }
 
-                String fullString = getString(R.string.main_text0controlsBy, playerStateViewModel.trackTitle.get(), playerStateViewModel.trackArtist.get());
                 TextView fullText = findViewById(R.id.control_text_songtext);
                 if (fullText != null) {
-                    fullText.setText(fullString);
+                    if (value.isEmpty()) {
+                        fullText.setText("");
+                    } else {
+                        String fullString = getString(R.string.main_text0controlsBy, playerStateViewModel.trackTitle.get(), playerStateViewModel.trackArtist.get());
+                        fullText.setText(fullString);
+                    }
                     fullText.setSelected(true);
                 }
             }
@@ -1029,10 +1033,14 @@ public class MainActivity extends Activity implements MainContract.View,
                     text.setSelected(true);
                 }
 
-                String fullString = getString(R.string.main_text0controlsBy, playerStateViewModel.trackTitle.get(), playerStateViewModel.trackArtist.get());
                 TextView fullText = findViewById(R.id.control_text_songtext);
                 if (fullText != null) {
-                    fullText.setText(fullString);
+                    if (value.isEmpty()) {
+                        fullText.setText("");
+                    } else {
+                        String fullString = getString(R.string.main_text0controlsBy, playerStateViewModel.trackTitle.get(), playerStateViewModel.trackArtist.get());
+                        fullText.setText(fullString);
+                    }
                     fullText.setSelected(true);
                 }
             }

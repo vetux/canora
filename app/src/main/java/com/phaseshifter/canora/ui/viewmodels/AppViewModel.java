@@ -14,15 +14,25 @@ import com.phaseshifter.canora.ui.data.misc.SelectionIndicator;
 import com.phaseshifter.canora.utils.Observable;
 
 public class AppViewModel {
-    public final Observable<Boolean> devMode = new Observable<>();
+    public final Observable<Boolean> devMode = new Observable<>(false);
 
     public final Observable<SelectionIndicator> contentSelector = new Observable<>(new SelectionIndicator(AudioContentSelector.TRACKS, null));
     public final Observable<Boolean> isContentLoading = new Observable<>(false);
     public final Observable<Boolean> isSelecting = new Observable<>(false);
-    public final Observable<String> notFoundText = new Observable<>();
+    public final Observable<String> notFoundText = new Observable<>("Not Found");
 
-    public final Observable<Boolean> isSearching = new Observable<>();
-    public final Observable<String> searchText = new Observable<>();
+    public final Observable<Boolean> isSearching = new Observable<>(false);
+    public final Observable<String> searchText = new Observable<>("");
+
+    public void notifyObservers() {
+        devMode.notifyObservers();
+        contentSelector.notifyObservers();
+        isContentLoading.notifyObservers();
+        isSelecting.notifyObservers();
+        notFoundText.notifyObservers();
+        isSearching.notifyObservers();
+        searchText.notifyObservers();
+    }
 
     private String getContentName(SelectionIndicator uiIndicator,
                                   Context context,

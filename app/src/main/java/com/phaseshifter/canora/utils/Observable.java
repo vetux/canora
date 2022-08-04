@@ -1,5 +1,7 @@
 package com.phaseshifter.canora.utils;
 
+import com.google.common.base.Objects;
+
 import java.util.HashSet;
 
 public class Observable<T> {
@@ -37,7 +39,7 @@ public class Observable<T> {
     }
 
     public void setIfNotEqual(T newValue) {
-        if (!value.equals(newValue)) {
+        if (!Objects.equal(value, newValue)) {
             value = newValue;
             notifyObservers();
         }
