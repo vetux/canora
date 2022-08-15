@@ -735,6 +735,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
             case TRACKS:
                 view.setNavigationMax(false);
                 view.setTransportControlMax(false);
+                appViewModel.isSearching.set(false);
                 appViewModel.isSelecting.set(false);
                 uiContentSelector = new ContentSelector(MainPage.TRACKS, null);
                 setViewModelContentSelector(uiContentSelector);
@@ -743,6 +744,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
             case PLAYLISTS:
                 view.setNavigationMax(false);
                 view.setTransportControlMax(false);
+                appViewModel.isSearching.set(false);
                 appViewModel.isSelecting.set(false);
                 uiContentSelector = new ContentSelector(MainPage.PLAYLISTS, null);
                 setViewModelContentSelector(uiContentSelector);
@@ -751,6 +753,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
             case ALBUMS:
                 view.setNavigationMax(false);
                 view.setTransportControlMax(false);
+                appViewModel.isSearching.set(false);
                 appViewModel.isSelecting.set(false);
                 uiContentSelector = new ContentSelector(MainPage.ALBUMS, null);
                 setViewModelContentSelector(uiContentSelector);
@@ -759,6 +762,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
             case ARTISTS:
                 view.setNavigationMax(false);
                 view.setTransportControlMax(false);
+                appViewModel.isSearching.set(false);
                 appViewModel.isSelecting.set(false);
                 uiContentSelector = new ContentSelector(MainPage.ARTISTS, null);
                 setViewModelContentSelector(uiContentSelector);
@@ -789,6 +793,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
             case SOUNDCLOUD_CHARTS:
                 view.setNavigationMax(false);
                 view.setTransportControlMax(false);
+                appViewModel.isSearching.set(false);
                 appViewModel.isSelecting.set(false);
                 uiContentSelector = new ContentSelector(MainPage.SOUNDCLOUD_CHARTS, null);
                 setViewModelContentSelector(uiContentSelector);
@@ -797,6 +802,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
             case YOUTUBE_DL:
                 view.setNavigationMax(false);
                 view.setTransportControlMax(false);
+                appViewModel.isSearching.set(false);
                 appViewModel.isSelecting.set(false);
                 uiContentSelector = new ContentSelector(MainPage.YOUTUBE_DL, null);
                 setViewModelContentSelector(uiContentSelector);
