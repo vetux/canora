@@ -11,6 +11,8 @@ import com.phaseshifter.canora.ui.menu.ContextMenu;
 import com.phaseshifter.canora.ui.menu.OptionsMenu;
 import com.phaseshifter.canora.utils.RunnableArg;
 
+import java.io.File;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.List;
@@ -87,6 +89,8 @@ public interface MainContract {
         String getStringResource(int id);
 
         String getStringResource(int id, Object... formatArgs);
+
+        void createDocument(RunnableArg<File> onDocumentCreated, Runnable onCancel);
     }
 
     interface Presenter {
@@ -147,5 +151,15 @@ public interface MainContract {
         void onTransportControlChange(boolean controlMax);
 
         void onNavigationClick(NavigationItem item);
+
+        void onUrlTextChange(String text);
+
+        void onCheckUrlClick();
+
+        void onDownloadVideoClick();
+
+        void onDownloadAudioClick();
+
+        void onAddToPlaylistClick();
     }
 }

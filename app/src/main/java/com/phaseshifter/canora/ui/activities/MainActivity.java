@@ -72,6 +72,7 @@ import com.phaseshifter.canora.utils.android.AttributeConversion;
 import com.phaseshifter.canora.utils.android.metrics.AndroidFPSMeter;
 import com.phaseshifter.canora.utils.android.metrics.AndroidMemoryMeter;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -164,6 +165,7 @@ public class MainActivity extends Activity implements MainContract.View,
                 contentViewModel,
                 playerStateViewModel
         );
+
         trackAdapter = new AudioDataArrayAdapter(this, new ArrayList<>());
         playlistAdapter = new AudioPlaylistArrayAdapter(this, new ArrayList<>());
         externalContentObserver = new ContentObserver(new Handler(Looper.getMainLooper())) {
@@ -511,6 +513,11 @@ public class MainActivity extends Activity implements MainContract.View,
                 break;
         }
         return true;
+    }
+
+    @Override
+    public void createDocument(RunnableArg<File> onDocumentCreated, Runnable onCancel) {
+
     }
 
     //END Android Interfaces

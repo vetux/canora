@@ -725,6 +725,31 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
         }
     }
 
+    @Override
+    public void onUrlTextChange(String text) {
+
+    }
+
+    @Override
+    public void onCheckUrlClick() {
+
+    }
+
+    @Override
+    public void onDownloadVideoClick() {
+
+    }
+
+    @Override
+    public void onDownloadAudioClick() {
+
+    }
+
+    @Override
+    public void onAddToPlaylistClick() {
+
+    }
+
     //STOP Presenter Interface
 
     private HashSet<Integer> getSelectedTrackIndices() {

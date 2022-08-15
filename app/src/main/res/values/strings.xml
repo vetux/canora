@@ -144,7 +144,7 @@
     <string name="main_download_audio">Download Audio</string>
     <string name="main_download_video">Download Video</string>
 
-    <string name="main_downloaditem_progress">%1$s / %2$s mb</string>
+    <string name="main_downloaditem_eta">%1$s seconds</string>
 
     <string name="main_streamtitle">Title: %1$s</string>
     <string name="main_streamartist">Artist: %1$s</string>

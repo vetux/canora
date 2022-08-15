@@ -10,14 +10,14 @@
         android:text=""
         android:textColor="?onColorPrimary"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/textView_downloaditem_bytes"
+        app:layout_constraintEnd_toStartOf="@id/textView_downloaditem_eta"
         app:layout_constraintTop_toBottomOf="@id/progress_downloaditem" />
 
     <TextView
-        android:id="@+id/textView_downloaditem_bytes"
+        android:id="@+id/textView_downloaditem_eta"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/main_downloaditem_progress"
+        android:text="@string/main_downloaditem_eta"
         android:textColor="?onColorPrimary"
         app:layout_constraintStart_toEndOf="@id/textView_downloaditem_url"
         app:layout_constraintEnd_toEndOf="parent"
