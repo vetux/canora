@@ -51,6 +51,7 @@ import com.phaseshifter.canora.ui.activities.editors.AudioPlaylistEditorActivity
 import com.phaseshifter.canora.ui.arrayadapters.AudioDataArrayAdapter;
 import com.phaseshifter.canora.ui.arrayadapters.AudioPlaylistArrayAdapter;
 import com.phaseshifter.canora.ui.contracts.MainContract;
+import com.phaseshifter.canora.ui.data.MainPage;
 import com.phaseshifter.canora.ui.data.constants.NavigationItem;
 import com.phaseshifter.canora.ui.data.formatting.FilterOptions;
 import com.phaseshifter.canora.ui.data.formatting.SortingOptions;
@@ -496,6 +497,9 @@ public class MainActivity extends Activity implements MainContract.View,
             case R.id.nav_button_soundcloud_charts:
                 presenter.onNavigationClick(NavigationItem.SOUNDCLOUD_CHARTS);
                 break;
+            case R.id.nav_button_youtube_dl:
+                presenter.onNavigationClick(NavigationItem.YOUTUBE_DL);
+                break;
             case R.id.nav_button_settings:
                 presenter.onNavigationClick(NavigationItem.SETTINGS);
                 break;
@@ -878,6 +882,17 @@ public class MainActivity extends Activity implements MainContract.View,
                     showPlaylistContent();
                 } else {
                     showTrackContent();
+                }
+                View contentMain = findViewById(R.id.include_content_main);
+                View contentYtdl = findViewById(R.id.include_content_youtubedl);
+                if (contentMain != null && contentYtdl != null) {
+                    if (value.getPage() == MainPage.YOUTUBE_DL) {
+                        contentMain.setVisibility(View.GONE);
+                        contentYtdl.setVisibility(View.VISIBLE);
+                    } else {
+                        contentMain.setVisibility(View.VISIBLE);
+                        contentYtdl.setVisibility(View.GONE);
+                    }
                 }
             }
         });

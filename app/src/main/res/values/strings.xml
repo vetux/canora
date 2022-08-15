@@ -122,6 +122,10 @@
 
     <string name="main_navigation_header0device">Local Device</string>
     <string name="main_navigation_header0soundcloud">SoundCloud</string>
+
+    <string name="main_navigation_item_title0youtube_search">Search YouTube</string>
+    <string name="main_navigation_item_title0youtube_dl">YouTubeDL</string>
+
     <string name="main_navigation_item_title0search">Search</string>
     <string name="main_navigation_item_title0charts">Charts</string>
     <string name="main_navigation_item_title0comingSoon">Coming soon…</string>

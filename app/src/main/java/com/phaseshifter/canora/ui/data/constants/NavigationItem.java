@@ -10,6 +10,8 @@ public enum NavigationItem {
     SOUNDCLOUD_SEARCH,
     SOUNDCLOUD_CHARTS,
 
+    YOUTUBE_DL,
+
     SETTINGS,
     RATE,
     INFO

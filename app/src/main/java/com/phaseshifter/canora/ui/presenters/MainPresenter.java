@@ -702,6 +702,14 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                 setViewModelContentSelector(uiContentSelector);
                 updateVisibleContent();
                 break;
+            case YOUTUBE_DL:
+                view.setNavigationMax(false);
+                view.setTransportControlMax(false);
+                appViewModel.isSelecting.set(false);
+                uiContentSelector = new ContentSelector(MainPage.YOUTUBE_DL, null);
+                setViewModelContentSelector(uiContentSelector);
+                updateVisibleContent();
+                break;
             case SETTINGS:
                 view.setNavigationMax(false);
                 view.startSettings();
