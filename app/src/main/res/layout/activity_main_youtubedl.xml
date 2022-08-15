@@ -9,7 +9,9 @@
         android:id="@+id/edittext_youtubedl"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:textColor="?onTexBackground"
+        android:textColorHint="?onTexBackground_60"/>
 
     <Button
         android:id="@+id/button_youtubedl_checkurl"
@@ -30,7 +32,7 @@
             android:layout_height="wrap_content"
             android:text="@string/main_streamtitle"
             android:textColor="?onColorPrimary"
-            android:textSize="30sp"
+            android:textSize="20sp"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
@@ -39,7 +41,7 @@
             android:layout_height="wrap_content"
             android:text="@string/main_streamlength"
             android:textColor="?onColorPrimary"
-            android:textSize="30sp"
+            android:textSize="20sp"
             app:layout_constraintTop_toBottomOf="@id/textview_youtubedl_streamtitle" />
 
         <TextView
@@ -48,7 +50,7 @@
             android:layout_height="wrap_content"
             android:text="@string/main_streamsize"
             android:textColor="?onColorPrimary"
-            android:textSize="30sp"
+            android:textSize="20sp"
             app:layout_constraintTop_toBottomOf="@id/textview_youtubedl_streamlength" />
 
 
@@ -84,6 +86,7 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <ListView
+        android:id="@+id/listview_youtubedl_downloads"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"

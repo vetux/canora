@@ -11,7 +11,7 @@
         android:textColor="?onColorPrimary"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/textView_downloaditem_eta"
-        app:layout_constraintTop_toBottomOf="@id/progress_downloaditem" />
+        app:layout_constraintTop_toTopOf="@id/progress_downloaditem" />
 
     <TextView
         android:id="@+id/textView_downloaditem_eta"
@@ -20,20 +20,20 @@
         android:text="@string/main_downloaditem_eta"
         android:textColor="?onColorPrimary"
         app:layout_constraintStart_toEndOf="@id/textView_downloaditem_url"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/progress_downloaditem"/>
+        app:layout_constraintEnd_toStartOf="@id/progress_downloaditem"
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <ProgressBar
         android:id="@+id/progress_downloaditem"
-        android:layout_width="0dp"
+        android:layout_width="100dp"
         android:layout_height="20dp"
-        android:elevation="2dp"
         android:indeterminate="false"
         android:progressTint="?colorSecondary"
         android:progressTintMode="src_atop"
         android:padding="10dp"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@id/textView_downloaditem_eta"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent"
+        style="?android:attr/progressBarStyleHorizontal" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -105,7 +105,6 @@
         android:paddingRight="10dp"
         android:textColor="?onTexBackground"
         android:textColorHint="?onTexBackground_60"
-        android:textCursorDrawable="@null"
         android:textSize="20sp"
         app:layout_constraintStart_toStartOf="@id/toolbar_imageview_background"
         app:layout_constraintEnd_toEndOf="@id/toolbar_imageview_background"

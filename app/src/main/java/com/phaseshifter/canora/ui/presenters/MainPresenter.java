@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.phaseshifter.canora.R;
+import com.phaseshifter.canora.application.MainApplication;
 import com.phaseshifter.canora.data.media.audio.AudioData;
 import com.phaseshifter.canora.data.media.audio.source.AudioDataSourceUri;
 import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
@@ -41,6 +42,7 @@ import com.yausername.ffmpeg.FFmpeg;
 import com.yausername.youtubedl_android.YoutubeDL;
 import com.yausername.youtubedl_android.YoutubeDLException;
 import com.yausername.youtubedl_android.YoutubeDLRequest;
+import com.yausername.youtubedl_android.YoutubeDLResponse;
 import com.yausername.youtubedl_android.mapper.VideoInfo;
 
 import java.io.File;
@@ -50,6 +52,7 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -134,6 +137,15 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
         this.context = context;
         this.presExec = new ThreadPoolExecutor(1, 1, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
 
+        MainApplication app = (MainApplication) context.getApplicationContext();
+        app.downloads.addObserver(new Observer<List<DownloadProgress>>() {
+            @Override
+            public void update(Observable<List<DownloadProgress>> observable, List<DownloadProgress> value) {
+                ytdlViewModel.downloads.set(value);
+            }
+        });
+        ytdlViewModel.downloads.set(app.downloads.get());
+
         if (savedState instanceof MainPresenterState) {
             final MainPresenterState state = (MainPresenterState) savedState;
             // Repositories are stored application wide so the saved indicator uuid should be valid.
@@ -143,6 +155,11 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
             ytdlViewModel.infoForUrl.set(state.info);
             downloadingVideo = state.downloadingVideo;
             downloadingAudio = state.downloadingAudio;
+        }
+    }
+
+    private void joinExecutor(ExecutorService exec) throws InterruptedException {
+        while (!exec.awaitTermination(0, TimeUnit.SECONDS)) {
         }
     }
 
@@ -340,6 +357,12 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
 
     @Override
     public synchronized void stop() {
+        presExec.shutdown();
+        try {
+            joinExecutor(presExec);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         settingsRepository.putString(StringSetting.SC_CLIENTID, scAudioDataRepo.getClientID());
 
         MainPresenterState savedState = new MainPresenterState();
@@ -796,6 +819,8 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                     ytdlViewModel.infoForUrl.set(downloadInfo);
                 });
             } catch (Exception e) {
+                e.printStackTrace();
+                view.showWarning(e.getMessage());
             }
         });
     }
@@ -826,16 +851,14 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
     @Override
     public void onDocumentCreated(OutputStream fileStream) {
         String url = ytdlViewModel.url.get();
-        DownloadProgress dlProg = new DownloadProgress();
-        dlProg.url = url;
-        ytdlViewModel.downloads.get().add(dlProg);
         ytdlViewModel.downloads.notifyObservers();
         runPresenterTask(() -> {
+            MainApplication app = (MainApplication) context.getApplicationContext();
             try {
-                YoutubeDL instance = getYtdlInstance();
                 if (downloadingAudio) {
                     File youtubeDLDir = new File(context.getFilesDir(), "download_cache");
                     String outputFile = new String(youtubeDLDir.getAbsolutePath() + "/temp.mp3");
+                    new File(outputFile).delete();
                     YoutubeDLRequest request = new YoutubeDLRequest(url);
                     request.addOption("-o", youtubeDLDir.getAbsolutePath() + "/%(title)s.%(ext)s");
                     request.addOption("-f", "mp4");
@@ -843,47 +866,38 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                     request.addOption("--extract-audio");
                     request.addOption("--audio-format", "mp3");
                     request.addOption("--output", outputFile);
-                    instance.execute(request, (progress, etaInSeconds, line) -> {
-                        mainThread.execute(() -> {
-                            dlProg.progress = progress;
-                            dlProg.etaInSeconds = etaInSeconds;
-                            ytdlViewModel.downloads.notifyObservers();
-                        });
-                    });
-                    FileInputStream fis = new FileInputStream(outputFile);
-                    byte[] buffer = new byte[1024];
-                    int len;
-                    while ((len = fis.read(buffer)) != -1) {
-                        fileStream.write(buffer, 0, len);
-                    }
+                    app.startDownload(url, request, outputFile, fileStream, (e) -> {
+                                e.printStackTrace();
+                                view.showWarning(context.getString(R.string.main_download_failed, e.getMessage()));
+                            },
+                            () -> {
+                                if (view != null && context != null) {
+                                    view.showMessage(context.getString(R.string.main_download_successful));
+                                }
+                            });
                 } else if (downloadingVideo) {
                     YoutubeDLRequest request = new YoutubeDLRequest(url);
                     File youtubeDLDir = new File(context.getFilesDir(), "download_cache");
                     String outputFile = new String(youtubeDLDir.getAbsolutePath() + "/temp.mp4");
+                    new File(outputFile).delete();
                     request.addOption("-o", outputFile);
                     request.addOption("-f", "mp4");
                     request.addOption("--no-playlist");
-                    instance.execute(request, (progress, etaInSeconds, line) -> {
-                        mainThread.execute(() -> {
-                            dlProg.progress = progress;
-                            dlProg.etaInSeconds = etaInSeconds;
-                            ytdlViewModel.downloads.notifyObservers();
-                        });
-                    });
-                    FileInputStream fis = new FileInputStream(outputFile);
-                    byte[] buffer = new byte[1024];
-                    int len;
-                    while ((len = fis.read(buffer)) != -1) {
-                        fileStream.write(buffer, 0, len);
-                    }
+                    app.startDownload(url, request, outputFile, fileStream, (e) -> {
+                                e.printStackTrace();
+                                view.showWarning(context.getString(R.string.main_download_failed, e.getMessage()));
+                            },
+                            () -> {
+                                if (view != null && context != null) {
+                                    view.showMessage(context.getString(R.string.main_download_successful));
+                                }
+                            });
                 }
-                ytdlViewModel.downloads.get().remove(dlProg);
                 downloadingVideo = false;
                 downloadingAudio = false;
-                view.showMessage(context.getString(R.string.main_download_successful));
             } catch (Exception e) {
                 e.printStackTrace();
-                view.showMessage(context.getString(R.string.main_download_failed, e.getMessage()));
+                view.showWarning(context.getString(R.string.main_download_failed, e.getMessage()));
             }
         });
     }

@@ -145,8 +145,9 @@
     <string name="main_download_video">Download Video</string>
     <string name="main_download_successful">Download Successful</string>
     <string name="main_download_failed">Download Failed: %1$s</string>
+    <string name="main_check_failed">Url Check Failed: %1$s</string>
 
-    <string name="main_downloaditem_eta">%1$s seconds</string>
+    <string name="main_downloaditem_eta">%1$d seconds</string>
 
     <string name="main_streamtitle">Title: %1$s</string>
     <string name="main_streamsize">Size: %1$d bytes</string>
