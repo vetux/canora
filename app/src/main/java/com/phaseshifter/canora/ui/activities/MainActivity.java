@@ -54,7 +54,7 @@ import com.phaseshifter.canora.ui.contracts.MainContract;
 import com.phaseshifter.canora.ui.data.constants.NavigationItem;
 import com.phaseshifter.canora.ui.data.formatting.FilterOptions;
 import com.phaseshifter.canora.ui.data.formatting.SortingOptions;
-import com.phaseshifter.canora.ui.data.misc.SelectionIndicator;
+import com.phaseshifter.canora.ui.data.misc.ContentSelector;
 import com.phaseshifter.canora.ui.menu.ContextMenu;
 import com.phaseshifter.canora.ui.menu.OptionsMenu;
 import com.phaseshifter.canora.ui.presenters.MainPresenter;
@@ -856,13 +856,13 @@ public class MainActivity extends Activity implements MainContract.View,
                 }
             }
         });
-        appViewModel.contentSelector.addObserver(new Observer<SelectionIndicator>() {
+        appViewModel.contentSelector.addObserver(new Observer<ContentSelector>() {
             @Override
-            public void update(Observable<SelectionIndicator> observable, SelectionIndicator value) {
+            public void update(Observable<ContentSelector> observable, ContentSelector value) {
                 ViewGroup drawerItems = findViewById(R.id.nav_content_root);
                 if (drawerItems != null) {
                     CustomNavigationDrawer drawer = new CustomNavigationDrawer(drawerItems);
-                    drawer.setCheckedSelector(value.getSelector());
+                    drawer.setCheckedSelector(value.getPage());
                 }
                 if (value.isPlaylistView()) {
                     showPlaylistContent();
@@ -1291,6 +1291,7 @@ public class MainActivity extends Activity implements MainContract.View,
                     .translationX(0)
                     .setDuration(250);
         }
+        trackAdapter.notifyDataSetChanged();
     }
 
     private void showPlaylistContent() {
@@ -1316,6 +1317,7 @@ public class MainActivity extends Activity implements MainContract.View,
                     .translationX(0)
                     .setDuration(250);
         }
+        playlistAdapter.notifyDataSetChanged();
     }
 
     private void openNavigationDrawer() {

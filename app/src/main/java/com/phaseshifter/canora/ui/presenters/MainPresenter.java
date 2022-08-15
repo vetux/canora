@@ -18,11 +18,11 @@ import com.phaseshifter.canora.model.repo.SoundCloudAudioRepository;
 import com.phaseshifter.canora.service.state.PlayerState;
 import com.phaseshifter.canora.service.wrapper.AutoBindingServiceWrapper;
 import com.phaseshifter.canora.ui.contracts.MainContract;
-import com.phaseshifter.canora.ui.data.AudioContentSelector;
+import com.phaseshifter.canora.ui.data.MainPage;
 import com.phaseshifter.canora.ui.data.constants.NavigationItem;
 import com.phaseshifter.canora.ui.data.formatting.FilterOptions;
 import com.phaseshifter.canora.ui.data.formatting.SortingOptions;
-import com.phaseshifter.canora.ui.data.misc.SelectionIndicator;
+import com.phaseshifter.canora.ui.data.misc.ContentSelector;
 import com.phaseshifter.canora.ui.menu.ContextMenu;
 import com.phaseshifter.canora.ui.menu.OptionsMenu;
 import com.phaseshifter.canora.ui.selectors.MainSelector;
@@ -68,8 +68,8 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
     private FilterOptions filterOptions = new FilterOptions();
     private SortingOptions sortingOptions = new SortingOptions();
 
-    private SelectionIndicator uiIndicator = new SelectionIndicator(AudioContentSelector.TRACKS, null);
-    private SelectionIndicator contentIndicator = null;
+    private ContentSelector uiIndicator = new ContentSelector(MainPage.TRACKS, null);
+    private ContentSelector contentIndicator = null;
 
     private HashSet<UUID> selection = new HashSet<>();
 
@@ -109,20 +109,6 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
         this.playerStateViewModel = playerStateViewModel;
         this.presExec = new ThreadPoolExecutor(1, 1, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
 
-        scAudioDataRepo.setClientID(settingsRepository.getString(StringSetting.SC_CLIENTID));
-
-        theme = themeRepository.get(settingsRepository.getInt(IntegerSetting.THEME));
-
-        sortingOptions.sortby = settingsRepository.getInt(IntegerSetting.SORT_BY);
-        sortingOptions.sortdir = settingsRepository.getInt(IntegerSetting.SORT_DIR);
-        sortingOptions.sorttech = settingsRepository.getInt(IntegerSetting.SORT_TECH);
-
-        filterOptions.filterBy = settingsRepository.getInt(IntegerSetting.FILTER_BY);
-
-        view.setTheme(theme);
-
-        appViewModel.devMode.set(settingsRepository.getBoolean(BooleanSetting.DEVELOPERMODE));
-
         if (savedState instanceof MainPresenterState) {
             final MainPresenterState state = (MainPresenterState) savedState;
             // Repositories are stored application wide so the saved indicator uuid should be valid.
@@ -149,7 +135,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
         List<AudioData> formattedTracks = new ArrayList<>();
         List<AudioPlaylist> formattedPlaylists = new ArrayList<>();
         if (uiIndicator.isPlaylistView()) {
-            switch (uiIndicator.getSelector()) {
+            switch (uiIndicator.getPage()) {
                 case PLAYLISTS:
                     sortedPlaylists = ListSorter.sortAudioPlaylist(userPlaylistRepository.getAll(), sortingOptions);
                     break;
@@ -168,7 +154,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
             }
             formattedPlaylists = ListFilter.filterAudioPlaylist(sortedPlaylists, filterOptions);
         } else {
-            switch (uiIndicator.getSelector()) {
+            switch (uiIndicator.getPage()) {
                 case TRACKS:
                     sortedTracks = ListSorter.sortAudioData(deviceAudioRepository.getTracks(), sortingOptions);
                     break;
@@ -193,7 +179,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                 case YOUTUBE_SEARCH:
                     break;
             }
-            if (uiIndicator.getSelector() != AudioContentSelector.SOUNDCLOUD_SEARCH) {
+            if (uiIndicator.getPage() != MainPage.SOUNDCLOUD_SEARCH) {
                 formattedTracks = ListFilter.filterAudioData(sortedTracks, filterOptions);
             } else {
                 formattedTracks = sortedTracks;
@@ -201,6 +187,17 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
         }
         contentViewModel.visibleTracks.set(formattedTracks);
         contentViewModel.visiblePlaylists.set(formattedPlaylists);
+        if (!uiIndicator.isPlaylistView() && contentViewModel.visibleTracks.get().isEmpty()) {
+            if (uiIndicator.getPage() == MainPage.SOUNDCLOUD_SEARCH){
+                appViewModel.notFoundText.set("Enter text to begin searching soundcloud...");
+            } else {
+                appViewModel.notFoundText.set("No tracks found");
+            }
+        } else if (uiIndicator.isPlaylistView() && contentViewModel.visiblePlaylists.get().isEmpty()) {
+            appViewModel.notFoundText.set("No playlists found");
+        } else {
+            appViewModel.notFoundText.set(null);
+        }
     }
 
     @Override
@@ -212,6 +209,18 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
 
     @Override
     public synchronized void start() {
+        scAudioDataRepo.setClientID(settingsRepository.getString(StringSetting.SC_CLIENTID));
+
+        theme = themeRepository.get(settingsRepository.getInt(IntegerSetting.THEME));
+
+        sortingOptions.sortby = settingsRepository.getInt(IntegerSetting.SORT_BY);
+        sortingOptions.sortdir = settingsRepository.getInt(IntegerSetting.SORT_DIR);
+        sortingOptions.sorttech = settingsRepository.getInt(IntegerSetting.SORT_TECH);
+
+        filterOptions.filterBy = settingsRepository.getInt(IntegerSetting.FILTER_BY);
+
+        appViewModel.devMode.set(settingsRepository.getBoolean(BooleanSetting.DEVELOPERMODE));
+
         service.bind();
         PlayerState playerState = service.getState().get();
         if (playerState != null)
@@ -221,6 +230,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
         runPresenterTask(() -> {
             deviceAudioRepository.refresh();
             mainThread.execute(() -> {
+                view.setTheme(theme);
                 appViewModel.notifyObservers();
                 contentViewModel.notifyObservers();
                 playerStateViewModel.notifyObservers();
@@ -295,15 +305,16 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
 
     @Override
     public void onSearchTextChange(String text) {
+        assert(text != null);
         filterOptions.filterFor = text;
-        if (uiIndicator.getSelector() != AudioContentSelector.SOUNDCLOUD_SEARCH) {
+        if (uiIndicator.getPage() != MainPage.SOUNDCLOUD_SEARCH) {
             updateVisibleContent();
         }
     }
 
     @Override
     public void onSearchTextEditingFinished() {
-        if (uiIndicator.getSelector() == AudioContentSelector.SOUNDCLOUD_SEARCH) {
+        if (uiIndicator.getPage() == MainPage.SOUNDCLOUD_SEARCH) {
             String text = filterOptions.filterFor;
             runPresenterTask(() -> {
                 scAudioDataRepo.refreshSearch(text);
@@ -328,7 +339,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
             actions.add(OptionsMenu.Action.SELECT_START);
         }
 
-        if (uiIndicator.getSelector() == AudioContentSelector.PLAYLISTS) {
+        if (uiIndicator.getPage() == MainPage.PLAYLISTS) {
             if (uiIndicator.isPlaylistView() && appViewModel.isSelecting.get()) {
                 actions.add(OptionsMenu.Action.DELETE);
             } else if (!uiIndicator.isPlaylistView()) {
@@ -360,14 +371,16 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
     public void onBackPress() {
         if (!uiIndicator.equals(contentIndicator)
                 && !uiIndicator.isPlaylistView()
-                && uiIndicator.getSelector() != AudioContentSelector.TRACKS) {
-            uiIndicator = new SelectionIndicator(uiIndicator.getSelector(), null);
+                && uiIndicator.getPage() != MainPage.TRACKS) {
+            uiIndicator = new ContentSelector(uiIndicator.getPage(), null);
             appViewModel.isSelecting.set(false);
             appViewModel.contentSelector.set(uiIndicator);
+            updateVisibleContent();
         } else if (contentIndicator != null && !uiIndicator.equals(contentIndicator)) {
             uiIndicator = contentIndicator;
             appViewModel.isSelecting.set(false);
             appViewModel.contentSelector.set(uiIndicator);
+            updateVisibleContent();
         } else {
             view.shutdown();
         }
@@ -423,7 +436,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
         HashSet<ContextMenu.Action> actions = new HashSet<>();
         actions.add(ContextMenu.Action.SELECT);
         actions.add(ContextMenu.Action.EDIT);
-        if (uiIndicator.getSelector() == AudioContentSelector.PLAYLISTS) {
+        if (uiIndicator.getPage() == MainPage.PLAYLISTS) {
             actions.add(ContextMenu.Action.DELETE);
         }
         view.showContentContextMenu(index, actions, (action) -> {
@@ -451,8 +464,8 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
             HashSet<Integer> indices = getSelectedPlaylistIndices();
             contentViewModel.contentPlaylistsSelection.set(indices);
         } else {
-            uiIndicator = new SelectionIndicator(uiIndicator.getSelector(), processedData.get(index).getMetadata().getId());
-            if (uiIndicator.getSelector() == AudioContentSelector.SOUNDCLOUD_CHARTS) {
+            uiIndicator = new ContentSelector(uiIndicator.getPage(), processedData.get(index).getMetadata().getId());
+            if (uiIndicator.getPage() == MainPage.SOUNDCLOUD_CHARTS) {
                 runPresenterTask(() -> {
                     scAudioDataRepo.refreshCharts(scAudioDataRepo.getChartsIndex(uiIndicator.getUuid()));
                     mainThread.execute(() -> {
@@ -471,7 +484,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
     public void onPlaylistContentLongClick(int index) {
         HashSet<ContextMenu.Action> actions = new HashSet<>();
         actions.add(ContextMenu.Action.SELECT);
-        if (uiIndicator.getSelector() == AudioContentSelector.PLAYLISTS) {
+        if (uiIndicator.getPage() == MainPage.PLAYLISTS) {
             actions.add(ContextMenu.Action.EDIT);
             actions.add(ContextMenu.Action.DELETE);
         }
@@ -483,7 +496,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
 
     @Override
     public void onTrackContentScrollToBottom() {
-        if (uiIndicator.getSelector() == AudioContentSelector.SOUNDCLOUD_SEARCH) {
+        if (uiIndicator.getPage() == MainPage.SOUNDCLOUD_SEARCH) {
             if (!isScrollLoading) {
                 isScrollLoading = true;
                 if (!scAudioDataRepo.isSearchLimitReached()) {
@@ -491,7 +504,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                     updateVisibleContent();
                 }
             }
-        } else if (uiIndicator.getSelector() == AudioContentSelector.SOUNDCLOUD_CHARTS && !uiIndicator.isPlaylistView()) {
+        } else if (uiIndicator.getPage() == MainPage.SOUNDCLOUD_CHARTS && !uiIndicator.isPlaylistView()) {
             if (!isScrollLoading) {
                 if (!scAudioDataRepo.isChartsLimitReached()) {
                     scAudioDataRepo.refreshCharts(scAudioDataRepo.getChartsIndex(uiIndicator.getUuid()));
@@ -569,35 +582,39 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                 view.setNavigationMax(false);
                 view.setTransportControlMax(false);
                 appViewModel.isSelecting.set(false);
-                uiIndicator = new SelectionIndicator(AudioContentSelector.TRACKS, null);
+                uiIndicator = new ContentSelector(MainPage.TRACKS, null);
                 appViewModel.contentSelector.set(uiIndicator);
+                updateVisibleContent();
                 break;
             case PLAYLISTS:
                 view.setNavigationMax(false);
                 view.setTransportControlMax(false);
                 appViewModel.isSelecting.set(false);
-                uiIndicator = new SelectionIndicator(AudioContentSelector.PLAYLISTS, null);
+                uiIndicator = new ContentSelector(MainPage.PLAYLISTS, null);
                 appViewModel.contentSelector.set(uiIndicator);
+                updateVisibleContent();
                 break;
             case ALBUMS:
                 view.setNavigationMax(false);
                 view.setTransportControlMax(false);
                 appViewModel.isSelecting.set(false);
-                uiIndicator = new SelectionIndicator(AudioContentSelector.ALBUMS, null);
+                uiIndicator = new ContentSelector(MainPage.ALBUMS, null);
                 appViewModel.contentSelector.set(uiIndicator);
+                updateVisibleContent();
                 break;
             case ARTISTS:
                 view.setNavigationMax(false);
                 view.setTransportControlMax(false);
                 appViewModel.isSelecting.set(false);
-                uiIndicator = new SelectionIndicator(AudioContentSelector.ARTISTS, null);
+                uiIndicator = new ContentSelector(MainPage.ARTISTS, null);
                 appViewModel.contentSelector.set(uiIndicator);
+                updateVisibleContent();
                 break;
             case GENRES:
                 view.setNavigationMax(false);
                 view.setTransportControlMax(false);
                 appViewModel.isSelecting.set(false);
-                uiIndicator = new SelectionIndicator(AudioContentSelector.GENRES, null);
+                uiIndicator = new ContentSelector(MainPage.GENRES, null);
                 appViewModel.contentSelector.set(uiIndicator);
                 updateVisibleContent();
                 break;
@@ -606,7 +623,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                 view.setTransportControlMax(false);
                 appViewModel.isSearching.set(true);
                 appViewModel.isSelecting.set(false);
-                uiIndicator = new SelectionIndicator(AudioContentSelector.SOUNDCLOUD_SEARCH, null);
+                uiIndicator = new ContentSelector(MainPage.SOUNDCLOUD_SEARCH, null);
                 runPresenterTask(() -> {
                     scAudioDataRepo.refreshSearch(appViewModel.searchText.get());
                     mainThread.execute(() -> {
@@ -619,7 +636,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                 view.setNavigationMax(false);
                 view.setTransportControlMax(false);
                 appViewModel.isSelecting.set(false);
-                uiIndicator = new SelectionIndicator(AudioContentSelector.SOUNDCLOUD_CHARTS, null);
+                uiIndicator = new ContentSelector(MainPage.SOUNDCLOUD_CHARTS, null);
                 appViewModel.contentSelector.set(uiIndicator);
                 updateVisibleContent();
                 break;
@@ -856,7 +873,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                         view.showDialog_DeletePlaylists(playlistsToDelete, () -> {
                             boolean resetUiIndicator = false;
                             for (AudioPlaylist pl : playlistsToDelete) {
-                                if (contentIndicator.getSelector() == AudioContentSelector.PLAYLISTS
+                                if (contentIndicator.getPage() == MainPage.PLAYLISTS
                                         && Objects.equals(contentIndicator.getUuid(), pl.getMetadata().getId()))
                                     resetUiIndicator = true;
                                 userPlaylistRepository.remove(pl.getMetadata().getId());
@@ -899,10 +916,10 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                         userPlaylistRepository.remove(playlistToDelete.getMetadata().getId());
                         if (Objects.equals(uiIndicator, contentIndicator)) {
                             contentIndicator = null;
-                            uiIndicator = new SelectionIndicator(uiIndicator.getSelector(), null);
+                            uiIndicator = new ContentSelector(uiIndicator.getPage(), null);
                             appViewModel.contentSelector.set(uiIndicator);
                         } else {
-                            uiIndicator = new SelectionIndicator(uiIndicator.getSelector(), null);
+                            uiIndicator = new ContentSelector(uiIndicator.getPage(), null);
                             appViewModel.contentSelector.set(uiIndicator);
                         }
                         view.showMessage("Deleted Playlist", "Playlist deleted");

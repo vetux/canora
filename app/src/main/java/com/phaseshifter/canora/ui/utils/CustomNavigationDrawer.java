@@ -4,7 +4,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.phaseshifter.canora.R;
-import com.phaseshifter.canora.ui.data.AudioContentSelector;
+import com.phaseshifter.canora.ui.data.MainPage;
 
 public class CustomNavigationDrawer {
     private final ViewGroup root;
@@ -25,7 +25,7 @@ public class CustomNavigationDrawer {
         root.findViewById(resID).setSelected(true);
     }
 
-    public void setCheckedSelector(AudioContentSelector selector) {
+    public void setCheckedSelector(MainPage selector) {
         for (int i = 0; i < root.getChildCount(); i++) {
             root.getChildAt(i).setSelected(false);
         }

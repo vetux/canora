@@ -18,7 +18,7 @@ public class ContentViewModel {
     public final Observable<HashSet<Integer>> contentTracksSelection = new Observable<>(new HashSet<>());
 
     public final Observable<List<AudioPlaylist>> visiblePlaylists = new Observable<>(new ArrayList<>());
-    public final Observable<Integer> contentPlaylistHighlight = new Observable<>(0);
+    public final Observable<Integer> contentPlaylistHighlight = new Observable<>(null);
     public final Observable<HashSet<Integer>> contentPlaylistsSelection = new Observable<>(new HashSet<>());
 
     public void notifyObservers(){

@@ -175,6 +175,11 @@ public class AudioDataArrayAdapter extends ArrayAdapter<AudioData> implements Se
     }
 
     @Override
+    public int getCount() {
+        return contentRef.size();
+    }
+
+    @Override
     public Object[] getSections() {
         return sectionChars.toArray();
     }

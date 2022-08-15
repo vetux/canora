@@ -1,6 +1,6 @@
 package com.phaseshifter.canora.ui.data;
 
-public enum AudioContentSelector {
+public enum MainPage {
     TRACKS,
     PLAYLISTS,
     ARTISTS,
@@ -8,5 +8,6 @@ public enum AudioContentSelector {
     GENRES,
     SOUNDCLOUD_SEARCH,
     SOUNDCLOUD_CHARTS,
-    YOUTUBE_SEARCH
+    YOUTUBE_SEARCH,
+    YOUTUBE_DL
 }

@@ -5,21 +5,20 @@ import static com.phaseshifter.canora.ui.selectors.MainSelector.getPlaylistTitle
 import android.content.Context;
 
 import com.phaseshifter.canora.R;
-import com.phaseshifter.canora.data.theme.AppTheme;
 import com.phaseshifter.canora.model.repo.DeviceAudioRepository;
 import com.phaseshifter.canora.model.repo.SoundCloudAudioRepository;
 import com.phaseshifter.canora.model.repo.UserPlaylistRepository;
-import com.phaseshifter.canora.ui.data.AudioContentSelector;
-import com.phaseshifter.canora.ui.data.misc.SelectionIndicator;
+import com.phaseshifter.canora.ui.data.MainPage;
+import com.phaseshifter.canora.ui.data.misc.ContentSelector;
 import com.phaseshifter.canora.utils.Observable;
 
 public class AppViewModel {
     public final Observable<Boolean> devMode = new Observable<>(false);
 
-    public final Observable<SelectionIndicator> contentSelector = new Observable<>(new SelectionIndicator(AudioContentSelector.TRACKS, null));
+    public final Observable<ContentSelector> contentSelector = new Observable<>(new ContentSelector(MainPage.TRACKS, null));
     public final Observable<Boolean> isContentLoading = new Observable<>(false);
     public final Observable<Boolean> isSelecting = new Observable<>(false);
-    public final Observable<String> notFoundText = new Observable<>("Not Found");
+    public final Observable<String> notFoundText = new Observable<>(null);
 
     public final Observable<Boolean> isSearching = new Observable<>(false);
     public final Observable<String> searchText = new Observable<>("");
@@ -34,19 +33,19 @@ public class AppViewModel {
         searchText.notifyObservers();
     }
 
-    private String getContentName(SelectionIndicator uiIndicator,
+    private String getContentName(ContentSelector uiIndicator,
                                   Context context,
                                   DeviceAudioRepository audioDataRepository,
                                   UserPlaylistRepository audioPlaylistRepository,
                                   SoundCloudAudioRepository scAudioDataRepo) {
         if (uiIndicator.isPlaylistView()) {
-            return getSelectorName(uiIndicator.getSelector(), context);
+            return getSelectorName(uiIndicator.getPage(), context);
         } else {
             return getIndicatorName(uiIndicator, context, audioDataRepository, audioPlaylistRepository, scAudioDataRepo);
         }
     }
 
-    private String getSelectorName(AudioContentSelector selector, Context context) {
+    private String getSelectorName(MainPage selector, Context context) {
         switch (selector) {
             case TRACKS:
                 return context.getString(R.string.main_toolbar_title0tracks);
@@ -65,13 +64,13 @@ public class AppViewModel {
         return "Error";
     }
 
-    private String getIndicatorName(SelectionIndicator indicator,
+    private String getIndicatorName(ContentSelector indicator,
                                     Context context,
                                     DeviceAudioRepository audioDataRepository,
                                     UserPlaylistRepository audioPlaylistRepository,
                                     SoundCloudAudioRepository scAudioDataRepo) {
         String text = getPlaylistTitle(indicator, audioDataRepository, audioPlaylistRepository, scAudioDataRepo);
-        switch (indicator.getSelector()) {
+        switch (indicator.getPage()) {
             case TRACKS:
                 return context.getString(R.string.main_toolbar_title0tracks);
             case PLAYLISTS:
