@@ -9,6 +9,7 @@ import com.phaseshifter.canora.model.repo.DeviceAudioRepository;
 import com.phaseshifter.canora.model.repo.SoundCloudAudioRepository;
 import com.phaseshifter.canora.model.repo.UserPlaylistRepository;
 import com.phaseshifter.canora.ui.data.MainPage;
+import com.phaseshifter.canora.ui.data.constants.NavigationItem;
 import com.phaseshifter.canora.ui.data.misc.ContentSelector;
 import com.phaseshifter.canora.utils.Observable;
 

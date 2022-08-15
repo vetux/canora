@@ -51,6 +51,9 @@ public class CustomNavigationDrawer {
             case SOUNDCLOUD_CHARTS:
                 root.findViewById(R.id.nav_button_soundcloud_charts).setSelected(true);
                 break;
+            case YOUTUBE_DL:
+                root.findViewById(R.id.nav_button_youtube_dl).setSelected(true);
+                break;
         }
     }
 
