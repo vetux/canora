@@ -6,8 +6,12 @@ import android.util.Log;
 import com.phaseshifter.canora.R;
 import com.phaseshifter.canora.application.MainApplication;
 import com.phaseshifter.canora.data.media.audio.AudioData;
+import com.phaseshifter.canora.data.media.audio.metadata.AudioMetadata;
+import com.phaseshifter.canora.data.media.audio.metadata.AudioMetadataMemory;
+import com.phaseshifter.canora.data.media.audio.source.AudioDataSource;
 import com.phaseshifter.canora.data.media.audio.source.AudioDataSourceUri;
 import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
+import com.phaseshifter.canora.data.media.playlist.metadata.PlaylistMetadata;
 import com.phaseshifter.canora.data.media.playlist.metadata.PlaylistMetadataMemory;
 import com.phaseshifter.canora.data.settings.BooleanSetting;
 import com.phaseshifter.canora.data.settings.FloatSetting;
@@ -18,6 +22,7 @@ import com.phaseshifter.canora.model.editor.AudioMetadataEditor;
 import com.phaseshifter.canora.model.formatting.ListFilter;
 import com.phaseshifter.canora.model.formatting.ListSorter;
 import com.phaseshifter.canora.model.repo.SoundCloudAudioRepository;
+import com.phaseshifter.canora.plugin.ytdl.AudioDataSourceYtdl;
 import com.phaseshifter.canora.service.state.PlayerState;
 import com.phaseshifter.canora.service.wrapper.AutoBindingServiceWrapper;
 import com.phaseshifter.canora.ui.contracts.MainContract;
@@ -798,6 +803,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                 DownloadInfo downloadInfo = new DownloadInfo();
                 downloadInfo.url = info.getUrl();
                 downloadInfo.title = info.getTitle();
+                downloadInfo.user = info.getUploader();
                 downloadInfo.size = info.getFileSize();
                 if (downloadInfo.size == 0)
                     downloadInfo.size = info.getFileSizeApproximate();
@@ -833,7 +839,29 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
 
     @Override
     public void onAddToPlaylistClick() {
-
+        DownloadInfo info = ytdlViewModel.infoForUrl.get();
+        AudioMetadataMemory trackMetadata = new AudioMetadataMemory();
+        trackMetadata.setId(UUID.randomUUID());
+        trackMetadata.setTitle(info.title);
+        trackMetadata.setArtist(info.user);
+        trackMetadata.setLength(info.duration * 1000L);
+        AudioDataSource trackSource = new AudioDataSourceYtdl(ytdlViewModel.url.get());
+        AudioData track = new AudioData(trackMetadata, trackSource);
+        List<AudioData> tracks = new ArrayList<>();
+        tracks.add(track);
+        view.showAddSelectionMenu(userPlaylistRepository.getAll(),
+                () -> {
+                    view.showDialog_CreatePlaylist(tracks, (name) -> {
+                        PlaylistMetadataMemory metadata = new PlaylistMetadataMemory(UUID.randomUUID(), name, null);
+                        AudioPlaylist playlist = new AudioPlaylist(metadata, tracks);
+                        userPlaylistRepository.add(playlist);
+                    }, () -> {
+                    });
+                }, (playlist) -> {
+                    AudioPlaylist targetCopy = new AudioPlaylist(playlist);
+                    targetCopy.getData().add(track);
+                    userPlaylistRepository.replace(playlist.getMetadata().getId(), targetCopy);
+                });
     }
 
     @Override
@@ -1108,7 +1136,8 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                         view.showDialog_DeletePlaylists(playlistsToDelete, () -> {
                             boolean resetUiIndicator = false;
                             for (AudioPlaylist pl : playlistsToDelete) {
-                                if (playingContentSelector.getPage() == MainPage.PLAYLISTS
+                                if (playingContentSelector != null
+                                        && playingContentSelector.getPage() == MainPage.PLAYLISTS
                                         && Objects.equals(playingContentSelector.getUuid(), pl.getMetadata().getId()))
                                     resetUiIndicator = true;
                                 userPlaylistRepository.remove(pl.getMetadata().getId());

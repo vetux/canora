@@ -27,6 +27,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 public class MainApplication extends Application {
+    public static MainApplication instance;
     private DeviceAudioRepository audioDataRepo;
     private UserPlaylistRepository audioPlaylistRepository;
     private SoundCloudAudioRepository scAudioDataRepo;
@@ -41,6 +42,7 @@ public class MainApplication extends Application {
     private boolean instanceInit = false;
 
     public MainApplication() {
+        instance = this;
         this.downloadExec = new ThreadPoolExecutor(1, 4, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
     }
 

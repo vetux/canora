@@ -5,6 +5,7 @@ import java.io.Serializable;
 public class DownloadInfo implements Serializable {
     public String url;
     public String title;
+    public String user;
     public int duration;
     public long size;
 }
