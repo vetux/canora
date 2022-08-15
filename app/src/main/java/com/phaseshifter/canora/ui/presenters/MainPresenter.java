@@ -227,7 +227,9 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
             contentViewModel.visibleTracks.set(formattedTracks);
         }
 
-        if (!uiContentSelector.isPlaylistView() && contentViewModel.visibleTracks.get().isEmpty()) {
+        if (uiContentSelector.getPage() == MainPage.YOUTUBE_DL) {
+            appViewModel.notFoundText.set(null);
+        } else if (!uiContentSelector.isPlaylistView() && contentViewModel.visibleTracks.get().isEmpty()) {
             if (uiContentSelector.getPage() == MainPage.SOUNDCLOUD_SEARCH) {
                 appViewModel.notFoundText.set("Enter text to begin searching soundcloud...");
             } else {
