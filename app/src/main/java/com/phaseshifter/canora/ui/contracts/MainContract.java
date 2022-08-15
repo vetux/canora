@@ -83,6 +83,10 @@ public interface MainContract {
         void setTransportControlMax(boolean maxControls);
 
         void setNavigationMax(boolean maxNav);
+
+        String getStringResource(int id);
+
+        String getStringResource(int id, Object... formatArgs);
     }
 
     interface Presenter {

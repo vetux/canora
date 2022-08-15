@@ -25,6 +25,8 @@
     <string name="main_toolbar_title0artists">Artists</string>
     <string name="main_toolbar_title0genres">Genres</string>
     <string name="main_toolbar_title0sc">SoundCloud</string>
+    <string name="main_toolbar_title0youtube">YouTube</string>
+    <string name="main_toolbar_title0youtube_dl">YouTubeDL</string>
 
     <string name="main_toolbar_title0subplaylist">Playlists / %1$s</string>
     <string name="main_toolbar_title0subalbum">Albums / %1$s</string>

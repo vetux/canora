@@ -1,9 +1,12 @@
 package com.phaseshifter.canora.ui.viewmodels;
 
 import android.content.Context;
+import android.content.res.Resources;
 
+import com.phaseshifter.canora.R;
 import com.phaseshifter.canora.data.media.audio.AudioData;
 import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
+import com.phaseshifter.canora.ui.data.misc.ContentSelector;
 import com.phaseshifter.canora.utils.Observable;
 
 import java.util.ArrayList;
@@ -21,7 +24,7 @@ public class ContentViewModel {
     public final Observable<Integer> contentPlaylistHighlight = new Observable<>(null);
     public final Observable<HashSet<Integer>> contentPlaylistsSelection = new Observable<>(new HashSet<>());
 
-    public void notifyObservers(){
+    public void notifyObservers() {
         contentName.notifyObservers();
 
         visibleTracks.notifyObservers();

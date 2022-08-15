@@ -34,6 +34,7 @@ public class ContentSelector implements Serializable {
         return page != MainPage.TRACKS
                 && page != MainPage.SOUNDCLOUD_SEARCH
                 && page != MainPage.YOUTUBE_SEARCH
+                && page != MainPage.YOUTUBE_DL
                 && uuid == null;
     }
 

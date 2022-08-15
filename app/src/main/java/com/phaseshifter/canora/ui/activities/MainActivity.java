@@ -782,7 +782,17 @@ public class MainActivity extends Activity implements MainContract.View,
         });
     }
 
-    //END View Interface
+    @Override
+    public String getStringResource(int id) {
+        return getString(id);
+    }
+
+    @Override
+    public String getStringResource(int id, Object... formatArgs) {
+        return getStringResource(id, formatArgs);
+    }
+
+//END View Interface
 
     private void setListeners() {
         List<ImageButton> imageButtons = new ArrayList<>();
