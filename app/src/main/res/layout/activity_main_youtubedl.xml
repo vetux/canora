@@ -34,22 +34,23 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/textview_youtubedl_streamartist"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/main_streamartist"
-            android:textColor="?onColorPrimary"
-            android:textSize="30sp"
-            app:layout_constraintTop_toBottomOf="@id/textview_youtubedl_streamtitle" />
-
-        <TextView
             android:id="@+id/textview_youtubedl_streamlength"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/main_streamlength"
             android:textColor="?onColorPrimary"
             android:textSize="30sp"
-            app:layout_constraintTop_toBottomOf="@id/textview_youtubedl_streamartist" />
+            app:layout_constraintTop_toBottomOf="@id/textview_youtubedl_streamtitle" />
+
+        <TextView
+            android:id="@+id/textview_youtubedl_streamsize"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/main_streamsize"
+            android:textColor="?onColorPrimary"
+            android:textSize="30sp"
+            app:layout_constraintTop_toBottomOf="@id/textview_youtubedl_streamlength" />
+
 
         <Button
             android:id="@+id/button_youtubedl_download_video"
@@ -59,7 +60,7 @@
             android:text="@string/main_download_video"
             app:layout_constraintEnd_toStartOf="@id/button_youtubedl_download_audio"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/textview_youtubedl_streamlength" />
+            app:layout_constraintTop_toBottomOf="@id/textview_youtubedl_streamsize" />
 
         <Button
             android:id="@+id/button_youtubedl_download_audio"
@@ -69,7 +70,7 @@
             android:text="@string/main_download_audio"
             app:layout_constraintEnd_toStartOf="@id/button_youtubedl_addstreamtoplaylist"
             app:layout_constraintStart_toEndOf="@id/button_youtubedl_download_video"
-            app:layout_constraintTop_toBottomOf="@id/textview_youtubedl_streamlength" />
+            app:layout_constraintTop_toBottomOf="@id/textview_youtubedl_streamsize" />
 
         <Button
             android:id="@+id/button_youtubedl_addstreamtoplaylist"
@@ -79,7 +80,7 @@
             android:text="@string/main_add_stream_to_playlist"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/button_youtubedl_download_audio"
-            app:layout_constraintTop_toBottomOf="@id/textview_youtubedl_streamlength" />
+            app:layout_constraintTop_toBottomOf="@id/textview_youtubedl_streamsize" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <ListView

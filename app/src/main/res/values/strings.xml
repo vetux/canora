@@ -143,13 +143,19 @@
     <string name="main_add_stream_to_playlist">Add to Playlist</string>
     <string name="main_download_audio">Download Audio</string>
     <string name="main_download_video">Download Video</string>
+    <string name="main_download_successful">Download Successful</string>
+    <string name="main_download_failed">Download Failed: %1$s</string>
 
     <string name="main_downloaditem_eta">%1$s seconds</string>
 
     <string name="main_streamtitle">Title: %1$s</string>
-    <string name="main_streamartist">Artist: %1$s</string>
-    <string name="main_streamlength">Length: %1$s Seconds</string>
-    <string name="main_streamlength_hours">Length: %1$s Hours %2$s Seconds</string>
+    <string name="main_streamsize">Size: %1$d bytes</string>
+    <string name="main_streamsize_kb">Size: %1$f kb</string>
+    <string name="main_streamsize_mb">Size: %1$f mb</string>
+    <string name="main_streamsize_gb">Size: %1$f gb</string>
+    <string name="main_streamlength">Duration: %1$d Seconds</string>
+    <string name="main_streamlength_minutes">Duration: %1$d m %2$d s</string>
+    <string name="main_streamlength_hours">Duration: %1$d h %2$d m %3$d s</string>
 
     <string name="editor_audio_toolbar_title0edit">Edit %1$s</string>
     <string name="editor_audio_header0title">Title</string>

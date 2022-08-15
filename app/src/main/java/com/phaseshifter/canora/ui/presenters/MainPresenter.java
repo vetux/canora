@@ -1,6 +1,6 @@
 package com.phaseshifter.canora.ui.presenters;
 
-import android.content.res.Resources;
+import android.content.Context;
 import android.util.Log;
 
 import com.phaseshifter.canora.R;
@@ -20,6 +20,8 @@ import com.phaseshifter.canora.model.repo.SoundCloudAudioRepository;
 import com.phaseshifter.canora.service.state.PlayerState;
 import com.phaseshifter.canora.service.wrapper.AutoBindingServiceWrapper;
 import com.phaseshifter.canora.ui.contracts.MainContract;
+import com.phaseshifter.canora.ui.data.DownloadInfo;
+import com.phaseshifter.canora.ui.data.DownloadProgress;
 import com.phaseshifter.canora.ui.data.MainPage;
 import com.phaseshifter.canora.ui.data.constants.NavigationItem;
 import com.phaseshifter.canora.ui.data.formatting.FilterOptions;
@@ -32,10 +34,19 @@ import com.phaseshifter.canora.ui.viewmodels.AppViewModel;
 import com.phaseshifter.canora.ui.viewmodels.ContentViewModel;
 import com.phaseshifter.canora.ui.viewmodels.PlayerStateViewModel;
 import com.phaseshifter.canora.model.repo.*;
+import com.phaseshifter.canora.ui.viewmodels.YoutubeDlViewModel;
 import com.phaseshifter.canora.utils.Observable;
 import com.phaseshifter.canora.utils.Observer;
+import com.yausername.ffmpeg.FFmpeg;
+import com.yausername.youtubedl_android.YoutubeDL;
+import com.yausername.youtubedl_android.YoutubeDLException;
+import com.yausername.youtubedl_android.YoutubeDLRequest;
+import com.yausername.youtubedl_android.mapper.VideoInfo;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.Executor;
@@ -64,8 +75,11 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
     private final AppViewModel appViewModel;
     private final ContentViewModel contentViewModel;
     private final PlayerStateViewModel playerStateViewModel;
+    private final YoutubeDlViewModel ytdlViewModel;
 
     private final AudioMetadataEditor metadataEditor;
+
+    private final Context context;
 
     private FilterOptions filterOptions = new FilterOptions();
     private SortingOptions sortingOptions = new SortingOptions();
@@ -78,11 +92,16 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
     private List<AudioData> sortedTracks = new ArrayList<>();
     private List<AudioPlaylist> sortedPlaylists = new ArrayList<>();
 
+    private boolean downloadingAudio = false;
+    private boolean downloadingVideo = false;
+
     private AppTheme theme = null;
 
     private int presenterTasks = 0;
 
     private boolean isScrollLoading = false;
+
+    private boolean ytdlInit = false;
 
     public MainPresenter(MainContract.View view,
                          Serializable savedState,
@@ -96,7 +115,9 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                          Executor mainThread,
                          AppViewModel appViewModel,
                          ContentViewModel contentViewModel,
-                         PlayerStateViewModel playerStateViewModel) {
+                         PlayerStateViewModel playerStateViewModel,
+                         YoutubeDlViewModel ytdlViewModel,
+                         Context context) {
         this.view = view;
         this.service = service;
         this.deviceAudioRepository = audioDataRepository;
@@ -109,6 +130,8 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
         this.appViewModel = appViewModel;
         this.contentViewModel = contentViewModel;
         this.playerStateViewModel = playerStateViewModel;
+        this.ytdlViewModel = ytdlViewModel;
+        this.context = context;
         this.presExec = new ThreadPoolExecutor(1, 1, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
 
         if (savedState instanceof MainPresenterState) {
@@ -116,6 +139,10 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
             // Repositories are stored application wide so the saved indicator uuid should be valid.
             uiContentSelector = state.uiIndicator;
             playingContentSelector = state.uiIndicator;
+            ytdlViewModel.url.set(state.url);
+            ytdlViewModel.infoForUrl.set(state.info);
+            downloadingVideo = state.downloadingVideo;
+            downloadingAudio = state.downloadingAudio;
         }
     }
 
@@ -259,6 +286,16 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
         appViewModel.contentSelector.set(selector);
     }
 
+    private YoutubeDL getYtdlInstance() throws YoutubeDLException {
+        YoutubeDL instance = YoutubeDL.getInstance();
+        if (!ytdlInit) {
+            ytdlInit = true;
+            instance.init(context);
+            FFmpeg.getInstance().init(context);
+        }
+        return instance;
+    }
+
     @Override
     public void update(Observable<PlayerState> observable, PlayerState value) {
         playerStateViewModel.applyPlayerState(value);
@@ -295,6 +332,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                 appViewModel.notifyObservers();
                 contentViewModel.notifyObservers();
                 playerStateViewModel.notifyObservers();
+                ytdlViewModel.notifyObservers();
                 updateVisibleContent();
             });
         });
@@ -307,6 +345,10 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
         MainPresenterState savedState = new MainPresenterState();
         savedState.uiIndicator = uiContentSelector;
         savedState.contentIndicator = playingContentSelector;
+        savedState.info = ytdlViewModel.infoForUrl.get();
+        savedState.downloadingAudio = downloadingAudio;
+        savedState.downloadingVideo = downloadingVideo;
+        savedState.url = ytdlViewModel.url.get();
         view.saveState(savedState);
 
         service.getState().removeObserver(this);
@@ -727,27 +769,123 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
 
     @Override
     public void onUrlTextChange(String text) {
-
+        ytdlViewModel.url.set(text);
     }
 
     @Override
     public void onCheckUrlClick() {
+        String url = ytdlViewModel.url.get();
+        runPresenterTask(() -> {
+            try {
+                YoutubeDL instance = getYtdlInstance();
+                if (!ytdlInit) {
+                    ytdlInit = true;
+                    instance.init(context);
+                }
+                VideoInfo info = instance.getInfo(url);
 
+                DownloadInfo downloadInfo = new DownloadInfo();
+                downloadInfo.url = info.getUrl();
+                downloadInfo.title = info.getTitle();
+                downloadInfo.size = info.getFileSize();
+                if (downloadInfo.size == 0)
+                    downloadInfo.size = info.getFileSizeApproximate();
+                downloadInfo.duration = info.getDuration();
+
+                mainThread.execute(() -> {
+                    ytdlViewModel.infoForUrl.set(downloadInfo);
+                });
+            } catch (Exception e) {
+            }
+        });
     }
 
     @Override
     public void onDownloadVideoClick() {
-
+        DownloadInfo info = ytdlViewModel.infoForUrl.get();
+        if (info != null) {
+            downloadingVideo = true;
+            view.createDocument("*/*", ".mp4");
+        }
     }
 
     @Override
     public void onDownloadAudioClick() {
-
+        DownloadInfo info = ytdlViewModel.infoForUrl.get();
+        if (info != null) {
+            downloadingAudio = true;
+            view.createDocument("*/*", ".mp3");
+        }
     }
 
     @Override
     public void onAddToPlaylistClick() {
 
+    }
+
+    @Override
+    public void onDocumentCreated(OutputStream fileStream) {
+        String url = ytdlViewModel.url.get();
+        DownloadProgress dlProg = new DownloadProgress();
+        dlProg.url = url;
+        ytdlViewModel.downloads.get().add(dlProg);
+        ytdlViewModel.downloads.notifyObservers();
+        runPresenterTask(() -> {
+            try {
+                YoutubeDL instance = getYtdlInstance();
+                if (downloadingAudio) {
+                    File youtubeDLDir = new File(context.getFilesDir(), "download_cache");
+                    String outputFile = new String(youtubeDLDir.getAbsolutePath() + "/temp.mp3");
+                    YoutubeDLRequest request = new YoutubeDLRequest(url);
+                    request.addOption("-o", youtubeDLDir.getAbsolutePath() + "/%(title)s.%(ext)s");
+                    request.addOption("-f", "mp4");
+                    request.addOption("--no-playlist");
+                    request.addOption("--extract-audio");
+                    request.addOption("--audio-format", "mp3");
+                    request.addOption("--output", outputFile);
+                    instance.execute(request, (progress, etaInSeconds, line) -> {
+                        mainThread.execute(() -> {
+                            dlProg.progress = progress;
+                            dlProg.etaInSeconds = etaInSeconds;
+                            ytdlViewModel.downloads.notifyObservers();
+                        });
+                    });
+                    FileInputStream fis = new FileInputStream(outputFile);
+                    byte[] buffer = new byte[1024];
+                    int len;
+                    while ((len = fis.read(buffer)) != -1) {
+                        fileStream.write(buffer, 0, len);
+                    }
+                } else if (downloadingVideo) {
+                    YoutubeDLRequest request = new YoutubeDLRequest(url);
+                    File youtubeDLDir = new File(context.getFilesDir(), "download_cache");
+                    String outputFile = new String(youtubeDLDir.getAbsolutePath() + "/temp.mp4");
+                    request.addOption("-o", outputFile);
+                    request.addOption("-f", "mp4");
+                    request.addOption("--no-playlist");
+                    instance.execute(request, (progress, etaInSeconds, line) -> {
+                        mainThread.execute(() -> {
+                            dlProg.progress = progress;
+                            dlProg.etaInSeconds = etaInSeconds;
+                            ytdlViewModel.downloads.notifyObservers();
+                        });
+                    });
+                    FileInputStream fis = new FileInputStream(outputFile);
+                    byte[] buffer = new byte[1024];
+                    int len;
+                    while ((len = fis.read(buffer)) != -1) {
+                        fileStream.write(buffer, 0, len);
+                    }
+                }
+                ytdlViewModel.downloads.get().remove(dlProg);
+                downloadingVideo = false;
+                downloadingAudio = false;
+                view.showMessage(context.getString(R.string.main_download_successful));
+            } catch (Exception e) {
+                e.printStackTrace();
+                view.showMessage(context.getString(R.string.main_download_failed, e.getMessage()));
+            }
+        });
     }
 
     //STOP Presenter Interface
@@ -817,7 +955,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                     view.showDialog_DeletePlaylists(playlistsToDelete, () -> {
                                 userPlaylistRepository.remove(playlistToDelete.getMetadata().getId());
                                 updateVisibleContent();
-                                view.showMessage("Deleted Playlist", "Playlist deleted");
+                                view.showMessage("Playlist deleted");
                             },
                             () -> {
                             });
@@ -835,7 +973,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                         AudioPlaylist clean = new AudioPlaylist(currentPlaylist.getMetadata(), cleanTracks);
                         userPlaylistRepository.replace(currentPlaylist.getMetadata().getId(), clean);
                         updateVisibleContent();
-                        view.showMessage("Deleted Tracks", "Deleted tracks from playlist");
+                        view.showMessage("Deleted tracks from playlist");
                     }, () -> {
                     });
                 }
@@ -895,7 +1033,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                                         userPlaylistRepository.add(playlist);
                                         appViewModel.isSelecting.set(false);
                                         updateVisibleContent();
-                                        view.showMessage("Created Playlist", "Created playlist");
+                                        view.showMessage("Created playlist");
                                     },
                                     () -> {
                                     });
@@ -921,7 +1059,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
 
                             appViewModel.isSelecting.set(false);
                             updateVisibleContent();
-                            view.showMessage("Added tracks", "Added tracks to playlist");
+                            view.showMessage("Added tracks to playlist");
                         });
                 break;
             case SELECT_START:
@@ -977,7 +1115,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                                 playingContentSelector = null;
                             else
                                 updateVisibleContent();
-                            view.showMessage("Playlists Deleted", "Deleted playlists");
+                            view.showMessage("Deleted playlists");
                         }, () -> {
                         });
                     } else {
@@ -997,7 +1135,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                                 AudioPlaylist clean = new AudioPlaylist(currentPlaylist.getMetadata(), cleanTracks);
                                 userPlaylistRepository.replace(currentPlaylist.getMetadata().getId(), clean);
                                 updateVisibleContent();
-                                view.showMessage("Deleted tracks", "Deleted tracks from playlist");
+                                view.showMessage("Deleted tracks from playlist");
                             }, () -> {
                             });
                         }
@@ -1017,7 +1155,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                             uiContentSelector = new ContentSelector(uiContentSelector.getPage(), null);
                             setViewModelContentSelector(uiContentSelector);
                         }
-                        view.showMessage("Deleted Playlist", "Playlist deleted");
+                        view.showMessage("Playlist deleted");
                     }, () -> {
                     });
                 }

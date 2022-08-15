@@ -11,7 +11,6 @@ import com.phaseshifter.canora.ui.menu.ContextMenu;
 import com.phaseshifter.canora.ui.menu.OptionsMenu;
 import com.phaseshifter.canora.utils.RunnableArg;
 
-import java.io.File;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.HashSet;
@@ -41,7 +40,7 @@ public interface MainContract {
                                   Runnable onAddToNew,
                                   RunnableArg<AudioPlaylist> onAddToPlaylist);
 
-        void showMessage(String title, String text);
+        void showMessage(String text);
 
         void showWarning(String text);
 
@@ -90,7 +89,7 @@ public interface MainContract {
 
         String getStringResource(int id, Object... formatArgs);
 
-        void createDocument(RunnableArg<File> onDocumentCreated, Runnable onCancel);
+        void createDocument(String mime, String fileExtension);
     }
 
     interface Presenter {
@@ -161,5 +160,7 @@ public interface MainContract {
         void onDownloadAudioClick();
 
         void onAddToPlaylistClick();
+
+        void onDocumentCreated(OutputStream fileStream);
     }
 }

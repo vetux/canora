@@ -51,6 +51,7 @@ import com.phaseshifter.canora.ui.activities.editors.AudioPlaylistEditorActivity
 import com.phaseshifter.canora.ui.arrayadapters.AudioDataArrayAdapter;
 import com.phaseshifter.canora.ui.arrayadapters.AudioPlaylistArrayAdapter;
 import com.phaseshifter.canora.ui.contracts.MainContract;
+import com.phaseshifter.canora.ui.data.DownloadInfo;
 import com.phaseshifter.canora.ui.data.MainPage;
 import com.phaseshifter.canora.ui.data.constants.NavigationItem;
 import com.phaseshifter.canora.ui.data.formatting.FilterOptions;
@@ -65,6 +66,7 @@ import com.phaseshifter.canora.ui.popup.ListPopupFactory;
 import com.phaseshifter.canora.ui.viewmodels.AppViewModel;
 import com.phaseshifter.canora.ui.viewmodels.ContentViewModel;
 import com.phaseshifter.canora.ui.viewmodels.PlayerStateViewModel;
+import com.phaseshifter.canora.ui.viewmodels.YoutubeDlViewModel;
 import com.phaseshifter.canora.utils.Observable;
 import com.phaseshifter.canora.utils.Observer;
 import com.phaseshifter.canora.utils.RunnableArg;
@@ -72,12 +74,12 @@ import com.phaseshifter.canora.utils.android.AttributeConversion;
 import com.phaseshifter.canora.utils.android.metrics.AndroidFPSMeter;
 import com.phaseshifter.canora.utils.android.metrics.AndroidMemoryMeter;
 
-import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -92,12 +94,13 @@ public class MainActivity extends Activity implements MainContract.View,
         AdapterView.OnItemLongClickListener,
         AbsListView.OnScrollListener,
         View.OnClickListener,
-        TextWatcher,
         CustomNavigationDrawer.OnItemClickListener {
     public static final int REQUESTCODE_PERMISSIONS = 0;
     public static final int REQUESTCODE_PERMISSIONS_SCOPEDSTORAGE = 1;
     public static final int REQUESTCODE_EDIT_AUDIODATA = 2;
     public static final int REQUESTCODE_EDIT_AUDIOPLAYLIST = 3;
+
+    public static final int REQUESTCODE_CREATE_DOCUMENT = 4;
 
     private static final String BUNDLE_PRESENTERSTATE = "REDX";
 
@@ -109,6 +112,7 @@ public class MainActivity extends Activity implements MainContract.View,
     private AppViewModel appViewModel;
     private ContentViewModel contentViewModel;
     private PlayerStateViewModel playerStateViewModel;
+    private YoutubeDlViewModel ytdlViewModel;
 
     private MainContract.Presenter presenter;
 
@@ -135,6 +139,9 @@ public class MainActivity extends Activity implements MainContract.View,
 
     private Serializable savedState = null;
 
+    private TextWatcher searchWatcher;
+    private TextWatcher urlWatcher;
+
     //START Android Interfaces
 
     @Override
@@ -150,6 +157,7 @@ public class MainActivity extends Activity implements MainContract.View,
         appViewModel = new AppViewModel();
         contentViewModel = new ContentViewModel();
         playerStateViewModel = new PlayerStateViewModel();
+        ytdlViewModel = new YoutubeDlViewModel();
         setViewModelListeners(contentViewModel, playerStateViewModel);
         presenter = new MainPresenter(this,
                 savedState,
@@ -163,7 +171,9 @@ public class MainActivity extends Activity implements MainContract.View,
                 this::runOnUiThread,
                 appViewModel,
                 contentViewModel,
-                playerStateViewModel
+                playerStateViewModel,
+                ytdlViewModel,
+                getApplication()
         );
 
         trackAdapter = new AudioDataArrayAdapter(this, new ArrayList<>());
@@ -177,6 +187,51 @@ public class MainActivity extends Activity implements MainContract.View,
             @Override
             public void onChange(boolean selfChange, Uri uri) {
                 presenter.onMediaStoreDataChange();
+            }
+        };
+
+        searchWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                presenter.onSearchTextChange(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                searchTimer.cancel();
+                searchTimer = new Timer();
+                searchTimer.schedule(
+                        new TimerTask() {
+                            @Override
+                            public void run() {
+                                runOnUiThread(() -> {
+                                    presenter.onSearchTextEditingFinished();
+                                });
+                            }
+                        },
+                        SEARCH_FINISHED_DELAY
+                );
+            }
+        };
+
+        urlWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                presenter.onUrlTextChange(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
             }
         };
     }
@@ -302,6 +357,18 @@ public class MainActivity extends Activity implements MainContract.View,
                         break;
                 }
                 break;
+            case REQUESTCODE_CREATE_DOCUMENT:
+                if (data != null) {
+                    Uri resultUri = data.getData();
+                    if (resultUri != null) {
+                        try {
+                            presenter.onDocumentCreated(getContentResolver().openOutputStream(resultUri));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                break;
             default:
                 Log.v(LOG_TAG, "Unrecognized request code: " + requestCode);
                 break;
@@ -398,37 +465,6 @@ public class MainActivity extends Activity implements MainContract.View,
     }
 
     @Override
-    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-    }
-
-    @Override
-    public void onTextChanged(CharSequence s, int start, int before, int count) {
-        EditText searchText = findViewById(R.id.toolbar_edittext_search);
-        if (s.hashCode() == searchText.getText().hashCode()) {
-            presenter.onSearchTextChange(s.toString());
-        } else {
-            throw new RuntimeException("TextWatcher received unrecognized CharSequence: " + s);
-        }
-    }
-
-    @Override
-    public void afterTextChanged(Editable s) {
-        searchTimer.cancel();
-        searchTimer = new Timer();
-        searchTimer.schedule(
-                new TimerTask() {
-                    @Override
-                    public void run() {
-                        runOnUiThread(() -> {
-                            presenter.onSearchTextEditingFinished();
-                        });
-                    }
-                },
-                SEARCH_FINISHED_DELAY
-        );
-    }
-
-    @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.control_button_prev_full:
@@ -471,6 +507,18 @@ public class MainActivity extends Activity implements MainContract.View,
                 break;
             case R.id.display_button_floating_addto:
                 presenter.onFloatingAddToButtonClick();
+                break;
+            case R.id.button_youtubedl_checkurl:
+                presenter.onCheckUrlClick();
+                break;
+            case R.id.button_youtubedl_download_video:
+                presenter.onDownloadVideoClick();
+                break;
+            case R.id.button_youtubedl_download_audio:
+                presenter.onDownloadAudioClick();
+                break;
+            case R.id.button_youtubedl_addstreamtoplaylist:
+                presenter.onAddToPlaylistClick();
                 break;
         }
     }
@@ -516,8 +564,12 @@ public class MainActivity extends Activity implements MainContract.View,
     }
 
     @Override
-    public void createDocument(RunnableArg<File> onDocumentCreated, Runnable onCancel) {
-
+    public void createDocument(String mime, String fileExtension) {
+        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType(mime);
+        intent.putExtra(Intent.EXTRA_TITLE, fileExtension);
+        startActivityForResult(intent, REQUESTCODE_CREATE_DOCUMENT);
     }
 
     //END Android Interfaces
@@ -593,9 +645,9 @@ public class MainActivity extends Activity implements MainContract.View,
     }
 
     @Override
-    public void showMessage(String title, String text) {
+    public void showMessage(String text) {
         runOnUiThread(() -> {
-            Toast.makeText(this, title + " : " + text, Toast.LENGTH_LONG).show();
+            Toast.makeText(this, text, Toast.LENGTH_LONG).show();
         });
     }
 
@@ -827,8 +879,22 @@ public class MainActivity extends Activity implements MainContract.View,
             button.setOnClickListener(this);
         }
 
+        List<Button> buttons = new ArrayList<>();
+
+        buttons.add(findViewById(R.id.button_youtubedl_checkurl));
+        buttons.add(findViewById(R.id.button_youtubedl_download_video));
+        buttons.add(findViewById(R.id.button_youtubedl_download_audio));
+        buttons.add(findViewById(R.id.button_youtubedl_addstreamtoplaylist));
+
+        for (Button button : buttons) {
+            button.setOnClickListener(this);
+        }
+
         EditText searchText = findViewById(R.id.toolbar_edittext_search);
-        searchText.addTextChangedListener(this);
+        searchText.addTextChangedListener(searchWatcher);
+
+        EditText urlText = findViewById(R.id.edittext_youtubedl);
+        urlText.addTextChangedListener(urlWatcher);
 
         CustomNavigationDrawer drawer = new CustomNavigationDrawer(findViewById(R.id.nav_content_root));
         drawer.setOnClickListener(this);
@@ -947,9 +1013,9 @@ public class MainActivity extends Activity implements MainContract.View,
             public void update(Observable<String> observable, String value) {
                 EditText searchText = findViewById(R.id.toolbar_edittext_search);
                 if (searchText != null) {
-                    searchText.removeTextChangedListener(MainActivity.this);
+                    searchText.removeTextChangedListener(searchWatcher);
                     searchText.setText(value);
-                    searchText.addTextChangedListener(MainActivity.this);
+                    searchText.addTextChangedListener(searchWatcher);
                     if (searchText.isFocused()) {
                         searchText.setSelection(searchText.getText().length());
                     }
@@ -1227,6 +1293,62 @@ public class MainActivity extends Activity implements MainContract.View,
         playerStateViewModel.volume.addObserver(new Observer<Float>() {
             @Override
             public void update(Observable<Float> observable, Float value) {
+            }
+        });
+        ytdlViewModel.url.addObserver(new Observer<String>() {
+            @Override
+            public void update(Observable<String> observable, String value) {
+                EditText urlText = findViewById(R.id.edittext_youtubedl);
+                if (urlText != null) {
+                    String v = urlText.getText().toString();
+                    if (!Objects.equals(value, v)) {
+                        urlText.removeTextChangedListener(urlWatcher);
+                        urlText.setText(value);
+                        urlText.addTextChangedListener(urlWatcher);
+                    }
+                }
+            }
+        });
+        ytdlViewModel.infoForUrl.addObserver(new Observer<DownloadInfo>() {
+            @Override
+            public void update(Observable<DownloadInfo> observable, DownloadInfo value) {
+                View container = findViewById(R.id.layout_youtubedl_streaminfo);
+                TextView titleText = findViewById(R.id.textview_youtubedl_streamtitle);
+                TextView durText = findViewById(R.id.textview_youtubedl_streamlength);
+                TextView sizeText = findViewById(R.id.textview_youtubedl_streamsize);
+                if (container != null
+                        && titleText != null
+                        && durText != null
+                        && sizeText != null) {
+                    if (value != null) {
+                        container.setVisibility(View.VISIBLE);
+                        titleText.setText(value.title);
+                        int minutes = value.duration / 60;
+                        int hours = (value.duration - (minutes * 60)) / 60;
+                        int seconds = value.duration - ((hours * 60 * 60) + (minutes * 60));
+                        if (hours > 0) {
+                            durText.setText(getString(R.string.main_streamlength_hours, hours, minutes, seconds));
+                        } else if (minutes > 0) {
+                            durText.setText(getString(R.string.main_streamlength_minutes, minutes, seconds));
+                        } else {
+                            durText.setText(getString(R.string.main_streamlength, seconds));
+                        }
+                        float kb = (float)value.size / 1000.0f;
+                        float mb = (float)value.size / 1000000.0f;
+                        float gb = (float)value.size / 1000000000.0f;
+                        if (gb >= 1){
+                            sizeText.setText(getString(R.string.main_streamsize_gb, gb));
+                        } else if (mb >= 1){
+                            sizeText.setText(getString(R.string.main_streamsize_mb, mb));
+                        } else if (kb >= 1){
+                            sizeText.setText(getString(R.string.main_streamsize_kb, kb));
+                        } else {
+                            sizeText.setText(getString(R.string.main_streamsize, value.size));
+                        }
+                    } else {
+                        container.setVisibility(View.GONE);
+                    }
+                }
             }
         });
     }
