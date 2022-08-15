@@ -11,6 +11,7 @@ import com.phaseshifter.canora.ui.data.DownloadProgress;
 import com.phaseshifter.canora.utils.Observable;
 import com.phaseshifter.canora.utils.RunnableArg;
 import com.phaseshifter.canora.utils.android.ContentUriFactory;
+import com.yausername.ffmpeg.FFmpeg;
 import com.yausername.youtubedl_android.YoutubeDL;
 import com.yausername.youtubedl_android.YoutubeDLException;
 import com.yausername.youtubedl_android.YoutubeDLRequest;
@@ -91,7 +92,7 @@ public class MainApplication extends Application {
         downloads.notifyObservers();
         downloadExec.submit(() -> {
             try {
-                YoutubeDL.getInstance().execute(request, (progress, etaInSeconds, line) -> {
+                getYoutubeDlInstance().execute(request, (progress, etaInSeconds, line) -> {
                     new Handler(getMainLooper()).post(() -> {
                         downloadProgress.progress = progress;
                         downloadProgress.etaInSeconds = etaInSeconds;
@@ -122,8 +123,11 @@ public class MainApplication extends Application {
     }
 
     public YoutubeDL getYoutubeDlInstance() throws YoutubeDLException {
-        if (!instanceInit)
+        if (!instanceInit){
             YoutubeDL.getInstance().init(this);
+            FFmpeg.getInstance().init(this);
+            YoutubeDL.getInstance().updateYoutubeDL(this);
+        }
         return YoutubeDL.getInstance();
     }
 }

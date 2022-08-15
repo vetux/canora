@@ -303,16 +303,6 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
         appViewModel.contentSelector.set(selector);
     }
 
-    private YoutubeDL getYtdlInstance() throws YoutubeDLException {
-        YoutubeDL instance = YoutubeDL.getInstance();
-        if (!ytdlInit) {
-            ytdlInit = true;
-            instance.init(context);
-            FFmpeg.getInstance().init(context);
-        }
-        return instance;
-    }
-
     @Override
     public void update(Observable<PlayerState> observable, PlayerState value) {
         playerStateViewModel.applyPlayerState(value);
@@ -800,11 +790,9 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
         String url = ytdlViewModel.url.get();
         runPresenterTask(() -> {
             try {
-                YoutubeDL instance = getYtdlInstance();
-                if (!ytdlInit) {
-                    ytdlInit = true;
-                    instance.init(context);
-                }
+                MainApplication app = (MainApplication) context.getApplicationContext();
+                YoutubeDL instance = app.getYoutubeDlInstance();
+
                 VideoInfo info = instance.getInfo(url);
 
                 DownloadInfo downloadInfo = new DownloadInfo();
