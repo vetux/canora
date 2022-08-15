@@ -250,6 +250,55 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
         } else {
             appViewModel.notFoundText.set(null);
         }
+
+        updateHighlightedIndex();
+    }
+
+    private void updateHighlightedIndex() {
+        PlayerState state = service.getState().get();
+        if (state != null) {
+            AudioData track = state.getCurrentTrack();
+            int index = contentViewModel.visibleTracks.get().indexOf(track);
+            if (track != null
+                    && uiContentSelector.equals(playingContentSelector)
+                    && index >= 0) {
+                contentViewModel.visibleTracksHighlightedIndex.set(index);
+            } else {
+                contentViewModel.visibleTracksHighlightedIndex.set(null);
+            }
+
+            if (playingContentSelector != null
+                    && uiContentSelector.isPlaylistView()
+                    && uiContentSelector.getPage().equals(playingContentSelector.getPage())) {
+                int plIndex = 0;
+                switch (playingContentSelector.getPage()) {
+                    case PLAYLISTS:
+                        plIndex = contentViewModel.visiblePlaylists.get().indexOf(userPlaylistRepository.get(playingContentSelector.getUuid()));
+                        break;
+                    case ARTISTS:
+                        plIndex = contentViewModel.visiblePlaylists.get().indexOf(deviceAudioRepository.getArtist(playingContentSelector.getUuid()));
+                        break;
+                    case ALBUMS:
+                        plIndex = contentViewModel.visiblePlaylists.get().indexOf(deviceAudioRepository.getAlbum(playingContentSelector.getUuid()));
+                        break;
+                    case GENRES:
+                        plIndex = contentViewModel.visiblePlaylists.get().indexOf(deviceAudioRepository.getGenre(playingContentSelector.getUuid()));
+                        break;
+                    case SOUNDCLOUD_CHARTS:
+                        plIndex = contentViewModel.visiblePlaylists.get().indexOf(scAudioDataRepo.getChartsPlaylist(playingContentSelector.getUuid()));
+                        break;
+                }
+                if (plIndex >= 0) {
+                    contentViewModel.contentPlaylistHighlight.set(plIndex);
+                } else {
+                    contentViewModel.contentPlaylistHighlight.set(null);
+                }
+            } else {
+                contentViewModel.contentPlaylistHighlight.set(null);
+            }
+        } else {
+            contentViewModel.contentPlaylistHighlight.set(null);
+        }
     }
 
     private void setViewModelContentSelector(ContentSelector selector) {
@@ -311,6 +360,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
     @Override
     public void update(Observable<PlayerState> observable, PlayerState value) {
         playerStateViewModel.applyPlayerState(value);
+        updateHighlightedIndex();
     }
 
     //START Presenter Interface
