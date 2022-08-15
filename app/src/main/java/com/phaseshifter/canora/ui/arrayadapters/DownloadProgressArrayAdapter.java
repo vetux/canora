@@ -64,10 +64,14 @@ public class DownloadProgressArrayAdapter extends ArrayAdapter<DownloadProgress>
 
         DownloadProgress progress = contentRef.get(position);
         url.setText(progress.url);
-        eta.setText(C.getString(R.string.main_downloaditem_eta, progress.etaInSeconds));
+        if (progress.etaInSeconds < 0) {
+            eta.setText("-");
+        } else {
+            eta.setText(C.getString(R.string.main_downloaditem_eta, progress.etaInSeconds));
+        }
         pb.setIndeterminate(false);
         pb.setMax(100);
-        pb.setProgress((int)progress.progress);
+        pb.setProgress((int) progress.progress);
         return listItem;
     }
 
