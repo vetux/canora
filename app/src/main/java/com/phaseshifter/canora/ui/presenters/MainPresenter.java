@@ -155,17 +155,14 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
             final MainPresenterState state = (MainPresenterState) savedState;
             // Repositories are stored application wide so the saved indicator uuid should be valid.
             uiContentSelector = state.uiIndicator;
-            playingContentSelector = state.uiIndicator;
+            playingContentSelector = state.contentIndicator;
             ytdlViewModel.url.set(state.url);
             ytdlViewModel.infoForUrl.set(state.info);
             downloadingVideo = state.downloadingVideo;
             downloadingAudio = state.downloadingAudio;
         }
-    }
 
-    private void joinExecutor(ExecutorService exec) throws InterruptedException {
-        while (!exec.awaitTermination(0, TimeUnit.SECONDS)) {
-        }
+        appViewModel.contentSelector.set(uiContentSelector);
     }
 
     private void runPresenterTask(Runnable task) {
@@ -402,12 +399,6 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
 
     @Override
     public synchronized void stop() {
-        presExec.shutdown();
-        try {
-            joinExecutor(presExec);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         settingsRepository.putString(StringSetting.SC_CLIENTID, scAudioDataRepo.getClientID());
 
         MainPresenterState savedState = new MainPresenterState();
