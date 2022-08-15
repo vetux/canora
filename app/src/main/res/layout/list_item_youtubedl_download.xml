@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <TextView
+        android:id="@+id/textView_downloaditem_url"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textColor="?onColorPrimary"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/textView_downloaditem_bytes"
+        app:layout_constraintTop_toBottomOf="@id/progress_downloaditem" />
+
+    <TextView
+        android:id="@+id/textView_downloaditem_bytes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/main_downloaditem_progress"
+        android:textColor="?onColorPrimary"
+        app:layout_constraintStart_toEndOf="@id/textView_downloaditem_url"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/progress_downloaditem"/>
+
+    <ProgressBar
+        android:id="@+id/progress_downloaditem"
+        android:layout_width="0dp"
+        android:layout_height="20dp"
+        android:elevation="2dp"
+        android:indeterminate="false"
+        android:progressTint="?colorSecondary"
+        android:progressTintMode="src_atop"
+        android:padding="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

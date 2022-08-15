@@ -139,6 +139,18 @@
     <string name="main_navigation_item_title0rate">Rate this App</string>
     <string name="main_navigation_item_title0appInfo">App info</string>
 
+    <string name="main_check_url">Check URL</string>
+    <string name="main_add_stream_to_playlist">Add to Playlist</string>
+    <string name="main_download_audio">Download Audio</string>
+    <string name="main_download_video">Download Video</string>
+
+    <string name="main_downloaditem_progress">%1$s / %2$s mb</string>
+
+    <string name="main_streamtitle">Title: %1$s</string>
+    <string name="main_streamartist">Artist: %1$s</string>
+    <string name="main_streamlength">Length: %1$s Seconds</string>
+    <string name="main_streamlength_hours">Length: %1$s Hours %2$s Seconds</string>
+
     <string name="editor_audio_toolbar_title0edit">Edit %1$s</string>
     <string name="editor_audio_header0title">Title</string>
     <string name="editor_audio_header0artist">Artist</string>
