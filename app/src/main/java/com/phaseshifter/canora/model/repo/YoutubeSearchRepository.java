@@ -47,9 +47,7 @@ public class YoutubeSearchRepository {
                     YoutubeResponse response = client.execute(request);
                     if (response != null) {
                         nextPage = response.nextPage;
-                        for (YoutubeVideo video : response.videos) {
-                            results.get().add(client.getAudioData(key, video));
-                        }
+                        results.get().addAll(client.getAudioData(key, response.videos));
                         results.notifyObservers();
                     }
                 } catch (Exception e) {
