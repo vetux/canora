@@ -1,8 +1,11 @@
 <div>
 
+
 <div align="right">
-  <img border="0" alt="API23+" src="https://img.shields.io/badge/API-23%2B-green.svg?style=flat" align="left">
-  <img border="0" alt="LICENSE_GPL2" src="https://img.shields.io/badge/license-GPL2-blue" align="left">
+  <img alt="API26+" src="https://img.shields.io/badge/API-26%2B-green.svg?style=flat" align="left">
+  <img alt="LICENSE_GPL2" src="https://img.shields.io/badge/license-GPL2-blue" align="left">
+  <img alt="CODE_SIZE" src="https://img.shields.io/github/languages/code-size/vetux/canora" align="left">
+  <img alt="LAST_COMMIT" src="https://img.shields.io/github/last-commit/vetux/canora" align="right">
 </div>
 
 <br>
