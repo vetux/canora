@@ -9,17 +9,17 @@
 
 <div align="center">
   <img src="https://github.com/xenotux/canora/blob/master/docs/mainIcon.png" alt="MainIcon" width="300" height="300"/>
-  <h1>Canora Music Player</h1>
 </div>
 
+# Canora
+
 </div>
 
-The aim of this project is to provide a lightweight fast and costumizable music playback experience on android.
+A lightweight fast and customizable music playback and streaming experience for Android.
 
-<br>
-<br>
-
-Features:
-* Playlist Creation
-* Themes
-* Metadata Editor
+## Features
+- Themes
+- Metadata Editor
+- Download or stream videos from [1000+ sites](https://ytdl-org.github.io/youtube-dl/supportedsites.html) supported by youtube-dl
+- Create Playlists with tracks from any source
+- Explore SoundCloud and YouTube content
