@@ -12,4 +12,7 @@ public class MainPresenterState implements Serializable {
     public DownloadInfo info;
     public boolean downloadingAudio;
     public boolean downloadingVideo;
+    public String contentSearch ;
+    public String scSearch;
+    public String ytSearch;
 }
