@@ -23,3 +23,10 @@ A lightweight fast and customizable music playback and streaming experience for 
 - Download or stream videos from [1000+ sites](https://ytdl-org.github.io/youtube-dl/supportedsites.html) supported by youtube-dl
 - Create Playlists with tracks from any source
 - Explore SoundCloud and YouTube content
+
+## Credits
+- yausername - [youtubedl-android](https://github.com/yausername/youtubedl-android)
+- Google - [ExoPlayer](https://github.com/google/ExoPlayer)
+- IJabz - [jaudiotagger](https://bitbucket.org/ijabz/jaudiotagger/src)
+- bumptech - [glide](https://github.com/bumptech/glide)
+- Square, Inc. - [okhttp3](https://square.github.io/okhttp/)
