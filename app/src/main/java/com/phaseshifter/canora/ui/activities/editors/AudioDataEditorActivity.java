@@ -2,11 +2,14 @@ package com.phaseshifter.canora.ui.activities.editors;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
+
 import com.phaseshifter.canora.R;
 import com.phaseshifter.canora.application.MainApplication;
 import com.phaseshifter.canora.data.media.audio.AudioData;
@@ -15,6 +18,8 @@ import com.phaseshifter.canora.data.media.audio.source.AudioDataSourceFile;
 import com.phaseshifter.canora.data.media.audio.source.AudioDataSourceUri;
 import com.phaseshifter.canora.data.theme.AppTheme;
 import com.phaseshifter.canora.model.editor.AudioMetadataMask;
+import com.phaseshifter.canora.plugin.soundcloud.AudioDataSourceSC;
+import com.phaseshifter.canora.plugin.ytdl.AudioDataSourceYtdl;
 import com.phaseshifter.canora.utils.android.Miscellaneous;
 
 public class AudioDataEditorActivity extends Activity {
@@ -131,19 +136,33 @@ public class AudioDataEditorActivity extends Activity {
         }
         genreText.setText(sb.toString());
 
+        boolean gotUri = true;
         if (data.getDataSource() instanceof AudioDataSourceUri) {
             fileText.setText(((AudioDataSourceUri) data.getDataSource()).getUri().toString());
         } else if (data.getDataSource() instanceof AudioDataSourceFile) {
             fileText.setText(((AudioDataSourceFile) data.getDataSource()).getFile().getAbsolutePath());
+        } else if (data.getDataSource() instanceof AudioDataSourceSC) {
+            fileText.setText(((AudioDataSourceSC) data.getDataSource()).getUrls());
+        } else if (data.getDataSource() instanceof AudioDataSourceYtdl) {
+            fileText.setText(((AudioDataSourceYtdl)data.getDataSource()).getUrl());
         } else {
-            fileText.setText("UNSUPPORTED");
+            gotUri = false;
+            fileText.setText("");
         }
 
-        titleText.setEnabled(mask.titleEdit);
-        artistText.setEnabled(mask.artistEdit);
-        albumText.setEnabled(mask.albumEdit);
-        genreText.setEnabled(mask.genreEdit);
-        fileText.setEnabled(false);
+        titleText.setTextIsSelectable(true);
+        artistText.setTextIsSelectable(true);
+        albumText.setTextIsSelectable(true);
+        genreText.setTextIsSelectable(true);
+        fileText.setTextIsSelectable(true);
+
+        titleText.setInputType(mask.titleEdit ? EditorInfo.TYPE_CLASS_TEXT : EditorInfo.TYPE_NULL);
+        artistText.setInputType(mask.artistEdit ? EditorInfo.TYPE_CLASS_TEXT : EditorInfo.TYPE_NULL);
+        albumText.setInputType(mask.albumEdit ? EditorInfo.TYPE_CLASS_TEXT : EditorInfo.TYPE_NULL);
+        genreText.setInputType(mask.genreEdit ? EditorInfo.TYPE_CLASS_TEXT : EditorInfo.TYPE_NULL);
+        fileText.setInputType(EditorInfo.TYPE_NULL);
+
+        fileText.setEnabled(gotUri);
 
         setListeners();
     }

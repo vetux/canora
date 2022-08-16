@@ -43,6 +43,15 @@ public class AudioDataSourceSC implements AudioDataSource, Serializable {
     private final List<SCV2Track.MediaTranscoding> codings = new ArrayList<>();
     private transient List<Pair<SCV2StreamProtocol, String>> streams = null;
 
+    public String getUrls() {
+        StringBuilder ret = new StringBuilder();
+        for (SCV2Track.MediaTranscoding coding : codings){
+            ret.append(coding.getUrl());
+            ret.append(", ");
+        }
+        return ret.toString();
+    }
+
     private SCV2Client getClient() {
         if (client == null) {
             client = new SCV2Client();

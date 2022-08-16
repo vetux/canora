@@ -31,6 +31,10 @@ public class AudioDataSourceYtdl implements AudioDataSource, Serializable {
     private final String url;
     private transient String streamUrl = null;
 
+    public String getUrl() {
+        return url;
+    }
+
     private void syncWithPool() {
         semaphore.acquireUninterruptibly();
         semaphore.release();

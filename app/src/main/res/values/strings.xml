@@ -163,7 +163,7 @@
     <string name="editor_audio_header0artist">Artist</string>
     <string name="editor_audio_header0album">Album</string>
     <string name="editor_audio_header0genre">Genre</string>
-    <string name="editor_audio_header0filepath">Filepath</string>
+    <string name="editor_audio_header0filepath">Uri</string>
     <string name="editor_audio_menu_item0apply">Apply</string>
     <string name="editor_audio_menu_item0delete">Delete</string>
 

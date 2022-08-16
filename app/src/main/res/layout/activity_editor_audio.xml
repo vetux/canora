@@ -149,13 +149,15 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:padding="10dp">
-                <TextView android:id="@+id/titlefilepath"
-                          android:layout_width="wrap_content"
-                          android:layout_height="wrap_content"
-                          android:layout_gravity="center"
-                          android:text="@string/editor_audio_header0filepath"
-                          android:textColor="?onColorPrimary"
-                          android:layout_centerHorizontal="true"/>
+
+                <TextView
+                    android:id="@+id/titlefilepath"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_gravity="center"
+                    android:text="@string/editor_audio_header0filepath"
+                    android:textColor="?onColorPrimary" />
                 <EditText android:id="@+id/filepath"
                           android:layout_width="match_parent"
                           android:layout_height="wrap_content"
