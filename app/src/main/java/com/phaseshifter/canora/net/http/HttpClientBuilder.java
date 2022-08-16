@@ -13,7 +13,7 @@ public class HttpClientBuilder {
     private int readTimeout = 30;
     private TimeUnit readTimeoutUnit = TimeUnit.SECONDS;
 
-    private HttpClientBuilder() {
+    public HttpClientBuilder() {
     }
 
     public static HttpClientBuilder create() {
