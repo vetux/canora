@@ -6,54 +6,42 @@ import android.net.Uri;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
-import com.google.android.exoplayer2.source.hls.HlsMediaSource;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.phaseshifter.canora.application.MainApplication;
 import com.phaseshifter.canora.data.media.audio.source.AudioDataSource;
-import com.phaseshifter.canora.plugin.soundcloud.api.exceptions.SCConnectionException;
-import com.phaseshifter.canora.plugin.soundcloud.api.exceptions.SCParsingException;
-import com.phaseshifter.canora.plugin.soundcloud.api_v2.client.SCV2Client;
-import com.phaseshifter.canora.plugin.soundcloud.api_v2.data.SCV2StreamProtocol;
-import com.phaseshifter.canora.plugin.soundcloud.api_v2.data.SCV2Track;
-import com.phaseshifter.canora.plugin.soundcloud.api_v2.data.SCV2TrackStreamData;
-import com.phaseshifter.canora.utils.Pair;
 import com.yausername.youtubedl_android.YoutubeDL;
 import com.yausername.youtubedl_android.YoutubeDLRequest;
 import com.yausername.youtubedl_android.mapper.VideoInfo;
 
-import org.json.JSONException;
-
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.Semaphore;
 
 public class AudioDataSourceYtdl implements AudioDataSource, Serializable {
     private static final long serialVersionUID = 1;
 
-    private static ExecutorService pool = Executors.newSingleThreadExecutor();
-    private static CountDownLatch latch = new CountDownLatch(0);
+    private transient ExecutorService pool = Executors.newSingleThreadExecutor();
+    private transient Semaphore semaphore = new Semaphore(1);
 
     private final String url;
     private transient String streamUrl = null;
 
     private void syncWithPool() {
-        while (latch.getCount() != 0) {
-            try {
-                latch.await();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+        semaphore.acquireUninterruptibly();
+        semaphore.release();
+    }
+
+    private void runTaskOnPool(Runnable task) {
+        semaphore.acquireUninterruptibly();
+        pool.submit(() -> {
+            task.run();
+            semaphore.release();
+        });
     }
 
     public AudioDataSourceYtdl(String url) {
@@ -64,8 +52,7 @@ public class AudioDataSourceYtdl implements AudioDataSource, Serializable {
     public void prepare() {
         syncWithPool();
         if (streamUrl == null) {
-            latch = new CountDownLatch(1);
-            pool.submit(() -> {
+            runTaskOnPool(() -> {
                 try {
                     YoutubeDL ytdl = MainApplication.instance.getYoutubeDlInstance();
                     YoutubeDLRequest request = new YoutubeDLRequest(url);
@@ -75,7 +62,6 @@ public class AudioDataSourceYtdl implements AudioDataSource, Serializable {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                latch.countDown();
             });
         }
     }

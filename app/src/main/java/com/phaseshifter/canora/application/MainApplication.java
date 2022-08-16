@@ -7,6 +7,8 @@ import com.phaseshifter.canora.model.provider.MediaStoreContentProvider;
 import com.phaseshifter.canora.model.repo.DeviceAudioRepository;
 import com.phaseshifter.canora.model.repo.UserPlaylistRepository;
 import com.phaseshifter.canora.model.repo.SoundCloudAudioRepository;
+import com.phaseshifter.canora.model.repo.YoutubeSearchRepository;
+import com.phaseshifter.canora.plugin.youtubeapi.YoutubeApiClient;
 import com.phaseshifter.canora.ui.data.DownloadProgress;
 import com.phaseshifter.canora.utils.Observable;
 import com.phaseshifter.canora.utils.RunnableArg;
@@ -31,6 +33,7 @@ public class MainApplication extends Application {
     private DeviceAudioRepository audioDataRepo;
     private UserPlaylistRepository audioPlaylistRepository;
     private SoundCloudAudioRepository scAudioDataRepo;
+    private YoutubeSearchRepository ytRepo;
 
     //Store objects passed between activities here as intent bundles cant hold more than 1MB
     private final HashMap<String, Object> bundle = new HashMap<>();
@@ -52,6 +55,7 @@ public class MainApplication extends Application {
         audioDataRepo = new DeviceAudioRepository(new MediaStoreContentProvider(this, new ContentUriFactory()));
         audioPlaylistRepository = new UserPlaylistRepository(new File(getPlaylistPath()));
         scAudioDataRepo = new SoundCloudAudioRepository();
+        ytRepo = new YoutubeSearchRepository(new YoutubeApiClient());
     }
 
     public DeviceAudioRepository getAudioDataRepo() {
@@ -64,6 +68,10 @@ public class MainApplication extends Application {
 
     public SoundCloudAudioRepository getScAudioRepository() {
         return scAudioDataRepo;
+    }
+
+    public YoutubeSearchRepository getYtRepo() {
+        return ytRepo;
     }
 
     public String getPlaylistPath() {
@@ -125,7 +133,7 @@ public class MainApplication extends Application {
     }
 
     public YoutubeDL getYoutubeDlInstance() throws YoutubeDLException {
-        if (!instanceInit){
+        if (!instanceInit) {
             YoutubeDL.getInstance().init(this);
             FFmpeg.getInstance().init(this);
             YoutubeDL.getInstance().updateYoutubeDL(this);

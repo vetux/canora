@@ -66,6 +66,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
     private final SettingsRepository settingsRepository;
     private final ThemeRepository themeRepository;
     private final SoundCloudAudioRepository scAudioDataRepo;
+    private final YoutubeSearchRepository ytRepo;
 
     private final AutoBindingServiceWrapper service;
 
@@ -79,6 +80,18 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
     private final YoutubeDlViewModel ytdlViewModel;
 
     private final AudioMetadataEditor metadataEditor;
+
+    private final Observer<List<AudioData>> ytObserver = new Observer<List<AudioData>>() {
+        @Override
+        public void update(Observable<List<AudioData>> observable, List<AudioData> value) {
+            if (uiContentSelector.getPage() == MainPage.YOUTUBE_SEARCH) {
+                isScrollLoading = false;
+                mainThread.execute(() -> {
+                    updateVisibleContent();
+                });
+            }
+        }
+    };
 
     private final Context context;
 
@@ -110,6 +123,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                          SettingsRepository settingsRepository,
                          ThemeRepository themeRepository,
                          SoundCloudAudioRepository scAudioDataRepo,
+                         YoutubeSearchRepository ytRepo,
                          AudioMetadataEditor metadataEditor,
                          Executor mainThread,
                          AppViewModel appViewModel,
@@ -124,6 +138,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
         this.settingsRepository = settingsRepository;
         this.themeRepository = themeRepository;
         this.scAudioDataRepo = scAudioDataRepo;
+        this.ytRepo = ytRepo;
         this.metadataEditor = metadataEditor;
         this.mainThread = mainThread;
         this.appViewModel = appViewModel;
@@ -132,6 +147,8 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
         this.ytdlViewModel = ytdlViewModel;
         this.context = context;
         this.presExec = new ThreadPoolExecutor(1, 1, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
+
+        ytRepo.setApiKey(settingsRepository.getString(StringSetting.YOUTUBE_API_KEY));
 
         MainApplication app = (MainApplication) context.getApplicationContext();
         app.downloads.addObserver(new Observer<List<DownloadProgress>>() {
@@ -217,12 +234,17 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                     sortedTracks = scAudioDataRepo.getChartsPlaylist(uiContentSelector.getUuid()).getData();
                     break;
                 case YOUTUBE_SEARCH:
+                    sortedTracks = ytRepo.results.get();
                     break;
             }
-            if (uiContentSelector.getPage() != MainPage.SOUNDCLOUD_SEARCH) {
-                formattedTracks = ListFilter.filterAudioData(sortedTracks, filterOptions);
-            } else {
-                formattedTracks = sortedTracks;
+            switch (uiContentSelector.getPage()) {
+                case SOUNDCLOUD_SEARCH:
+                case YOUTUBE_SEARCH:
+                    formattedTracks = sortedTracks;
+                    break;
+                default:
+                    formattedTracks = ListFilter.filterAudioData(sortedTracks, filterOptions);
+                    break;
             }
             contentViewModel.visibleTracks.set(formattedTracks);
         }
@@ -357,6 +379,8 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
 
     @Override
     public synchronized void start() {
+        ytRepo.results.addObserver(ytObserver);
+
         scAudioDataRepo.setClientID(settingsRepository.getString(StringSetting.SC_CLIENTID));
 
         theme = themeRepository.get(settingsRepository.getInt(IntegerSetting.THEME));
@@ -392,6 +416,8 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
 
     @Override
     public synchronized void stop() {
+        ytRepo.results.removeObserver(ytObserver);
+
         settingsRepository.putString(StringSetting.SC_CLIENTID, scAudioDataRepo.getClientID());
 
         MainPresenterState savedState = new MainPresenterState();
@@ -462,6 +488,15 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
     public void onSearchTextChange(String text) {
         assert (text != null);
         filterOptions.filterFor = text;
+        appViewModel.searchText.set(text);
+        switch (uiContentSelector.getPage()) {
+            case SOUNDCLOUD_SEARCH:
+            case YOUTUBE_SEARCH:
+                break;
+            default:
+                updateVisibleContent();
+                break;
+        }
         if (uiContentSelector.getPage() != MainPage.SOUNDCLOUD_SEARCH) {
             updateVisibleContent();
         }
@@ -475,6 +510,10 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                 scAudioDataRepo.refreshSearch(text);
                 mainThread.execute(this::updateVisibleContent);
             });
+        } else if (uiContentSelector.getPage() == MainPage.YOUTUBE_SEARCH) {
+            String text = filterOptions.filterFor;
+            ytRepo.setSearchText(text);
+            ytRepo.loadNextPage();
         }
     }
 
@@ -512,7 +551,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
     public void onSearchButtonClick() {
         boolean search = !appViewModel.isSearching.get();
         appViewModel.isSearching.set(search);
-        if (!appViewModel.searchText.get().isEmpty()) {
+        if (!filterOptions.filterFor.isEmpty()) {
             updateVisibleContent();
         }
     }
@@ -655,17 +694,29 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
         if (uiContentSelector.getPage() == MainPage.SOUNDCLOUD_SEARCH) {
             if (!isScrollLoading) {
                 isScrollLoading = true;
-                if (!scAudioDataRepo.isSearchLimitReached()) {
-                    scAudioDataRepo.refreshSearch(appViewModel.searchText.get());
-                    updateVisibleContent();
-                }
+                runPresenterTask(() -> {
+                    if (!scAudioDataRepo.isSearchLimitReached()) {
+                        scAudioDataRepo.refreshSearch(filterOptions.filterFor);
+                    }
+                    isScrollLoading = false;
+                    mainThread.execute(this::updateVisibleContent);
+                });
             }
         } else if (uiContentSelector.getPage() == MainPage.SOUNDCLOUD_CHARTS && !uiContentSelector.isPlaylistView()) {
             if (!isScrollLoading) {
-                if (!scAudioDataRepo.isChartsLimitReached()) {
-                    scAudioDataRepo.refreshCharts(scAudioDataRepo.getChartsIndex(uiContentSelector.getUuid()));
-                    updateVisibleContent();
-                }
+                isScrollLoading = true;
+                runPresenterTask(() -> {
+                    if (!scAudioDataRepo.isChartsLimitReached()) {
+                        scAudioDataRepo.refreshCharts(scAudioDataRepo.getChartsIndex(uiContentSelector.getUuid()));
+                    }
+                    isScrollLoading = false;
+                    mainThread.execute(this::updateVisibleContent);
+                });
+            }
+        } else if (uiContentSelector.getPage() == MainPage.YOUTUBE_SEARCH) {
+            if (!isScrollLoading) {
+                isScrollLoading = true;
+                ytRepo.loadNextPage();
             }
         }
     }
@@ -785,7 +836,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                 appViewModel.isSelecting.set(false);
                 uiContentSelector = new ContentSelector(MainPage.SOUNDCLOUD_SEARCH, null);
                 runPresenterTask(() -> {
-                    scAudioDataRepo.refreshSearch(appViewModel.searchText.get());
+                    scAudioDataRepo.refreshSearch(filterOptions.filterFor);
                     mainThread.execute(() -> {
                         setViewModelContentSelector(uiContentSelector);
                         updateVisibleContent();
@@ -798,6 +849,15 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                 appViewModel.isSearching.set(false);
                 appViewModel.isSelecting.set(false);
                 uiContentSelector = new ContentSelector(MainPage.SOUNDCLOUD_CHARTS, null);
+                setViewModelContentSelector(uiContentSelector);
+                updateVisibleContent();
+                break;
+            case YOUTUBE_SEARCH:
+                view.setNavigationMax(false);
+                view.setTransportControlMax(false);
+                appViewModel.isSearching.set(true);
+                appViewModel.isSelecting.set(false);
+                uiContentSelector = new ContentSelector(MainPage.YOUTUBE_SEARCH, null);
                 setViewModelContentSelector(uiContentSelector);
                 updateVisibleContent();
                 break;

@@ -206,7 +206,7 @@ public class YoutubeApiClient {
             }
             return ret;
         } else {
-            return null;
+            throw new RuntimeException("Received Status: " + String.valueOf(response.getStatusCode()) + " from endpoint");
         }
     }
 

@@ -54,6 +54,9 @@ public class CustomNavigationDrawer {
             case YOUTUBE_DL:
                 root.findViewById(R.id.nav_button_youtube_dl).setSelected(true);
                 break;
+            case YOUTUBE_SEARCH:
+                root.findViewById(R.id.nav_button_youtube_search).setSelected(true);
+                break;
         }
     }
 
