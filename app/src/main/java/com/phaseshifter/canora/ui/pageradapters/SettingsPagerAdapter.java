@@ -2,9 +2,11 @@ package com.phaseshifter.canora.ui.pageradapters;
 
 import android.view.View;
 import android.view.ViewGroup;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.viewpager.widget.PagerAdapter;
+
 import com.phaseshifter.canora.R;
 import com.phaseshifter.canora.ui.activities.SettingsActivity;
 import com.phaseshifter.canora.ui.data.constants.SettingsPage;
@@ -25,7 +27,7 @@ public class SettingsPagerAdapter extends PagerAdapter {
     @NonNull
     @Override
     public Object instantiateItem(@NonNull ViewGroup container, int position) {
-        ViewGroup view = ((ViewGroup) activity.getLayoutInflater().inflate(getPageLayoutResID(currentPage, position), container)).findViewById(getPageResID(currentPage, position));
+        ViewGroup view = ((ViewGroup) activity.getLayoutInflater().inflate(getPageLayout(currentPage, position), container)).findViewById(getPageResID(currentPage, position));
         activity.setupTab(view);
         return view;
     }
@@ -47,9 +49,9 @@ public class SettingsPagerAdapter extends PagerAdapter {
                 return 2;
             case SYSTEM:
                 if (activity.isDevMode())
-                    return 2;
+                    return 4;
                 else
-                    return 1;
+                    return 3;
             default:
                 return 0;
         }
@@ -72,10 +74,16 @@ public class SettingsPagerAdapter extends PagerAdapter {
                 else
                     return activity.getString(R.string.settings_header0equalizer);
             case SYSTEM:
-                if (position == 0)
-                    return activity.getString(R.string.settings_tab_title0general);
-                else
-                    return activity.getString(R.string.settings_tab_title0logs);
+                switch (position) {
+                    case 0:
+                        return activity.getString(R.string.settings_tab_title0general);
+                    case 1:
+                        return activity.getString(R.string.settings_tab_title0sc);
+                    case 2:
+                        return activity.getString(R.string.settings_tab_title0yt);
+                    case 3:
+                        return activity.getString(R.string.settings_tab_title0logs);
+                }
         }
         return "Error";
     }
@@ -85,20 +93,29 @@ public class SettingsPagerAdapter extends PagerAdapter {
         notifyDataSetChanged();
     }
 
-    private int getPageLayoutResID(SettingsPage currentPage, int position) {
+    private int getPageLayout(SettingsPage currentPage, int position) {
         switch (currentPage) {
             case DISPLAY:
-                return R.layout.settings_tab_display_theme;
+                if (position == 0)
+                    return R.layout.settings_tab_display_theme;
+                else
+                    return R.layout.settings_tab_display_misc;
             case SOUND:
                 if (position == 0)
                     return R.layout.settings_tab_audio_general;
                 else
                     return R.layout.settings_tab_audio_equalizer;
             case SYSTEM:
-                if (position == 0)
-                    return R.layout.settings_tab_system_general;
-                else
-                    return R.layout.settings_tab_system_log;
+                switch (position) {
+                    case 0:
+                        return R.layout.settings_tab_system_general;
+                    case 1:
+                        return R.layout.settings_tab_system_soundcloud;
+                    case 2:
+                        return R.layout.settings_tab_system_youtubeapi;
+                    case 3:
+                        return R.layout.settings_tab_system_log;
+                }
         }
         throw new RuntimeException("Error");
     }
@@ -116,10 +133,16 @@ public class SettingsPagerAdapter extends PagerAdapter {
                 else
                     return R.id.settings_tab_audio_equalizer;
             case SYSTEM:
-                if (position == 0)
-                    return R.id.settings_tab_system_general;
-                else
-                    return R.id.settings_tab_system_log;
+                switch (position) {
+                    case 0:
+                        return R.id.settings_tab_system_general;
+                    case 1:
+                        return R.id.settings_tab_system_soundcloud;
+                    case 2:
+                        return R.id.settings_tab_system_youtubeapi;
+                    case 3:
+                        return R.id.settings_tab_system_log;
+                }
         }
         throw new RuntimeException("Error");
     }

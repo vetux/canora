@@ -25,6 +25,10 @@ public interface SettingsContract {
 
         void setDeveloperMode(boolean devMode);
 
+        void setSoundCloudClientID(String clientID);
+
+        void setYoutubeApiKey(String apiKey);
+
         void setLog_playlist(int count, long size);
 
         void setLog_modifiedSettings(List<Pair<String, Object>> settings);
@@ -56,5 +60,9 @@ public interface SettingsContract {
         void onUseAnimationsChange(boolean useAnimations);
 
         void onDeveloperModeChange(boolean devMode);
+
+        void onSoundCloudClientIDChange(String clientID);
+
+        void onYoutubeApiKeyChange(String apiKey);
     }
 }

@@ -2,15 +2,19 @@ package com.phaseshifter.canora.ui.activities;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager.widget.ViewPager;
+
 import com.phaseshifter.canora.R;
 import com.phaseshifter.canora.application.MainApplication;
 import com.phaseshifter.canora.data.theme.AppTheme;
@@ -46,6 +50,8 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
     private final Observable<Float> volume = new Observable<>();
     private final Observable<Boolean> devMode = new Observable<>();
     private final Observable<Boolean> useAnimations = new Observable<>();
+    private final Observable<String> scClientID = new Observable<>();
+    private final Observable<String> ytApiKey = new Observable<>();
     private final Observable<Pair<Integer, Long>> playlistData = new Observable<>();
     private final Observable<List<Pair<String, Object>>> modifiedSettings = new Observable<>();
 
@@ -278,6 +284,16 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
     }
 
     @Override
+    public void setSoundCloudClientID(String clientID) {
+        scClientID.set(clientID);
+    }
+
+    @Override
+    public void setYoutubeApiKey(String apiKey) {
+        ytApiKey.set(apiKey);
+    }
+
+    @Override
     public void setLog_playlist(int count, long size) {
         Log.v(LOG_TAG, "setLog_playlist " + count + " " + size);
         playlistData.set(new Pair<>(count, size));
@@ -437,6 +453,57 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
                 playlistData.addObserver(playlistObserver);
                 modifiedSettings.addObserver(settingsObserver);
                 break;
+            case R.id.settings_tab_system_soundcloud:
+                EditText scText = findViewById(R.id.edittext_soundcloudid);
+                scText.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable s) {
+                        presenter.onSoundCloudClientIDChange(s.toString());
+                    }
+                });
+                scText.setText(scClientID.get());
+                scClientID.addObserver(new Observer<String>() {
+                    @Override
+                    public void update(Observable<String> observable, String value) {
+                        scText.setText(value);
+                    }
+                });
+                break;
+            case R.id.settings_tab_system_youtubeapi:
+                EditText ytText = findViewById(R.id.edittext_youtubekey);
+                ytText.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable s) {
+                        presenter.onYoutubeApiKeyChange(s.toString());
+                    }
+                });
+                ytText.setText(ytApiKey.get());
+                ytApiKey.addObserver(new Observer<String>() {
+                    @Override
+                    public void update(Observable<String> observable, String value) {
+                        ytText.setText(value);
+                    }
+                });
             case R.id.settings_tab_system_mediastore:
                 break;
             default:
@@ -452,6 +519,8 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
         useAnimations.removeAllObservers();
         playlistData.removeAllObservers();
         modifiedSettings.removeAllObservers();
+        ytApiKey.removeAllObservers();
+        scClientID.removeAllObservers();
     }
 
     public boolean isDevMode() {

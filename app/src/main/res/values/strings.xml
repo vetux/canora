@@ -147,6 +147,10 @@
     <string name="main_download_failed">Download Failed: %1$s</string>
     <string name="main_check_failed">Url Check Failed: %1$s</string>
 
+    <string name="main_connection_failed">Connection Failed: %1$s</string>
+
+    <string name="main_soundcloud_clientidchange">Updated SoundCloud clientID: %1$s</string>
+
     <string name="main_downloaditem_eta">%1$d seconds</string>
 
     <string name="main_streamtitle">Title: %1$s</string>
@@ -199,6 +203,8 @@
     <string name="settings_tab_title0other">Other</string>
     <string name="settings_tab_title0general">General</string>
     <string name="settings_tab_title0logs">Logs</string>
+    <string name="settings_tab_title0sc">SoundCloud</string>
+    <string name="settings_tab_title0yt">YouTube</string>
 
     <string name="settings_header0volume">Volume</string>
     <string name="settings_header0equalizer">Equalizer</string>
@@ -220,6 +226,9 @@
     <string name="settings_dialog_warning_devmode0text">The developer mode adds overlays and other functionality
         intended for debugging.\n\nDo you really want to enable developer mode?
     </string>
+
+    <string name="settings_soundcloud_id">SoundCloud client id...</string>
+    <string name="settings_youtube_id">YouTube API key...</string>
 
     <string name="arrayadapter_audioplaylist_header0numberOfTracks">%1$d Tracks</string>
 </resources>

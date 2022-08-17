@@ -2,6 +2,7 @@ package com.phaseshifter.canora.model.repo;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+
 import com.phaseshifter.canora.data.settings.*;
 
 import java.util.Map;
@@ -25,6 +26,10 @@ public class SettingsRepository {
 
     public Map<String, ?> getAll() {
         return prefs.getAll();
+    }
+
+    public void remove(String key) {
+        prefs.edit().remove(key).commit();
     }
 
     public boolean getBoolean(BooleanSetting setting) {

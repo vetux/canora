@@ -152,6 +152,16 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
         this.context = context;
         this.presExec = new ThreadPoolExecutor(1, 1, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
 
+        scAudioDataRepo.clientID.addObserver(new Observer<String>() {
+            @Override
+            public void update(Observable<String> observable, String value) {
+                if (!Objects.equals(settingsRepository.getString(StringSetting.SC_CLIENTID), value)) {
+                    settingsRepository.putString(StringSetting.SC_CLIENTID, value);
+                    view.showMessage(context.getString(R.string.main_soundcloud_clientidchange, value));
+                }
+            }
+        });
+
         MainApplication app = (MainApplication) context.getApplicationContext();
         app.downloads.addObserver(new Observer<List<DownloadProgress>>() {
             @Override
@@ -496,7 +506,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
     public synchronized void stop() {
         ytRepo.results.removeObserver(ytObserver);
 
-        settingsRepository.putString(StringSetting.SC_CLIENTID, scAudioDataRepo.getClientID());
+        settingsRepository.putString(StringSetting.SC_CLIENTID, scAudioDataRepo.clientID.get());
 
         MainPresenterState savedState = new MainPresenterState();
         savedState.uiIndicator = uiContentSelector;
@@ -604,6 +614,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
             ytRepo.loadNextPage(this::decrementTasks,
                     (e) -> {
                         decrementTasks();
+                        view.showWarning(context.getString(R.string.main_connection_failed, e.getMessage()));
                     });
             updateNotFoundText();
         }
@@ -808,6 +819,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                 ytRepo.loadNextPage(this::decrementTasks,
                         (e) -> {
                             decrementTasks();
+                            view.showWarning(context.getString(R.string.main_connection_failed, e.getMessage()));
                         });
             }
         }

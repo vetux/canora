@@ -1,9 +1,11 @@
 package com.phaseshifter.canora.ui.presenters;
 
 import android.util.Log;
+
 import com.phaseshifter.canora.data.settings.BooleanSetting;
 import com.phaseshifter.canora.data.settings.FloatSetting;
 import com.phaseshifter.canora.data.settings.IntegerSetting;
+import com.phaseshifter.canora.data.settings.StringSetting;
 import com.phaseshifter.canora.data.theme.AppTheme;
 import com.phaseshifter.canora.model.repo.SettingsRepository;
 import com.phaseshifter.canora.model.repo.ThemeRepository;
@@ -17,6 +19,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class SettingsPresenter implements SettingsContract.Presenter {
     private final String LOG_TAG = "SettingsPresenter";
@@ -30,6 +33,8 @@ public class SettingsPresenter implements SettingsContract.Presenter {
         public boolean useAnimations;
         public int playlistCount;
         public long playlistSize;
+        public String scClientID;
+        public String ytApiKey;
         public List<Pair<String, Object>> modifiedSettings;
 
         public void copy(State state) {
@@ -41,6 +46,8 @@ public class SettingsPresenter implements SettingsContract.Presenter {
             useAnimations = state.useAnimations;
             this.playlistCount = state.playlistCount;
             this.modifiedSettings = state.modifiedSettings;
+            this.scClientID = state.scClientID;
+            this.ytApiKey = state.ytApiKey;
         }
     }
 
@@ -159,6 +166,25 @@ public class SettingsPresenter implements SettingsContract.Presenter {
         }
     }
 
+    @Override
+    public void onSoundCloudClientIDChange(String clientID) {
+        if (clientID != null && clientID.isEmpty())
+            settingsRepository.remove(StringSetting.SC_CLIENTID.key);
+        else
+            settingsRepository.putString(StringSetting.SC_CLIENTID, clientID);
+        state.scClientID = clientID;
+    }
+
+    @Override
+    public void onYoutubeApiKeyChange(String apiKey) {
+        if (apiKey != null && apiKey.isEmpty()) {
+            settingsRepository.remove(StringSetting.YOUTUBE_API_KEY.key);
+        } else {
+            settingsRepository.putString(StringSetting.YOUTUBE_API_KEY, apiKey);
+        }
+        state.ytApiKey = apiKey;
+    }
+
     //STOP Presenter Interface
 
     private void loadApply() {
@@ -181,6 +207,11 @@ public class SettingsPresenter implements SettingsContract.Presenter {
         state.playlistCount = audioPlaylistRepository.getAll().size();
         state.playlistSize = audioPlaylistRepository.getSize();
         state.modifiedSettings = new ArrayList<>();
+        state.ytApiKey = settingsRepository.getString(StringSetting.YOUTUBE_API_KEY);
+        if (Objects.equals(state.ytApiKey, StringSetting.YOUTUBE_API_KEY.defaultValue)) {
+            state.ytApiKey = null;
+        }
+        state.scClientID = settingsRepository.getString(StringSetting.SC_CLIENTID);
         Map<String, ?> values = settingsRepository.getAll();
         if (values != null && values.size() > 0) {
             for (Map.Entry<String, ?> value : values.entrySet()) {
@@ -202,5 +233,7 @@ public class SettingsPresenter implements SettingsContract.Presenter {
         view.setUseAnimations(state.useAnimations);
         view.setLog_playlist(state.playlistCount, state.playlistSize);
         view.setLog_modifiedSettings(state.modifiedSettings);
+        view.setSoundCloudClientID(state.scClientID);
+        view.setYoutubeApiKey(state.ytApiKey);
     }
 }

@@ -18,6 +18,7 @@ import com.phaseshifter.canora.plugin.soundcloud.api_v2.data.SCV2ChartTrack;
 import com.phaseshifter.canora.plugin.soundcloud.api_v2.data.SCV2Charts;
 import com.phaseshifter.canora.plugin.soundcloud.api_v2.data.SCV2ChartsMutable;
 import com.phaseshifter.canora.plugin.soundcloud.api_v2.data.SCV2Track;
+import com.phaseshifter.canora.utils.Observable;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -47,12 +48,12 @@ public class SoundCloudAudioRepository {
     private int chartsActiveGenre;
     private boolean chartsLimitReached;
 
-    private String clientID;
+    public Observable<String> clientID = new Observable(null);
 
     private static final int resPerPage = 10;
 
     public SoundCloudAudioRepository(String clientID) {
-        this.clientID = clientID;
+        this.clientID.set(clientID);
         int i = 0;
         for (SCGenre genre : SCGenre.values()) {
             indexGenreMapping.put(i, genre);
@@ -76,10 +77,6 @@ public class SoundCloudAudioRepository {
         return searchText;
     }
 
-    public String getClientID() {
-        return clientID;
-    }
-
     public boolean isSearchLimitReached() {
         return searchLimitReached;
     }
@@ -89,11 +86,11 @@ public class SoundCloudAudioRepository {
     }
 
     public void setClientID(String id) {
-        clientID = id;
+        clientID.set(id);
         if (client == null) {
             client = new SCV2Client();
         }
-        client.setClientID(clientID);
+        client.setClientID(id);
     }
 
     public void refreshSearch(String q) {
@@ -200,14 +197,14 @@ public class SoundCloudAudioRepository {
         return charts;
     }
 
-    public AudioPlaylist getChartsPlaylist(UUID uuid){
+    public AudioPlaylist getChartsPlaylist(UUID uuid) {
         return charts.get(getChartsIndex(uuid));
     }
 
     private void updateClientId() {
         try {
-            clientID = client.getNewClientID();
-            client.setClientID(clientID);
+            clientID.set(client.getNewClientID());
+            client.setClientID(clientID.get());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -216,10 +213,10 @@ public class SoundCloudAudioRepository {
     private SCV2Client getClient() throws SCConnectionException, SCParsingException, IOException {
         if (client == null) {
             client = new SCV2Client();
-            if (clientID == null) {
-                clientID = client.getNewClientID();
+            if (clientID.get() == null) {
+                clientID.set(client.getNewClientID());
             }
-            client.setClientID(clientID);
+            client.setClientID(clientID.get());
         }
         return client;
     }
