@@ -9,6 +9,7 @@ import com.phaseshifter.canora.plugin.youtubeapi.YoutubeResource;
 import com.phaseshifter.canora.plugin.youtubeapi.YoutubeResponse;
 import com.phaseshifter.canora.plugin.youtubeapi.YoutubeVideo;
 import com.phaseshifter.canora.utils.Observable;
+import com.phaseshifter.canora.utils.RunnableArg;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +30,12 @@ public class YoutubeSearchRepository {
         this.key = key;
     }
 
-    public void loadNextPage() {
+    public boolean isSearchLimitReached() {
+        syncWithPool();
+        return !pages.isEmpty() && nextPage == null;
+    }
+
+    public void loadNextPage(Runnable onSuccess, RunnableArg<Exception> onError) {
         if (searchText == null) {
             throw new IllegalStateException("Next page called while no search text was set");
         }
@@ -50,8 +56,10 @@ public class YoutubeSearchRepository {
                         results.get().addAll(client.getAudioData(key, response.videos));
                         results.notifyObservers();
                     }
+                    onSuccess.run();
                 } catch (Exception e) {
                     e.printStackTrace();
+                    onError.run(e);
                 }
             });
         }

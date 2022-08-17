@@ -111,7 +111,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
 
     private AppTheme theme = null;
 
-    private int presenterTasks = 0;
+    private int presenterTaskCounter = 0;
 
     private boolean isScrollLoading = false;
 
@@ -152,8 +152,6 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
         this.context = context;
         this.presExec = new ThreadPoolExecutor(1, 1, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
 
-        ytRepo.setApiKey(settingsRepository.getString(StringSetting.YOUTUBE_API_KEY));
-
         MainApplication app = (MainApplication) context.getApplicationContext();
         app.downloads.addObserver(new Observer<List<DownloadProgress>>() {
             @Override
@@ -179,7 +177,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
 
         appViewModel.contentSelector.set(uiContentSelector);
 
-        switch(uiContentSelector.getPage()){
+        switch (uiContentSelector.getPage()) {
             default:
                 appViewModel.searchText.set(contentSearch);
                 break;
@@ -193,16 +191,24 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
     }
 
     private void runPresenterTask(Runnable task) {
-        appViewModel.isContentLoading.set(true);
-        presenterTasks++;
+        incrementTasks();
         presExec.submit(() -> {
             task.run();
-            if (--presenterTasks == 0) {
-                mainThread.execute(() -> {
-                    appViewModel.isContentLoading.set(false);
-                });
-            }
+            decrementTasks();
         });
+    }
+
+    private void incrementTasks() {
+        appViewModel.isContentLoading.set(true);
+        presenterTaskCounter++;
+    }
+
+    private void decrementTasks() {
+        if (--presenterTaskCounter == 0) {
+            mainThread.execute(() -> {
+                appViewModel.isContentLoading.set(false);
+            });
+        }
     }
 
     private void updateVisibleContent() {
@@ -276,10 +282,18 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
             contentViewModel.visibleTracks.set(formattedTracks);
         }
 
+        updateNotFoundText();
+
+        updateHighlightedIndex();
+    }
+
+    private void updateNotFoundText() {
         if (uiContentSelector.getPage() == MainPage.YOUTUBE_SEARCH
                 || uiContentSelector.getPage() == MainPage.SOUNDCLOUD_SEARCH) {
             if (contentViewModel.visibleTracks.get().isEmpty()) {
-                if (appViewModel.searchText.get() == null || appViewModel.searchText.get().isEmpty()) {
+                if (appViewModel.isContentLoading.get()) {
+                    appViewModel.notFoundText.set(context.getString(R.string.main_notfound0loading));
+                } else if (appViewModel.searchText.get() == null || appViewModel.searchText.get().isEmpty()) {
                     appViewModel.notFoundText.set(null);
                 } else {
                     appViewModel.notFoundText.set(context.getString(R.string.main_notfound0stringNotFound, appViewModel.searchText.get()));
@@ -304,8 +318,6 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
         } else {
             appViewModel.notFoundText.set(null);
         }
-
-        updateHighlightedIndex();
     }
 
     private void updateHighlightedIndex() {
@@ -444,6 +456,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
 
     @Override
     public synchronized void start() {
+        ytRepo.setApiKey(settingsRepository.getString(StringSetting.YOUTUBE_API_KEY));
         ytRepo.results.addObserver(ytObserver);
 
         scAudioDataRepo.setClientID(settingsRepository.getString(StringSetting.SC_CLIENTID));
@@ -577,14 +590,22 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
     public void onSearchTextEditingFinished() {
         if (uiContentSelector.getPage() == MainPage.SOUNDCLOUD_SEARCH) {
             String text = appViewModel.searchText.get();
-            runPresenterTask(() -> {
+            incrementTasks();
+            presExec.submit(() -> {
                 scAudioDataRepo.refreshSearch(text);
+                decrementTasks();
                 mainThread.execute(this::updateVisibleContent);
             });
+            updateNotFoundText();
         } else if (uiContentSelector.getPage() == MainPage.YOUTUBE_SEARCH) {
             String text = appViewModel.searchText.get();
             ytRepo.setSearchText(text);
-            ytRepo.loadNextPage();
+            incrementTasks();
+            ytRepo.loadNextPage(this::decrementTasks,
+                    (e) -> {
+                        decrementTasks();
+                    });
+            updateNotFoundText();
         }
     }
 
@@ -763,31 +784,31 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
     @Override
     public void onTrackContentScrollToBottom() {
         if (uiContentSelector.getPage() == MainPage.SOUNDCLOUD_SEARCH) {
-            if (!isScrollLoading) {
+            if (!isScrollLoading && !appViewModel.searchText.get().isEmpty() && !scAudioDataRepo.isSearchLimitReached()) {
                 isScrollLoading = true;
                 runPresenterTask(() -> {
-                    if (!scAudioDataRepo.isSearchLimitReached()) {
-                        scAudioDataRepo.refreshSearch(appViewModel.searchText.get());
-                    }
+                    scAudioDataRepo.refreshSearch(appViewModel.searchText.get());
                     isScrollLoading = false;
                     mainThread.execute(this::updateVisibleContent);
                 });
             }
         } else if (uiContentSelector.getPage() == MainPage.SOUNDCLOUD_CHARTS && !uiContentSelector.isPlaylistView()) {
-            if (!isScrollLoading) {
+            if (!isScrollLoading && !scAudioDataRepo.isChartsLimitReached()) {
                 isScrollLoading = true;
                 runPresenterTask(() -> {
-                    if (!scAudioDataRepo.isChartsLimitReached()) {
-                        scAudioDataRepo.refreshCharts(scAudioDataRepo.getChartsIndex(uiContentSelector.getUuid()));
-                    }
+                    scAudioDataRepo.refreshCharts(scAudioDataRepo.getChartsIndex(uiContentSelector.getUuid()));
                     isScrollLoading = false;
                     mainThread.execute(this::updateVisibleContent);
                 });
             }
         } else if (uiContentSelector.getPage() == MainPage.YOUTUBE_SEARCH) {
-            if (!isScrollLoading) {
+            if (!isScrollLoading && !appViewModel.searchText.get().isEmpty() && !ytRepo.isSearchLimitReached()) {
                 isScrollLoading = true;
-                ytRepo.loadNextPage();
+                incrementTasks();
+                ytRepo.loadNextPage(this::decrementTasks,
+                        (e) -> {
+                            decrementTasks();
+                        });
             }
         }
     }

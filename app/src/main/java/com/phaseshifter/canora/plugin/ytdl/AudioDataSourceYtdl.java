@@ -10,7 +10,6 @@ import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.phaseshifter.canora.application.MainApplication;
 import com.phaseshifter.canora.data.media.audio.source.AudioDataSource;
-import com.phaseshifter.canora.utils.RunnableArg;
 import com.yausername.youtubedl_android.YoutubeDL;
 import com.yausername.youtubedl_android.YoutubeDLRequest;
 import com.yausername.youtubedl_android.mapper.VideoInfo;
@@ -26,9 +25,6 @@ import java.util.concurrent.Semaphore;
 public class AudioDataSourceYtdl implements AudioDataSource, Serializable {
     private static final long serialVersionUID = 1;
 
-    private transient ExecutorService pool = Executors.newSingleThreadExecutor();
-    private transient Semaphore semaphore = new Semaphore(1);
-
     private final String url;
     private transient String streamUrl = null;
 
@@ -36,52 +32,28 @@ public class AudioDataSourceYtdl implements AudioDataSource, Serializable {
         return url;
     }
 
-    private void syncWithPool() {
-        semaphore.acquireUninterruptibly();
-        semaphore.release();
-    }
-
-    private void runTaskOnPool(Runnable task) {
-        semaphore.acquireUninterruptibly();
-        pool.submit(() -> {
-            task.run();
-            semaphore.release();
-        });
-    }
-
     public AudioDataSourceYtdl(String url) {
         this.url = url;
     }
 
     @Override
-    public void prepare(Runnable onPrepared, RunnableArg<Exception> onError) {
-        runTaskOnPool(() -> {
-            if (streamUrl == null) {
-                try {
-                    YoutubeDL ytdl = MainApplication.instance.getYoutubeDlInstance();
-                    YoutubeDLRequest request = new YoutubeDLRequest(url);
-                    request.addOption("-f", "best");
-                    VideoInfo streamInfo = ytdl.getInfo(request);
-                    streamUrl = streamInfo.getUrl();
-                    onPrepared.run();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    onError.run(e);
-                }
-            }
-        });
+    public void prepare() throws Exception {
+        if (streamUrl == null) {
+            YoutubeDL ytdl = MainApplication.instance.getYoutubeDlInstance();
+            YoutubeDLRequest request = new YoutubeDLRequest(url);
+            request.addOption("-f", "best");
+            VideoInfo streamInfo = ytdl.getInfo(request);
+            streamUrl = streamInfo.getUrl();
+        }
     }
 
     @Override
     public void finish() {
-        runTaskOnPool(() -> {
-            streamUrl = null;
-        });
+        streamUrl = null;
     }
 
     @Override
     public List<MediaSource> getExoPlayerSources(Context context) {
-        syncWithPool();
         if (streamUrl == null) {
             throw new RuntimeException("Failed to retrieve stream data for track " + url);
         }

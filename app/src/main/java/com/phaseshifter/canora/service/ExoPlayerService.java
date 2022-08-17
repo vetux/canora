@@ -35,10 +35,14 @@ import com.google.android.exoplayer2.source.MediaSource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 //TODO:Testing: Create Unit Tests for Service.
 //TODO: Implement volume fade
@@ -89,7 +93,10 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
     private final List<MediaSource> trackSources = new ArrayList<>();
     private int trackSourceIndex;
 
-    private boolean preparingTrack = false;
+    private AtomicInteger preparingTracks = new AtomicInteger(0);
+    private AudioData playingTrack = null;
+
+    private AtomicReference<AudioData> requestedTrack = new AtomicReference<>(null);
 
     private ThreadPoolExecutor pool = new ThreadPoolExecutor(1, 1, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
 
@@ -247,11 +254,10 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
     @Override
     public void play(UUID id) {
         Log.v(LOG_TAG, "play " + id);
-        AudioData c = playbackController.getCurrentTrack();
         AudioData n = playbackController.setNext(id);
         if (n != null) {
             Log.v(LOG_TAG, "Setting up Track: " + n.getMetadata().getTitle());
-            createPlayer(n, c);
+            createPlayer(n);
         } else {
             Log.e(LOG_TAG, "Null track");
         }
@@ -260,11 +266,10 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
     @Override
     public void next() {
         Log.v(LOG_TAG, "next");
-        AudioData c = playbackController.getCurrentTrack();
         AudioData n = playbackController.getNext();
         if (n != null) {
             Log.v(LOG_TAG, "Setting up Track: " + n.getMetadata().getTitle());
-            createPlayer(n, c);
+            createPlayer(n);
         } else {
             Log.e(LOG_TAG, "Null track");
         }
@@ -273,11 +278,10 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
     @Override
     public void previous() {
         Log.v(LOG_TAG, "previous");
-        AudioData c = playbackController.getCurrentTrack();
         AudioData n = playbackController.getPrev();
         if (n != null) {
             Log.v(LOG_TAG, "Setting up Track: " + n.getMetadata().getTitle());
-            createPlayer(n, c);
+            createPlayer(n);
         } else {
             Log.e(LOG_TAG, "Null track");
         }
@@ -407,7 +411,7 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
     }
 
     private void onStateModified() {
-        PlayerState newState = new PlayerState(playbackController, exoPlayer, volume, preparingTrack);
+        PlayerState newState = new PlayerState(playbackController, exoPlayer, volume, preparingTracks.get() > 0);
         runOnMainThread(() -> {
             boolean changed = !Objects.equals(this.state.get(), newState);
             this.state.set(newState);
@@ -615,41 +619,54 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
         registerReceiver(brcv, flt);
     }
 
-    private void createPlayer(AudioData current, AudioData previous) {
+    private void createPlayer(AudioData next) {
+        preparingTracks.incrementAndGet();
+
         exoPlayer.stop(true);
         exoPlayer.setPlayWhenReady(true);
 
-        if (previous != null){
-            previous.getDataSource().finish();
-        }
+        onStateModified();
 
-        preparingTrack = true;
-        current.getDataSource().prepare(() -> {
-            mainThread.post(() -> {
+        requestedTrack.set(next);
+
+        pool.submit(() -> {
+            AudioData track = requestedTrack.getAndSet(null);
+            if (track != null) {
+                if (playingTrack != null) {
+                    playingTrack.getDataSource().finish();
+                }
+                playingTrack = track;
                 try {
+                    track.getDataSource().prepare();
                     trackSources.clear();
-                    trackSources.addAll(current.getDataSource().getExoPlayerSources(this));
+                    trackSources.addAll(track.getDataSource().getExoPlayerSources(this));
                 } catch (Exception e) {
                     trackSources.clear();
-                    Log.e(LOG_TAG, "Failed to retrieve MediaSources");
                     e.printStackTrace();
-                    next();
+                    runOnMainThread(() -> {
+                        Log.e(LOG_TAG, "Failed to retrieve MediaSources");
+                        preparingTracks.decrementAndGet();
+                        if (requestedTrack.get() == null) {
+                            next();
+                        }
+                    });
                     return;
                 }
 
                 trackSourceIndex = 0;
 
-                Log.v(LOG_TAG, "Prepared MediaSources for track " + current.getMetadata().getTitle());
-
-                preparingTrack = false;
-                updateTrackSource();
-            });
-        }, (ex) -> {
-            preparingTrack = false;
-            next();
+                runOnMainThread(() -> {
+                    Log.v(LOG_TAG, "Prepared MediaSources for track " + track.getMetadata().getTitle());
+                    preparingTracks.decrementAndGet();
+                    if (requestedTrack.get() == null) {
+                        updateTrackSource();
+                        onStateModified();
+                    }
+                });
+            } else {
+                preparingTracks.decrementAndGet();
+            }
         });
-
-        onStateModified();
     }
 
     private void updateTrackSource() {

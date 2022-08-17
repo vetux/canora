@@ -125,7 +125,7 @@ public class SoundCloudAudioRepository {
         }
 
         if (succeeded) {
-            if (results == null) {
+            if (results == null || results.isEmpty()) {
                 // Last page reached
                 searchLimitReached = true;
             } else {

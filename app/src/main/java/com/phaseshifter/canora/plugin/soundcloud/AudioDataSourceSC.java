@@ -17,7 +17,6 @@ import com.phaseshifter.canora.plugin.soundcloud.api_v2.data.SCV2StreamProtocol;
 import com.phaseshifter.canora.plugin.soundcloud.api_v2.data.SCV2Track;
 import com.phaseshifter.canora.plugin.soundcloud.api_v2.data.SCV2TrackStreamData;
 import com.phaseshifter.canora.utils.Pair;
-import com.phaseshifter.canora.utils.RunnableArg;
 
 import org.json.JSONException;
 
@@ -26,10 +25,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Semaphore;
 
 public class AudioDataSourceSC implements AudioDataSource, Serializable {
     private static final long serialVersionUID = 1;
@@ -38,22 +33,6 @@ public class AudioDataSourceSC implements AudioDataSource, Serializable {
 
     private final List<SCV2Track.MediaTranscoding> codings = new ArrayList<>();
     private transient List<Pair<SCV2StreamProtocol, String>> streams = null;
-
-    private transient ExecutorService pool = Executors.newSingleThreadExecutor();
-    private transient Semaphore semaphore = new Semaphore(1);
-
-    private void syncWithPool() {
-        semaphore.acquireUninterruptibly();
-        semaphore.release();
-    }
-
-    private void runTaskOnPool(Runnable task) {
-        semaphore.acquireUninterruptibly();
-        pool.submit(() -> {
-            task.run();
-            semaphore.release();
-        });
-    }
 
     public String getUrls() {
         StringBuilder ret = new StringBuilder();
@@ -101,37 +80,31 @@ public class AudioDataSourceSC implements AudioDataSource, Serializable {
     }
 
     @Override
-    public void prepare(Runnable onPrepared, RunnableArg<Exception> onError) {
-        runTaskOnPool(() -> {
-            if (getStreams().isEmpty()) {
+    public void prepare() throws Exception {
+        if (getStreams().isEmpty()) {
+            try {
+                loadStreams();
+            } catch (Exception e) {
+                e.printStackTrace();
+                updateClientId();
                 try {
                     loadStreams();
-                    onPrepared.run();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    updateClientId();
-                    try {
-                        loadStreams();
-                    } catch (Exception ex) {
-                        getStreams().clear();
-                        ex.printStackTrace();
-                        onError.run(ex);
-                    }
+                } catch (Exception ex) {
+                    getStreams().clear();
+                    ex.printStackTrace();
+                    throw ex;
                 }
             }
-        });
+        }
     }
 
     @Override
     public void finish() {
-        runTaskOnPool(() -> {
-            streams.clear();
-        });
+        streams.clear();
     }
 
     @Override
     public List<MediaSource> getExoPlayerSources(Context context) {
-        syncWithPool();
         if (getStreams().isEmpty()) {
             throw new RuntimeException("Failed to retrieve stream data for track " + codings);
         }
