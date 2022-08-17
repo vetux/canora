@@ -7,7 +7,7 @@ import com.phaseshifter.canora.model.comparison.AudioDataComparsion;
 
 import java.util.*;
 
-public class SimplePlaybackController implements PlaybackController {
+public class DefaultPlaybackController implements PlaybackController {
     private final String LOG_TAG = "PlaybackManager";
 
     private final int historySize = 999;
@@ -26,7 +26,7 @@ public class SimplePlaybackController implements PlaybackController {
     private final Random rand = new Random();
     private int nextRandom = -1;
 
-    public SimplePlaybackController() {
+    public DefaultPlaybackController() {
         shuffle = false;
         repeat = false;
         history = new Stack<>();
@@ -66,7 +66,7 @@ public class SimplePlaybackController implements PlaybackController {
             return currentTrack;
         } else if (shuffle) {
             Log.v(LOG_TAG, "SHUFFLE ON");
-            if (nextRandom < 0){
+            if (nextRandom < 0) {
                 nextRandom = rand.nextInt(shuffleCache.size());
             }
             currentTrack = shuffleCache.get(nextRandom);
@@ -100,7 +100,7 @@ public class SimplePlaybackController implements PlaybackController {
             return forwardHistory.peek();
         } else if (shuffle) {
             Log.v(LOG_TAG, "SHUFFLE ON");
-            if (nextRandom < 0){
+            if (nextRandom < 0) {
                 nextRandom = rand.nextInt(shuffleCache.size());
             }
             return shuffleCache.get(nextRandom);

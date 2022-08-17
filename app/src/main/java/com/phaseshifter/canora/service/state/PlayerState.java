@@ -26,10 +26,10 @@ public class PlayerState implements Serializable {
         this.volume = volume;
     }
 
-    public PlayerState(PlaybackController playbackController, ExoPlayer player, float volume) {
+    public PlayerState(PlaybackController playbackController, ExoPlayer player, float volume, boolean loadingTrack) {
         this(
                 playbackController.getCurrentTrack(),
-                PlaybackState.fromInt(player.getPlaybackState()),
+                loadingTrack ? PlaybackState.STATE_BUFFERING : PlaybackState.fromInt(player.getPlaybackState()),
                 player.isPlaying(),
                 playbackController.getRepeat(),
                 playbackController.getShuffle(),

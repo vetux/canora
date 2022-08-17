@@ -31,9 +31,14 @@ public class PlayerStateViewModel {
     public final Observable<Float> volume = new Observable<>(0f);
 
     public void applyPlayerState(PlayerState state) {
-        buffering.setIfNotEqual(state.getPlaybackState() == PlaybackState.STATE_BUFFERING);
+        if (state.isPlaying()
+                && state.getPlaybackState() != PlaybackState.STATE_READY) {
+            buffering.setIfNotEqual(true);
+        } else {
+            buffering.setIfNotEqual(state.getPlaybackState() == PlaybackState.STATE_BUFFERING);
+        }
 
-        if (state.getCurrentTrack() == null){
+        if (state.getCurrentTrack() == null) {
             trackTitle.setIfNotEqual("");
             trackArtist.setIfNotEqual("");
             trackArtwork.setIfNotEqual(null);

@@ -17,11 +17,11 @@ import com.phaseshifter.canora.plugin.soundcloud.api_v2.data.SCV2StreamProtocol;
 import com.phaseshifter.canora.plugin.soundcloud.api_v2.data.SCV2Track;
 import com.phaseshifter.canora.plugin.soundcloud.api_v2.data.SCV2TrackStreamData;
 import com.phaseshifter.canora.utils.Pair;
+import com.phaseshifter.canora.utils.RunnableArg;
 
 import org.json.JSONException;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,23 +29,35 @@ import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.Semaphore;
 
 public class AudioDataSourceSC implements AudioDataSource, Serializable {
     private static final long serialVersionUID = 1;
 
     private static SCV2Client client;
-    private static ExecutorService pool = Executors.newSingleThreadExecutor();
-    private static CountDownLatch latch = new CountDownLatch(0);
 
     private final List<SCV2Track.MediaTranscoding> codings = new ArrayList<>();
     private transient List<Pair<SCV2StreamProtocol, String>> streams = null;
 
+    private transient ExecutorService pool = Executors.newSingleThreadExecutor();
+    private transient Semaphore semaphore = new Semaphore(1);
+
+    private void syncWithPool() {
+        semaphore.acquireUninterruptibly();
+        semaphore.release();
+    }
+
+    private void runTaskOnPool(Runnable task) {
+        semaphore.acquireUninterruptibly();
+        pool.submit(() -> {
+            task.run();
+            semaphore.release();
+        });
+    }
+
     public String getUrls() {
         StringBuilder ret = new StringBuilder();
-        for (SCV2Track.MediaTranscoding coding : codings){
+        for (SCV2Track.MediaTranscoding coding : codings) {
             ret.append(coding.getUrl());
             ret.append(", ");
         }
@@ -65,16 +77,6 @@ public class AudioDataSourceSC implements AudioDataSource, Serializable {
             client.setClientID(client.getNewClientID());
         } catch (Exception e) {
             e.printStackTrace();
-        }
-    }
-
-    private void syncWithPool() {
-        while (latch.getCount() != 0) {
-            try {
-                latch.await();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
     }
 
@@ -99,13 +101,12 @@ public class AudioDataSourceSC implements AudioDataSource, Serializable {
     }
 
     @Override
-    public void prepare() {
-        syncWithPool();
-        if (getStreams().isEmpty()) {
-            latch = new CountDownLatch(1);
-            pool.submit(() -> {
+    public void prepare(Runnable onPrepared, RunnableArg<Exception> onError) {
+        runTaskOnPool(() -> {
+            if (getStreams().isEmpty()) {
                 try {
                     loadStreams();
+                    onPrepared.run();
                 } catch (Exception e) {
                     e.printStackTrace();
                     updateClientId();
@@ -114,16 +115,22 @@ public class AudioDataSourceSC implements AudioDataSource, Serializable {
                     } catch (Exception ex) {
                         getStreams().clear();
                         ex.printStackTrace();
+                        onError.run(ex);
                     }
                 }
-                latch.countDown();
-            });
-        }
+            }
+        });
+    }
+
+    @Override
+    public void finish() {
+        runTaskOnPool(() -> {
+            streams.clear();
+        });
     }
 
     @Override
     public List<MediaSource> getExoPlayerSources(Context context) {
-        prepare();
         syncWithPool();
         if (getStreams().isEmpty()) {
             throw new RuntimeException("Failed to retrieve stream data for track " + codings);

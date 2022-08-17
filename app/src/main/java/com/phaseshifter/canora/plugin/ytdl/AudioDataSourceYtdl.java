@@ -10,6 +10,7 @@ import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.phaseshifter.canora.application.MainApplication;
 import com.phaseshifter.canora.data.media.audio.source.AudioDataSource;
+import com.phaseshifter.canora.utils.RunnableArg;
 import com.yausername.youtubedl_android.YoutubeDL;
 import com.yausername.youtubedl_android.YoutubeDLRequest;
 import com.yausername.youtubedl_android.mapper.VideoInfo;
@@ -53,26 +54,33 @@ public class AudioDataSourceYtdl implements AudioDataSource, Serializable {
     }
 
     @Override
-    public void prepare() {
-        syncWithPool();
-        if (streamUrl == null) {
-            runTaskOnPool(() -> {
+    public void prepare(Runnable onPrepared, RunnableArg<Exception> onError) {
+        runTaskOnPool(() -> {
+            if (streamUrl == null) {
                 try {
                     YoutubeDL ytdl = MainApplication.instance.getYoutubeDlInstance();
                     YoutubeDLRequest request = new YoutubeDLRequest(url);
                     request.addOption("-f", "best");
                     VideoInfo streamInfo = ytdl.getInfo(request);
                     streamUrl = streamInfo.getUrl();
+                    onPrepared.run();
                 } catch (Exception e) {
                     e.printStackTrace();
+                    onError.run(e);
                 }
-            });
-        }
+            }
+        });
+    }
+
+    @Override
+    public void finish() {
+        runTaskOnPool(() -> {
+            streamUrl = null;
+        });
     }
 
     @Override
     public List<MediaSource> getExoPlayerSources(Context context) {
-        prepare();
         syncWithPool();
         if (streamUrl == null) {
             throw new RuntimeException("Failed to retrieve stream data for track " + url);

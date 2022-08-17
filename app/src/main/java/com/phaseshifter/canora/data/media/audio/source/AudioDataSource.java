@@ -3,6 +3,7 @@ package com.phaseshifter.canora.data.media.audio.source;
 import android.content.Context;
 
 import com.google.android.exoplayer2.source.MediaSource;
+import com.phaseshifter.canora.utils.RunnableArg;
 
 import java.util.List;
 
@@ -11,8 +12,14 @@ public interface AudioDataSource {
      * Prepare the data source for playback.
      * <p>
      * Called some time before getExoPlayerSource is called.
+     * @param onPrepared
+     * @param onError
      */
-    default void prepare() {
+    default void prepare(Runnable onPrepared, RunnableArg<Exception> onError) {
+        onPrepared.run();
+    }
+
+    default void finish(){
     }
 
     /**

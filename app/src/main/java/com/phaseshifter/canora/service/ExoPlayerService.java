@@ -23,7 +23,7 @@ import com.phaseshifter.canora.R;
 import com.phaseshifter.canora.data.media.audio.AudioData;
 import com.phaseshifter.canora.service.mediasession.MediaSessionCallback;
 import com.phaseshifter.canora.service.playback.PlaybackController;
-import com.phaseshifter.canora.service.playback.SimplePlaybackController;
+import com.phaseshifter.canora.service.playback.DefaultPlaybackController;
 import com.phaseshifter.canora.service.state.PlayerState;
 import com.phaseshifter.canora.ui.activities.MainActivity;
 import com.phaseshifter.canora.utils.Observable;
@@ -34,7 +34,6 @@ import com.google.android.exoplayer2.source.MediaSource;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -90,6 +89,8 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
     private final List<MediaSource> trackSources = new ArrayList<>();
     private int trackSourceIndex;
 
+    private boolean preparingTrack = false;
+
     private ThreadPoolExecutor pool = new ThreadPoolExecutor(1, 1, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
 
     //Binder
@@ -105,7 +106,7 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
     @Override
     public void onCreate() {
         Log.v(LOG_TAG, "onCreate");
-        playbackController = new SimplePlaybackController();
+        playbackController = new DefaultPlaybackController();
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         if (audioManager != null) {
             if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -246,10 +247,11 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
     @Override
     public void play(UUID id) {
         Log.v(LOG_TAG, "play " + id);
+        AudioData c = playbackController.getCurrentTrack();
         AudioData n = playbackController.setNext(id);
         if (n != null) {
             Log.v(LOG_TAG, "Setting up Track: " + n.getMetadata().getTitle());
-            createPlayer(n);
+            createPlayer(n, c);
         } else {
             Log.e(LOG_TAG, "Null track");
         }
@@ -258,11 +260,11 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
     @Override
     public void next() {
         Log.v(LOG_TAG, "next");
+        AudioData c = playbackController.getCurrentTrack();
         AudioData n = playbackController.getNext();
-        playbackController.peekNext().getDataSource().prepare();
         if (n != null) {
             Log.v(LOG_TAG, "Setting up Track: " + n.getMetadata().getTitle());
-            createPlayer(n);
+            createPlayer(n, c);
         } else {
             Log.e(LOG_TAG, "Null track");
         }
@@ -271,10 +273,11 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
     @Override
     public void previous() {
         Log.v(LOG_TAG, "previous");
+        AudioData c = playbackController.getCurrentTrack();
         AudioData n = playbackController.getPrev();
         if (n != null) {
             Log.v(LOG_TAG, "Setting up Track: " + n.getMetadata().getTitle());
-            createPlayer(n);
+            createPlayer(n, c);
         } else {
             Log.e(LOG_TAG, "Null track");
         }
@@ -404,7 +407,7 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
     }
 
     private void onStateModified() {
-        PlayerState newState = new PlayerState(playbackController, exoPlayer, volume);
+        PlayerState newState = new PlayerState(playbackController, exoPlayer, volume, preparingTrack);
         runOnMainThread(() -> {
             boolean changed = !Objects.equals(this.state.get(), newState);
             this.state.set(newState);
@@ -612,29 +615,41 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
         registerReceiver(brcv, flt);
     }
 
-    private boolean createPlayer(AudioData file) {
-        file.getDataSource().prepare();
-
+    private void createPlayer(AudioData current, AudioData previous) {
         exoPlayer.stop(true);
         exoPlayer.setPlayWhenReady(true);
 
-        try {
-            trackSources.clear();
-            trackSources.addAll(file.getDataSource().getExoPlayerSources(this));
-        } catch (Exception e) {
-            trackSources.clear();
-            Log.e(LOG_TAG, "Failed to retrieve MediaSources");
-            e.printStackTrace();
-            return false;
+        if (previous != null){
+            previous.getDataSource().finish();
         }
 
-        trackSourceIndex = 0;
+        preparingTrack = true;
+        current.getDataSource().prepare(() -> {
+            mainThread.post(() -> {
+                try {
+                    trackSources.clear();
+                    trackSources.addAll(current.getDataSource().getExoPlayerSources(this));
+                } catch (Exception e) {
+                    trackSources.clear();
+                    Log.e(LOG_TAG, "Failed to retrieve MediaSources");
+                    e.printStackTrace();
+                    next();
+                    return;
+                }
 
-        Log.v(LOG_TAG, "Prepared MediaSources for track " + file.getMetadata().getTitle());
+                trackSourceIndex = 0;
 
-        updateTrackSource();
+                Log.v(LOG_TAG, "Prepared MediaSources for track " + current.getMetadata().getTitle());
 
-        return true;
+                preparingTrack = false;
+                updateTrackSource();
+            });
+        }, (ex) -> {
+            preparingTrack = false;
+            next();
+        });
+
+        onStateModified();
     }
 
     private void updateTrackSource() {
