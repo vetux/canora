@@ -132,10 +132,10 @@
                 android:maxHeight="5dp"
                 android:minHeight="5dp"
                 android:padding="10dp"
-                android:progress="1000"
+                android:progress="500"
                 android:progressDrawable="@drawable/seekbar_progress_playercontrols"
                 android:splitTrack="false"
-                android:thumbTint="?onColorPrimary"
+                android:thumbTint="?onTexControlFull"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />

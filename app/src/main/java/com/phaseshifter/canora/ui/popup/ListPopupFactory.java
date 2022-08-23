@@ -82,7 +82,7 @@ public class ListPopupFactory {
         offsety += offsetY;
 
         ListPopupWindow popupWindow = new ListPopupWindow(context);
-        popupWindow.setBackgroundDrawable(new ColorDrawable(AttributeConversion.getColorForAtt(R.attr.colorPrimary, context)));
+        popupWindow.setBackgroundDrawable(new ColorDrawable(AttributeConversion.getColorForAtt(R.attr.colorOverlay, context)));
         popupWindow.setAnchorView(anchor);
         popupWindow.setModal(true);
         popupWindow.setWidth(widthPixels);
@@ -127,7 +127,7 @@ public class ListPopupFactory {
 
         ListPopupWindow popupWindow = new ListPopupWindow(context);
         popupWindow.setPromptView(prompt);
-        popupWindow.setBackgroundDrawable(new ColorDrawable(AttributeConversion.getColorForAtt(R.attr.colorPrimary, context)));
+        popupWindow.setBackgroundDrawable(new ColorDrawable(AttributeConversion.getColorForAtt(R.attr.colorOverlay, context)));
         popupWindow.setAnchorView(anchor);
         popupWindow.setModal(true);
         popupWindow.setWidth(widthPixels);
@@ -177,7 +177,7 @@ public class ListPopupFactory {
         int widthPixels = (int) convertDpToPixels(widthDP, context);
 
         ListPopupWindow popupWindow = new ListPopupWindow(context);
-        popupWindow.setBackgroundDrawable(new ColorDrawable(AttributeConversion.getColorForAtt(R.attr.colorPrimary, context)));
+        popupWindow.setBackgroundDrawable(new ColorDrawable(AttributeConversion.getColorForAtt(R.attr.colorOverlay, context)));
         popupWindow.setAnchorView(anchor);
         popupWindow.setModal(true);
         popupWindow.setWidth(widthPixels);

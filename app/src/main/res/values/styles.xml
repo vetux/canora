@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Application Themes -->
-    <style name="Default" parent="MarineBlue"/>
+    <style name="Default" parent="Dark"/>
 
     <style name="Base" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Main Styling Attributes -->
@@ -10,6 +10,8 @@
         <item name="colorSecondary_20">?colorDebugUnset</item>
         <item name="colorSecondary_60">?colorDebugUnset</item>
         <item name="colorSecondaryAlt">?colorDebugUnset</item>
+
+        <item name="colorOverlay">?colorDebugUnset</item>
 
         <item name="onColorPrimary">?colorDebugUnset</item>
         <item name="onColorPrimary_20">?colorDebugUnset</item>
@@ -28,11 +30,13 @@
         <item name="texNavHeader">?colorDebugUnset</item>
 
         <item name="onTexToolbar">?colorDebugUnset</item>
+        <item name="onTexToolbar_60">?colorDebugUnset</item>
         <item name="onTexBackground">?colorDebugUnset</item>
         <item name="onTexBackground_20">?colorDebugUnset</item>
         <item name="onTexBackground_60">?colorDebugUnset</item>
         <item name="onTexControl">?colorDebugUnset</item>
         <item name="onTexControlFull">?colorDebugUnset</item>
+        <item name="onTexControlFull_60">?colorDebugUnset</item>
         <item name="onTexNotification">?colorDebugUnset</item>
         <item name="onTexSurface">?colorDebugUnset</item>
         <item name="onTexNavHeader">?colorDebugUnset</item>
@@ -74,6 +78,8 @@
         <item name="colorSecondary_60">#9900FFD9</item>
         <item name="colorSecondaryAlt">#00D9FF</item>
 
+        <item name="colorOverlay">#001D3A</item>
+
         <item name="onColorPrimary">#fff</item>
         <item name="onColorPrimary_20">#33FFFFFF</item>
         <item name="onColorPrimary_60">#99FFFFFF</item>
@@ -91,11 +97,13 @@
         <item name="texNavHeader">?colorPrimaryAlt</item>
 
         <item name="onTexToolbar">#fff</item>
+        <item name="onTexToolbar_60">#3CFFFFFF</item>
         <item name="onTexBackground">#fff</item>
         <item name="onTexBackground_20">#33FFFFFF</item>
         <item name="onTexBackground_60">#99FFFFFF</item>
         <item name="onTexControl">#fff</item>
         <item name="onTexControlFull">#fff</item>
+        <item name="onTexControlFull_60">#3CFFFFFF</item>
         <item name="onTexNotification">?colorDebugUnset</item>
         <item name="onTexSurface">#fff</item>
         <item name="onTexNavHeader">#fff</item>
@@ -114,6 +122,8 @@
         <item name="colorSecondary_20">#3300FFD9</item>
         <item name="colorSecondary_60">#9900FFD9</item>
         <item name="colorSecondaryAlt">#00D9FF</item>
+
+        <item name="colorOverlay">#4A4A4A</item>
 
         <item name="onColorPrimary">#fff</item>
         <item name="onColorPrimary_20">#33FFFFFF</item>
@@ -136,11 +146,13 @@
         <item name="scaleTexControl">@integer/ImageView_scaleType_fitEnd</item>
 
         <item name="onTexToolbar">#fff</item>
+        <item name="onTexToolbar_60">#3CFFFFFF</item>
         <item name="onTexBackground">#fff</item>
         <item name="onTexBackground_20">#33FFFFFF</item>
         <item name="onTexBackground_60">#99FFFFFF</item>
         <item name="onTexControl">#fff</item>
         <item name="onTexControlFull">#fff</item>
+        <item name="onTexControlFull_60">#3CFFFFFF</item>
         <item name="onTexNotification">?colorDebugUnset</item>
         <item name="onTexSurface">#fff</item>
         <item name="onTexNavHeader">#fff</item>
@@ -160,6 +172,8 @@
         <item name="colorSecondary_60">#991BEAEA</item>
         <item name="colorSecondaryAlt">#00A3A3</item>
 
+        <item name="colorOverlay">#4A4A4A</item>
+
         <item name="onColorPrimary">#fff</item>
         <item name="onColorPrimary_20">#33FFFFFF</item>
         <item name="onColorPrimary_60">#99FFFFFF</item>
@@ -177,11 +191,13 @@
         <item name="texNavHeader">?colorPrimaryAlt</item>
 
         <item name="onTexToolbar">#fff</item>
+        <item name="onTexToolbar_60">#3CFFFFFF</item>
         <item name="onTexBackground">#fff</item>
         <item name="onTexBackground_20">#33FFFFFF</item>
         <item name="onTexBackground_60">#99FFFFFF</item>
         <item name="onTexControl">#fff</item>
         <item name="onTexControlFull">#fff</item>
+        <item name="onTexControlFull_60">#3CFFFFFF</item>
         <item name="onTexNotification">#fff</item>
         <item name="onTexSurface">#fff</item>
         <item name="onTexNavHeader">#fff</item>
@@ -195,18 +211,20 @@
 
     <style name="Light" parent="Base">
         <item name="colorPrimary">#FFFFFF</item>
-        <item name="colorPrimaryAlt">#949494</item>
-        <item name="colorSecondary">#FFDF46</item>
-        <item name="colorSecondary_20">#33FFDF46</item>
-        <item name="colorSecondary_60">#99FFDF46</item>
-        <item name="colorSecondaryAlt">#FFDD00</item>
+        <item name="colorPrimaryAlt">#DDDDDD</item>
+        <item name="colorSecondary">#0b57d0</item>
+        <item name="colorSecondary_20">#1433B5E5</item>
+        <item name="colorSecondary_60">#3C33B5E5</item>
+        <item name="colorSecondaryAlt">#d3e3fd</item>
 
-        <item name="onColorPrimary">#000</item>
-        <item name="onColorPrimary_20">#33000000</item>
-        <item name="onColorPrimary_60">#99000000</item>
+        <item name="colorOverlay">#F3F3F3</item>
+
+        <item name="onColorPrimary">?onColorPrimaryAlt</item>
+        <item name="onColorPrimary_20">#14000000</item>
+        <item name="onColorPrimary_60">#3C000000</item>
         <item name="onColorPrimaryAlt">#000</item>
-        <item name="onColorSecondary">#000</item>
-        <item name="onColorSecondaryAlt">#000</item>
+        <item name="onColorSecondary">?colorPrimaryAlt</item>
+        <item name="onColorSecondaryAlt">?colorPrimaryAlt</item>
 
         <item name="texToolbar">?colorPrimaryAlt</item>
         <item name="texBackground">?colorPrimary</item>
@@ -214,23 +232,25 @@
         <item name="texControlFull">?colorPrimaryAlt</item>
         <item name="texNotification">?colorDebugUnset</item>
         <item name="texWindow">?colorPrimaryAlt</item>
-        <item name="texSurface">#B9B9B9</item>
+        <item name="texSurface">?colorPrimaryAlt</item>
         <item name="texNavHeader">?colorPrimaryAlt</item>
 
-        <item name="onTexToolbar">?onColorPrimary</item>
+        <item name="onTexToolbar">?onColorPrimaryAlt</item>
+        <item name="onTexToolbar_60">#3C000000</item>
         <item name="onTexBackground">?onColorPrimary</item>
         <item name="onTexBackground_20">?onColorPrimary_20</item>
         <item name="onTexBackground_60">?onColorPrimary_60</item>
         <item name="onTexControl">?onColorPrimaryAlt</item>
-        <item name="onTexControlFull">?onColorPrimary</item>
+        <item name="onTexControlFull">?onColorPrimaryAlt</item>
+        <item name="onTexControlFull_60">#3CFFFFFF</item>
         <item name="onTexNotification">?colorDebugUnset</item>
         <item name="onTexSurface">?onColorPrimaryAlt</item>
         <item name="onTexNavHeader">?onColorPrimaryAlt</item>
 
-        <item name="tintTexControl">#33FFFFFF</item>
-        <item name="tintTexControlFull">#33FFFFFF</item>
+        <item name="tintTexControl">?colorDebugUnset</item>
+        <item name="tintTexControlFull">?colorDebugUnset</item>
 
         <item name="android:colorEdgeEffect">#696969</item>
-        <item name="android:textColorSecondary">#696969</item>
+        <item name="android:textColorSecondary">?onColorPrimary</item>
     </style>
 </resources>

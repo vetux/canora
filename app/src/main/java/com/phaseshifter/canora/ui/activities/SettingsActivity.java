@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
@@ -15,6 +16,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager.widget.ViewPager;
 
+import com.google.android.material.tabs.TabLayout;
 import com.phaseshifter.canora.R;
 import com.phaseshifter.canora.application.MainApplication;
 import com.phaseshifter.canora.data.theme.AppTheme;
@@ -189,12 +191,24 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
         if (theme != activeTheme.get()) {
             setTheme(theme.styleResID);
             setContentView(R.layout.activity_settings);
+
             motionLayoutController = new SettingsMotionLayoutController(findViewById(R.id.root));
             ImageButton button = findViewById(R.id.toolbar_button_nav);
             button.setOnClickListener(this);
             ViewPager pager = findViewById(R.id.settingsViewPager);
             pager.setAdapter(pagerAdapter);
             activeTheme.set(theme);
+
+            TabLayout tabs = findViewById(R.id.tabLayout);
+
+            TypedValue typedValue = new TypedValue();
+            getTheme().resolveAttribute(R.attr.onColorPrimary, typedValue, true);
+            int colA = typedValue.data;
+            getTheme().resolveAttribute(R.attr.colorSecondary, typedValue, true);
+            int colB = typedValue.data;
+
+            tabs.setTabTextColors(colA, colB);
+            tabs.setSelectedTabIndicatorColor(colB);
         }
     }
 
