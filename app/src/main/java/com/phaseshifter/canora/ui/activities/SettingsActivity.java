@@ -1,6 +1,8 @@
 package com.phaseshifter.canora.ui.activities;
 
+import android.content.Context;
 import android.content.DialogInterface;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -56,6 +58,9 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
     private final Observable<String> ytApiKey = new Observable<>();
     private final Observable<Pair<Integer, Long>> playlistData = new Observable<>();
     private final Observable<List<Pair<String, Object>>> modifiedSettings = new Observable<>();
+    private final Observable<Boolean> equalizerEnabled = new Observable<>(false);
+    private final Observable<Integer> equalizerPreset = new Observable<>(0);
+    private final Observable<String[]> equalizerPresets = new Observable<>(new String[0]);
 
     private SettingsContract.Presenter presenter;
 
@@ -65,6 +70,8 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
 
     private AutoBindingServiceWrapper service;
 
+    private Context context;
+
     //START Activity Interface
 
     @Override
@@ -72,11 +79,13 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_default);
         service = new AutoBindingServiceWrapper(this);
+        AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         presenter = new SettingsPresenter(this,
                 new SettingsRepository(this),
                 new ThemeRepository(),
                 ((MainApplication) getApplication()).getAudioPlaylistRepository(),
                 service,
+                audioManager,
                 savedInstanceState == null ? null : savedInstanceState.getSerializable(BUNDLE_PRESENTERSTATE));
         pagerAdapter = new SettingsPagerAdapter(this);
     }
@@ -308,6 +317,21 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
     }
 
     @Override
+    public void setEqualizerEnabled(boolean enabled) {
+        equalizerEnabled.set(enabled);
+    }
+
+    @Override
+    public void setEqualizerPresets(String[] presets) {
+        equalizerPresets.set(presets);
+    }
+
+    @Override
+    public void setEqualizerPreset(int preset) {
+        equalizerPreset.set(preset);
+    }
+
+    @Override
     public void setLog_playlist(int count, long size) {
         Log.v(LOG_TAG, "setLog_playlist " + count + " " + size);
         playlistData.set(new Pair<>(count, size));
@@ -360,6 +384,40 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
     public void setupTab(ViewGroup tab) {
         switch (tab.getId()) {
             case R.id.settings_tab_audio_equalizer:
+                Switch eSwitch = tab.findViewById(R.id.switch_equalizer);
+                ViewGroup container = tab.findViewById(R.id.container_equalizer);
+                Spinner spinner = tab.findViewById(R.id.equalizerSpinner);
+                eSwitch.setChecked(equalizerEnabled.get());
+                container.setVisibility(equalizerEnabled.get() ? View.VISIBLE : View.GONE);
+                equalizerEnabled.addObserver((obs, v) -> {
+                    eSwitch.setChecked(v);
+                    container.setVisibility(v ? View.VISIBLE : View.GONE);
+                });
+                ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, equalizerPresets.get());
+                spinner.setAdapter(adapter);
+                equalizerPresets.addObserver((obs, v) -> {
+                    ArrayAdapter<String> adapt = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, v);
+                    spinner.setAdapter(adapt);
+                });
+                spinner.setSelection(equalizerPreset.get());
+                equalizerPreset.addObserver((obs, v) -> {
+                    spinner.setSelection(v);
+                });
+                spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                        presenter.onEqualizerPresetChange(position);
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parentView) {
+                        throw new RuntimeException("Nothing selected. HOW COULD YOU");
+                    }
+
+                });
+                eSwitch.setOnCheckedChangeListener((CompoundButton buttonView, boolean isChecked) -> {
+                    presenter.onEqualizerEnabledChange(isChecked);
+                });
                 break;
             case R.id.settings_tab_audio_general:
                 SeekBar seekBar = tab.findViewById(R.id.volBar);
@@ -535,6 +593,9 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
         modifiedSettings.removeAllObservers();
         ytApiKey.removeAllObservers();
         scClientID.removeAllObservers();
+        equalizerEnabled.removeAllObservers();
+        equalizerPreset.removeAllObservers();
+        equalizerPresets.removeAllObservers();
     }
 
     public boolean isDevMode() {

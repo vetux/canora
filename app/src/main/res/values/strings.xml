@@ -213,10 +213,10 @@
     <string name="settings_header0showAnimation">Show animations</string>
     <string name="settings_header0glideAnimations">Glide Animations</string>
     <string name="settings_header0developerMode">Developer Mode</string>
-    <string name="settings_text0equalizerNotSupported">Equalizer presets are not supported by your device.</string>
     <string name="settings_text0playlistLog">%1$d Playlist/s using %2$.3f mb</string>
     <string name="settings_text0settingsLog">%1$d modified settings</string>
     <string name="settings_button0resetSettings">Reset Settings</string>
+    <string name="settings_text0enableEqualizer">Enable Equalizer</string>
 
     <string name="settings_dialog_settingsreset_title0warning">Warning</string>
     <string name="settings_dialog_settingsreset_text0confirmReset">Do you really want to reset all app settings?

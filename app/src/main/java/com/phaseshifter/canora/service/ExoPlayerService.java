@@ -11,6 +11,7 @@ import android.graphics.drawable.Icon;
 import android.media.AudioFocusRequest;
 import android.media.AudioManager;
 import android.media.MediaMetadata;
+import android.media.audiofx.Equalizer;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.os.*;
@@ -18,9 +19,13 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.PlaybackException;
 import com.phaseshifter.canora.R;
 import com.phaseshifter.canora.data.media.audio.AudioData;
+import com.phaseshifter.canora.data.settings.BooleanSetting;
+import com.phaseshifter.canora.data.settings.IntegerSetting;
+import com.phaseshifter.canora.model.repo.SettingsRepository;
 import com.phaseshifter.canora.service.mediasession.MediaSessionCallback;
 import com.phaseshifter.canora.service.playback.PlaybackController;
 import com.phaseshifter.canora.service.playback.DefaultPlaybackController;
@@ -100,6 +105,10 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
 
     private ThreadPoolExecutor pool = new ThreadPoolExecutor(1, 1, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
 
+    private Equalizer equalizer;
+    private boolean equalizerEnabled = false;
+    private int equalizerPreset = -1;
+
     //Binder
     private final IBinder mBinder = new LocalBinder();
 
@@ -173,6 +182,13 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
                         next();
                     }
                 }
+            }
+
+            @Override
+            public void onAudioSessionIdChanged(int audioSessionId) {
+                equalizer = new Equalizer(100, audioSessionId);
+                equalizer.setEnabled(equalizerEnabled);
+                equalizer.usePreset((short) equalizerPreset);
             }
         });
         exoPlayer.setVolume(volume);
@@ -365,6 +381,31 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
             onStateModified();
         } else {
             throw new IllegalArgumentException("Invalid volume: " + vol);
+        }
+    }
+
+    @Override
+    public void setEqualizerEnabled(boolean enabled) {
+        equalizerEnabled = enabled;
+        int id = exoPlayer.getAudioSessionId();
+        if (id != C.AUDIO_SESSION_ID_UNSET) {
+            // Equalizer does not do anything at all to the audio output in the emulator.
+            equalizer = new Equalizer(100, id);
+            equalizer.setEnabled(equalizerEnabled);
+            if (equalizerEnabled)
+                equalizer.usePreset((short) equalizerPreset);
+        }
+    }
+
+    @Override
+    public void setEqualizerPreset(int preset) {
+        equalizerPreset = preset;
+        int id = exoPlayer.getAudioSessionId();
+        if (id != C.AUDIO_SESSION_ID_UNSET) {
+            equalizer = new Equalizer(100, id);
+            equalizer.setEnabled(equalizerEnabled);
+            if (equalizerEnabled)
+                equalizer.usePreset((short) equalizerPreset);
         }
     }
 

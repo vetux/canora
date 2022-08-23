@@ -1,5 +1,7 @@
 package com.phaseshifter.canora.ui.presenters;
 
+import android.media.AudioManager;
+import android.media.audiofx.Equalizer;
 import android.util.Log;
 
 import com.phaseshifter.canora.data.settings.BooleanSetting;
@@ -36,6 +38,9 @@ public class SettingsPresenter implements SettingsContract.Presenter {
         public String scClientID;
         public String ytApiKey;
         public List<Pair<String, Object>> modifiedSettings;
+        public boolean equalizerEnabled;
+        public int equalizerPreset;
+        public String[] equalizerPresets;
 
         public void copy(State state) {
             page = state.page;
@@ -48,6 +53,9 @@ public class SettingsPresenter implements SettingsContract.Presenter {
             this.modifiedSettings = state.modifiedSettings;
             this.scClientID = state.scClientID;
             this.ytApiKey = state.ytApiKey;
+            equalizerEnabled = state.equalizerEnabled;
+            equalizerPreset = state.equalizerPreset;
+            equalizerPresets = state.equalizerPresets;
         }
     }
 
@@ -57,6 +65,7 @@ public class SettingsPresenter implements SettingsContract.Presenter {
     private final ThemeRepository themeRepository;
     private final UserPlaylistRepository audioPlaylistRepository;
     private final MediaPlayerService service;
+    private final AudioManager audioManager;
 
     private final State state = new State();
 
@@ -65,12 +74,14 @@ public class SettingsPresenter implements SettingsContract.Presenter {
                              ThemeRepository themeRepository,
                              UserPlaylistRepository audioPlaylistRepository,
                              MediaPlayerService service,
+                             AudioManager audioManager,
                              State state) {
         this.view = view;
         this.settingsRepository = settingsRepository;
         this.themeRepository = themeRepository;
         this.audioPlaylistRepository = audioPlaylistRepository;
         this.service = service;
+        this.audioManager = audioManager;
         if (state != null)
             this.state.copy(state);
     }
@@ -80,8 +91,9 @@ public class SettingsPresenter implements SettingsContract.Presenter {
                              ThemeRepository themeRepository,
                              UserPlaylistRepository audioPlaylistRepository,
                              MediaPlayerService service,
+                             AudioManager audioManager,
                              Serializable state) {
-        this(view, settingsRepository, themeRepository, audioPlaylistRepository, service, (State) state);
+        this(view, settingsRepository, themeRepository, audioPlaylistRepository, service, audioManager, (State) state);
     }
 
     //START Presenter Interface
@@ -185,6 +197,22 @@ public class SettingsPresenter implements SettingsContract.Presenter {
         state.ytApiKey = apiKey;
     }
 
+    @Override
+    public void onEqualizerEnabledChange(boolean equalizerEnabled) {
+        settingsRepository.putBoolean(BooleanSetting.EQUALIZER_ENABLED, equalizerEnabled);
+        state.equalizerEnabled = equalizerEnabled;
+        service.setEqualizerEnabled(equalizerEnabled);
+        view.setEqualizerEnabled(equalizerEnabled);
+    }
+
+    @Override
+    public void onEqualizerPresetChange(int preset) {
+        settingsRepository.putInt(IntegerSetting.EQUALIZER_PRESET_INDEX, preset);
+        state.equalizerPreset = preset;
+        service.setEqualizerPreset(preset);
+        view.setEqualizerPreset(preset);
+    }
+
     //STOP Presenter Interface
 
     private void loadApply() {
@@ -218,6 +246,14 @@ public class SettingsPresenter implements SettingsContract.Presenter {
                 state.modifiedSettings.add(new Pair<>(value.getKey(), value.getValue()));
             }
         }
+        state.equalizerEnabled = settingsRepository.getBoolean(BooleanSetting.EQUALIZER_ENABLED);
+        state.equalizerPreset = settingsRepository.getInt(IntegerSetting.EQUALIZER_PRESET_INDEX);
+        int id = audioManager.generateAudioSessionId(); // Documentation does not specify how to "ungenerate" an audio session id.
+        Equalizer equalizer = new Equalizer(0, id);
+        state.equalizerPresets = new String[equalizer.getNumberOfPresets()];
+        for (short i = 0; i < equalizer.getNumberOfPresets(); i++) {
+            state.equalizerPresets[i] = equalizer.getPresetName(i);
+        }
     }
 
     private void applyState(SettingsContract.View view, State state) {
@@ -235,5 +271,8 @@ public class SettingsPresenter implements SettingsContract.Presenter {
         view.setLog_modifiedSettings(state.modifiedSettings);
         view.setSoundCloudClientID(state.scClientID);
         view.setYoutubeApiKey(state.ytApiKey);
+        view.setEqualizerPresets(state.equalizerPresets);
+        view.setEqualizerPreset(state.equalizerPreset);
+        view.setEqualizerEnabled(state.equalizerEnabled);
     }
 }

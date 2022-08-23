@@ -44,5 +44,9 @@ public interface MediaPlayerService {
 
     void setVolume(float vol);
 
+    void setEqualizerEnabled(boolean enabled);
+
+    void setEqualizerPreset(int preset);
+
     Observable<PlayerState> getState();
 }

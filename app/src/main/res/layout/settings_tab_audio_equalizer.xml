@@ -1,46 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/settings_tab_audio_equalizer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="?colorPrimary">
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:background="?onColorPrimary_20" />
+    <TextView
+        android:id="@+id/text_enableequalizer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:text="@string/settings_text0enableEqualizer"
+        android:textColor="?onColorPrimary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <RelativeLayout
+    <Switch
+        android:id="@+id/switch_equalizer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/text_enableequalizer"
+        tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/container_equalizer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp">
+        app:layout_constraintTop_toBottomOf="@id/switch_equalizer">
 
         <TextView
             android:id="@+id/eqpresetTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:padding="10dp"
             android:text="@string/settings_header0equalizerPresets"
             android:textColor="?onColorPrimary"
-            android:layout_centerHorizontal="true"
-            android:maxLines="1" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-            android:id="@+id/equalizerSpinnerFallbackText"
+        <Spinner
+            android:id="@+id/equalizerSpinner"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/iap_dialog_storeph_text0comingSoon"
-            android:textColor="?colorSecondary"
-            android:layout_centerHorizontal="true"
-            android:layout_below="@id/eqpresetTitle"
             android:layout_margin="10dp"
-            android:maxLines="1" />
-        <!--   <Spinner android:id="@+id/equalizerSpinner"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:popupBackground="?colorPrimaryAlt"
-                    android:layout_below="@id/eqpresetTitle"
-                    android:layout_centerHorizontal="true"
-                    android:layout_margin="10dp"/>-->
-    </RelativeLayout>
-</LinearLayout>
+            android:padding="20dp"
+            android:popupBackground="?colorPrimaryAlt"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/eqpresetTitle" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
