@@ -393,10 +393,10 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
                     eSwitch.setChecked(v);
                     container.setVisibility(v ? View.VISIBLE : View.GONE);
                 });
-                ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, equalizerPresets.get());
+                ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.spinner_item_preset, equalizerPresets.get());
                 spinner.setAdapter(adapter);
                 equalizerPresets.addObserver((obs, v) -> {
-                    ArrayAdapter<String> adapt = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, v);
+                    ArrayAdapter<String> adapt = new ArrayAdapter<>(this, R.layout.spinner_item_preset, v);
                     spinner.setAdapter(adapt);
                 });
                 spinner.setSelection(equalizerPreset.get());
