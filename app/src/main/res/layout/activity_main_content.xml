@@ -10,7 +10,7 @@
         android:id="@+id/display_listview_tracks"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:divider="?onTexBackground_20"
+        android:divider="@android:color/transparent"
         android:dividerHeight="1dp"
         android:fastScrollEnabled="true"
         app:layout_constraintBottom_toBottomOf="parent"
