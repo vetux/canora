@@ -91,13 +91,14 @@ public class MainApplication extends Application {
     }
 
     public void startDownload(String url,
-                              YoutubeDLRequest request,
+                              String outputFile,
                               String tempFile,
+                              YoutubeDLRequest request,
                               OutputStream outputStream,
                               RunnableArg<Exception> exceptionHandler,
                               Runnable completionHandler) {
-        DownloadProgress downloadProgress = new DownloadProgress();
-        downloadProgress.url = url;
+        DownloadProgress downloadProgress = new DownloadProgress(url, outputFile);
+
         downloads.get().add(downloadProgress);
         downloads.notifyObservers();
         downloadExec.submit(() -> {

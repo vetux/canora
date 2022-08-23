@@ -1023,7 +1023,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
         DownloadInfo info = ytdlViewModel.infoForUrl.get();
         if (info != null) {
             downloadingVideo = true;
-            view.createDocument("*/*", ".mp4");
+            view.createDocument("*/*", info.title + "_" + info.user + ".mp4");
         }
     }
 
@@ -1032,7 +1032,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
         DownloadInfo info = ytdlViewModel.infoForUrl.get();
         if (info != null) {
             downloadingAudio = true;
-            view.createDocument("*/*", ".mp3");
+            view.createDocument("*/*", info.title + "_" + info.user + ".mp3");
         }
     }
 
@@ -1064,7 +1064,15 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
     }
 
     @Override
-    public void onDocumentCreated(OutputStream fileStream) {
+    public void onDocumentCreated(String uri) {
+        OutputStream fileStream;
+        try {
+            fileStream = view.openDocument(uri);
+        } catch (Exception e) {
+            view.showError("Failed to open file: " + e.getMessage());
+            return;
+        }
+
         String url = ytdlViewModel.url.get();
         ytdlViewModel.downloads.notifyObservers();
         runPresenterTask(() -> {
@@ -1079,15 +1087,23 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                     request.addOption("-f", "mp4");
                     request.addOption("--no-playlist");
                     request.addOption("--extract-audio");
+                    request.addOption("--add-metadata");
+                    request.addOption("--embed-thumbnail");
                     request.addOption("--audio-format", "mp3");
                     request.addOption("--output", outputFile);
-                    app.startDownload(url, request, outputFile, fileStream, (e) -> {
+                    app.startDownload(url, uri, outputFile, request, fileStream, (e) -> {
                                 e.printStackTrace();
                                 view.showWarning(context.getString(R.string.main_download_failed, e.getMessage()));
                             },
                             () -> {
                                 if (view != null && context != null) {
                                     view.showMessage(context.getString(R.string.main_download_successful));
+                                    view.scanDocument(uri, () -> {
+                                        mainThread.execute(() -> {
+                                            deviceAudioRepository.refresh();
+                                            updateVisibleContent();
+                                        });
+                                    });
                                 }
                             });
                 } else if (downloadingVideo) {
@@ -1098,13 +1114,19 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                     request.addOption("-o", outputFile);
                     request.addOption("-f", "mp4");
                     request.addOption("--no-playlist");
-                    app.startDownload(url, request, outputFile, fileStream, (e) -> {
+                    app.startDownload(url, uri, outputFile, request, fileStream, (e) -> {
                                 e.printStackTrace();
                                 view.showWarning(context.getString(R.string.main_download_failed, e.getMessage()));
                             },
                             () -> {
                                 if (view != null && context != null) {
                                     view.showMessage(context.getString(R.string.main_download_successful));
+                                    view.scanDocument(uri, () -> {
+                                        mainThread.execute(() -> {
+                                            deviceAudioRepository.refresh();
+                                            updateVisibleContent();
+                                        });
+                                    });
                                 }
                             });
                 }

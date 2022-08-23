@@ -1,5 +1,7 @@
 package com.phaseshifter.canora.ui.contracts;
 
+import android.net.Uri;
+
 import com.phaseshifter.canora.data.media.audio.AudioData;
 import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
 import com.phaseshifter.canora.data.theme.AppTheme;
@@ -11,6 +13,7 @@ import com.phaseshifter.canora.ui.menu.ContextMenu;
 import com.phaseshifter.canora.ui.menu.OptionsMenu;
 import com.phaseshifter.canora.utils.RunnableArg;
 
+import java.io.FileNotFoundException;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.HashSet;
@@ -89,7 +92,11 @@ public interface MainContract {
 
         String getStringResource(int id, Object... formatArgs);
 
-        void createDocument(String mime, String fileExtension);
+        void createDocument(String mime, String fileName);
+
+        OutputStream openDocument(String uri) throws FileNotFoundException;
+
+        void scanDocument(String uri, Runnable onScanComplete);
     }
 
     interface Presenter {
@@ -161,6 +168,6 @@ public interface MainContract {
 
         void onAddToPlaylistClick();
 
-        void onDocumentCreated(OutputStream fileStream);
+        void onDocumentCreated(String uri);
     }
 }

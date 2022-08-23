@@ -63,7 +63,7 @@ public class DownloadProgressArrayAdapter extends ArrayAdapter<DownloadProgress>
         ProgressBar pb = listItem.findViewById(R.id.progress_downloaditem);
 
         DownloadProgress progress = contentRef.get(position);
-        url.setText(progress.url);
+        url.setText(progress.outputFile);
         if (progress.etaInSeconds < 0) {
             eta.setText("-");
         } else {
