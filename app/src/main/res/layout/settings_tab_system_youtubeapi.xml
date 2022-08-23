@@ -5,12 +5,18 @@
     android:layout_height="match_parent"
     android:background="?colorPrimary"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+    <View
+        android:id="@+id/youtube_line"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="?onColorPrimary_20"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
         android:id="@+id/edittext_youtubekey"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/youtube_line"
         android:hint="@string/settings_youtube_id"
         android:textColor="?onTexBackground"
         android:textColorHint="?onTexBackground_60" />
