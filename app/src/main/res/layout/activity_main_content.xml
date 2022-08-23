@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_weight="1">
+
     <ListView
         android:id="@+id/display_listview_tracks"
         android:layout_width="0dp"
@@ -15,7 +16,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <GridView
         android:id="@+id/display_gridview_playlists"
@@ -28,7 +29,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ImageButton
         android:id="@+id/display_button_floating_addto"
@@ -41,7 +42,7 @@
         android:visibility="visible"
         android:layout_margin="30dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <TextView
         android:id="@+id/display_text_notfound"
@@ -56,5 +57,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:elevation="1dp"/>
+        android:elevation="1dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>

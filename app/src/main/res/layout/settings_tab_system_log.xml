@@ -1,21 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:id="@+id/settings_tab_system_log"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="vertical"
-              android:background="?colorPrimary">
-    <View android:layout_width="match_parent"
-          android:layout_height="2dp"
-          android:background="?onColorPrimary_20"/>
-    <ScrollView android:layout_width="match_parent"
-                android:layout_height="match_parent">
-        <TextView android:id="@+id/logText"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:padding="10dp"
-                  android:textSize="20sp"
-                  android:textColor="?onColorPrimary"
-                  android:gravity="center"/>
+    android:id="@+id/settings_tab_system_log"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="?colorPrimary">
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="?onColorPrimary_20" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/logText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:textSize="20sp"
+            android:textColor="?onColorPrimary"
+            android:gravity="center" />
     </ScrollView>
 </LinearLayout>

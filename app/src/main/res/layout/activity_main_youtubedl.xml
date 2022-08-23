@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
         android:textColor="?onTexBackground"
-        android:textColorHint="?onTexBackground_60"/>
+        android:textColorHint="?onTexBackground_60" />
 
     <Button
         android:id="@+id/button_youtubedl_checkurl"

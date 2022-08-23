@@ -4,6 +4,7 @@
     android:id="@+id/main_footer"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
+
     <com.phaseshifter.canora.ui.widgets.CustomImageView
         android:id="@+id/control_imageview_background"
         android:layout_width="match_parent"
@@ -13,8 +14,8 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        android:elevation="-1dp"/>
-    
+        android:elevation="-1dp" />
+
     <ImageButton
         android:id="@+id/control_button_open"
         android:layout_width="0dp"
@@ -23,7 +24,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/control_button_prev"/>
+        app:layout_constraintEnd_toStartOf="@id/control_button_prev" />
 
     <View
         android:id="@+id/control_guide_center"

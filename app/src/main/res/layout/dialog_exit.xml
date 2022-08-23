@@ -1,59 +1,73 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:id="@+id/root"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:orientation="vertical"
-              android:background="?colorPrimary">
-    <TextView android:id="@+id/title"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:gravity="center"
-              android:text="@string/main_dialog_exit_title0closeCanora"
-              android:textColor="?onColorPrimaryAlt"
-              android:textSize="22dp"
-              android:background="?colorPrimaryAlt"
-              android:paddingBottom="10dp"
-              android:paddingTop="10dp"/>
-    <LinearLayout android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:orientation="vertical">
-        <TextView android:id="@+id/extext"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:text="@string/main_dialog_exit_text0exitConfirmation"
-                  android:textColor="?onColorPrimary"
-                  android:gravity="center"
-                  android:paddingTop="10dp"
-                  android:paddingBottom="10dp"/>
-        <LinearLayout android:id="@+id/footer"
-                      android:layout_width="match_parent"
-                      android:layout_height="wrap_content"
-                      android:orientation="horizontal"
-                      android:layout_below="@id/extext">
-            <Button android:id="@+id/btnNeut"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:background="@drawable/dialog_button_background"
-                    android:layout_marginRight="2dp"
-                    android:text="@string/main_dialog_exit_button0minimize"
-                    android:textColor="?onColorPrimaryAlt"/>
-            <Button android:id="@+id/btnNeg"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/main_dialog_exit_button0no"
-                    android:textColor="?onColorPrimaryAlt"
-                    android:background="@drawable/dialog_button_background"
-                    android:layout_marginRight="2dp"/>
-            <Button android:id="@+id/btnPos"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/main_dialog_exit_button0yes"
-                    android:textColor="?onColorPrimaryAlt"
-                    android:background="@drawable/dialog_button_background"/>
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="?colorPrimary">
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="@string/main_dialog_exit_title0closeCanora"
+        android:textColor="?onColorPrimaryAlt"
+        android:textSize="22dp"
+        android:background="?colorPrimaryAlt"
+        android:paddingBottom="10dp"
+        android:paddingTop="10dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/extext"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/main_dialog_exit_text0exitConfirmation"
+            android:textColor="?onColorPrimary"
+            android:gravity="center"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp" />
+
+        <LinearLayout
+            android:id="@+id/footer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_below="@id/extext">
+
+            <Button
+                android:id="@+id/btnNeut"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/dialog_button_background"
+                android:layout_marginRight="2dp"
+                android:text="@string/main_dialog_exit_button0minimize"
+                android:textColor="?onColorPrimaryAlt" />
+
+            <Button
+                android:id="@+id/btnNeg"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/main_dialog_exit_button0no"
+                android:textColor="?onColorPrimaryAlt"
+                android:background="@drawable/dialog_button_background"
+                android:layout_marginRight="2dp" />
+
+            <Button
+                android:id="@+id/btnPos"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/main_dialog_exit_button0yes"
+                android:textColor="?onColorPrimaryAlt"
+                android:background="@drawable/dialog_button_background" />
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

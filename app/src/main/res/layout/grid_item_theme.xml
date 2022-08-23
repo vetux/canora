@@ -1,36 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             xmlns:app="http://schemas.android.com/apk/res-auto"
-             android:id="@+id/root"
-             android:layout_width="match_parent"
-             android:layout_height="wrap_content"
-             android:orientation="vertical"
-             android:background="?colorPrimary"
-             android:foreground="@drawable/grid_item_theme_background">
-    <RelativeLayout android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-        <RelativeLayout android:id="@+id/themePreviewParent"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerHorizontal="true"
-                        android:layout_marginTop="10dp"
-                        android:padding="5dp"
-                        android:background="@drawable/themepreview_background_normal">
-            <com.phaseshifter.canora.ui.widgets.CustomImageView android:id="@+id/themePreview"
-                                                                   android:layout_width="100dp"
-                                                                   android:layout_height="100dp"
-                                                                   android:scaleType="fitXY"
-                                                                   app:corners="10"
-                                                                   android:src="@drawable/texture_camo"/>
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="?colorPrimary"
+    android:foreground="@drawable/grid_item_theme_background">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <RelativeLayout
+            android:id="@+id/themePreviewParent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp"
+            android:padding="5dp"
+            android:background="@drawable/themepreview_background_normal">
+
+            <com.phaseshifter.canora.ui.widgets.CustomImageView
+                android:id="@+id/themePreview"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:scaleType="fitXY"
+                app:corners="10"
+                android:src="@drawable/texture_camo" />
         </RelativeLayout>
-        <TextView android:id="@+id/themeTitle"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:text="Camo"
-                  android:textColor="?onColorPrimary"
-                  android:layout_below="@id/themePreviewParent"
-                  android:layout_centerHorizontal="true"
-                  android:padding="10dp"
-                  android:maxLines="1"/>
+
+        <TextView
+            android:id="@+id/themeTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Camo"
+            android:textColor="?onColorPrimary"
+            android:layout_below="@id/themePreviewParent"
+            android:layout_centerHorizontal="true"
+            android:padding="10dp"
+            android:maxLines="1" />
     </RelativeLayout>
 </FrameLayout>

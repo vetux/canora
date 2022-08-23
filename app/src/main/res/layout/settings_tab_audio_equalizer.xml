@@ -1,32 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:id="@+id/settings_tab_audio_equalizer"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="vertical"
-              android:background="?colorPrimary">
-    <View android:layout_width="match_parent"
-          android:layout_height="2dp"
-          android:background="?onColorPrimary_20"/>
-    <RelativeLayout android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="10dp">
-        <TextView android:id="@+id/eqpresetTitle"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:text="@string/settings_header0equalizerPresets"
-                  android:textColor="?onColorPrimary"
-                  android:layout_centerHorizontal="true"
-                  android:maxLines="1"/>
-        <TextView android:id="@+id/equalizerSpinnerFallbackText"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:text="@string/iap_dialog_storeph_text0comingSoon"
-                  android:textColor="?colorSecondary"
-                  android:layout_centerHorizontal="true"
-                  android:layout_below="@id/eqpresetTitle"
-                  android:layout_margin="10dp"
-                  android:maxLines="1"/>
+    android:id="@+id/settings_tab_audio_equalizer"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="?colorPrimary">
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="?onColorPrimary_20" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp">
+
+        <TextView
+            android:id="@+id/eqpresetTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/settings_header0equalizerPresets"
+            android:textColor="?onColorPrimary"
+            android:layout_centerHorizontal="true"
+            android:maxLines="1" />
+
+        <TextView
+            android:id="@+id/equalizerSpinnerFallbackText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/iap_dialog_storeph_text0comingSoon"
+            android:textColor="?colorSecondary"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@id/eqpresetTitle"
+            android:layout_margin="10dp"
+            android:maxLines="1" />
         <!--   <Spinner android:id="@+id/equalizerSpinner"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

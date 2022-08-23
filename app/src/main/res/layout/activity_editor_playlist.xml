@@ -1,105 +1,129 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                                                   xmlns:app="http://schemas.android.com/apk/res-auto"
-                                                   android:id="@+id/root"
-                                                   android:layout_width="match_parent"
-                                                   android:layout_height="match_parent"
-                                                   android:orientation="vertical"
-                                                   android:background="?colorPrimary">
-    <com.phaseshifter.canora.ui.widgets.CustomImageView android:id="@+id/toolbar_imageview_background"
-                                                           android:layout_width="0dp"
-                                                           android:layout_height="50dp"
-                                                           android:scaleType="?scaleTexToolbar"
-                                                           android:src="?colorPrimaryAlt"
-                                                           app:automaticAnimation="true"
-                                                           android:clickable="true"
-                                                           android:focusable="true"
-                                                           app:layout_constraintStart_toStartOf="parent"
-                                                           app:layout_constraintEnd_toEndOf="parent"
-                                                           app:layout_constraintTop_toTopOf="parent"/>
-    <ImageButton android:id="@+id/toolbar_button_nav"
-                 android:layout_width="50dp"
-                 android:layout_height="50dp"
-                 android:padding="0dp"
-                 android:background="@drawable/ripple_oval_hp"
-                 android:src="@drawable/arrow_left"
-                 android:scaleType="fitCenter"
-                 android:tint="?onTexToolbar"
-                 app:layout_constraintStart_toStartOf="@id/toolbar_imageview_background"
-                 app:layout_constraintTop_toTopOf="parent"/>
-    <TextView android:id="@+id/toolbar_textview_title"
-              android:layout_width="0dp"
-              android:layout_height="50dp"
-              android:text="TITLE"
-              android:textColor="?onTexToolbar"
-              android:textSize="22sp"
-              android:maxLines="1"
-              android:ellipsize="end"
-              android:gravity="center_vertical"
-              app:layout_constraintStart_toEndOf="@id/toolbar_button_nav"
-              app:layout_constraintEnd_toStartOf="@id/toolbar_button_apply"
-              app:layout_constraintTop_toTopOf="@id/toolbar_imageview_background"
-              app:layout_constraintBottom_toBottomOf="@id/toolbar_imageview_background"/>
-    <ImageButton android:id="@+id/toolbar_button_apply"
-                 android:layout_width="50dp"
-                 android:layout_height="50dp"
-                 android:scaleType="fitCenter"
-                 android:background="@drawable/ripple_oval_hp"
-                 android:src="@drawable/check_ripple"
-                 android:tint="?colorSecondary"
-                 android:padding="10dp"
-                 app:layout_constraintEnd_toEndOf="@id/toolbar_imageview_background"
-                 app:layout_constraintTop_toTopOf="parent"/>
-    <RelativeLayout android:id="@+id/metacontainer"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/toolbar_imageview_background"
-                    app:layout_constraintBottom_toBottomOf="parent">
-        <com.phaseshifter.canora.ui.widgets.CustomImageView android:id="@+id/playlistImageEditor"
-                                                               android:layout_width="match_parent"
-                                                               android:layout_height="wrap_content"
-                                                               android:src="@drawable/artwork_unset"
-                                                               app:corners="50"
-                                                               app:ratioLock="true"
-                                                               android:scaleType="fitXY"
-                                                               android:layout_margin="20dp"
-                                                               android:layout_centerHorizontal="true"
-                                                               android:layout_above="@+id/textFields"/>
-        <ImageButton android:id="@+id/buttonRemoveImage"
-                     android:layout_width="30dp"
-                     android:layout_height="30dp"
-                     android:layout_margin="10dp"
-                     android:src="@drawable/baseline_clear_white_48dp"
-                     android:background="@drawable/ripple_oval_hp"
-                     android:tint="?colorSecondary"
-                     android:layout_alignStart="@id/playlistImageEditor"
-                     android:layout_alignTop="@id/playlistImageEditor"/>
-        <RelativeLayout android:id="@+id/textFields"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="?colorPrimary">
+
+    <com.phaseshifter.canora.ui.widgets.CustomImageView
+        android:id="@+id/toolbar_imageview_background"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:scaleType="?scaleTexToolbar"
+        android:src="?colorPrimaryAlt"
+        app:automaticAnimation="true"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageButton
+        android:id="@+id/toolbar_button_nav"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:padding="0dp"
+        android:background="@drawable/ripple_oval_hp"
+        android:src="@drawable/arrow_left"
+        android:scaleType="fitCenter"
+        android:tint="?onTexToolbar"
+        app:layout_constraintStart_toStartOf="@id/toolbar_imageview_background"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/toolbar_textview_title"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:text="TITLE"
+        android:textColor="?onTexToolbar"
+        android:textSize="22sp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:gravity="center_vertical"
+        app:layout_constraintStart_toEndOf="@id/toolbar_button_nav"
+        app:layout_constraintEnd_toStartOf="@id/toolbar_button_apply"
+        app:layout_constraintTop_toTopOf="@id/toolbar_imageview_background"
+        app:layout_constraintBottom_toBottomOf="@id/toolbar_imageview_background" />
+
+    <ImageButton
+        android:id="@+id/toolbar_button_apply"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:scaleType="fitCenter"
+        android:background="@drawable/ripple_oval_hp"
+        android:src="@drawable/check_ripple"
+        android:tint="?colorSecondary"
+        android:padding="10dp"
+        app:layout_constraintEnd_toEndOf="@id/toolbar_imageview_background"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <RelativeLayout
+        android:id="@+id/metacontainer"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbar_imageview_background"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <com.phaseshifter.canora.ui.widgets.CustomImageView
+            android:id="@+id/playlistImageEditor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:src="@drawable/artwork_unset"
+            app:corners="50"
+            app:ratioLock="true"
+            android:scaleType="fitXY"
+            android:layout_margin="20dp"
+            android:layout_centerHorizontal="true"
+            android:layout_above="@+id/textFields" />
+
+        <ImageButton
+            android:id="@+id/buttonRemoveImage"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_margin="10dp"
+            android:src="@drawable/baseline_clear_white_48dp"
+            android:background="@drawable/ripple_oval_hp"
+            android:tint="?colorSecondary"
+            android:layout_alignStart="@id/playlistImageEditor"
+            android:layout_alignTop="@id/playlistImageEditor" />
+
+        <RelativeLayout
+            android:id="@+id/textFields"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_alignParentBottom="true">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_margin="10dp">
+
+                <TextView
+                    android:id="@+id/titlename"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/editor_playlist_header0title"
+                    android:textColor="?onColorPrimary"
+                    android:textSize="20sp"
+                    android:layout_centerHorizontal="true" />
+
+                <RelativeLayout
+                    android:id="@+id/titleback"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/titlename">
+
+                    <EditText
+                        android:id="@+id/titleedit"
                         android:layout_width="match_parent"
-                        android:layout_height="200dp"
-                        android:layout_alignParentBottom="true">
-            <RelativeLayout android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentStart="true"
-                            android:layout_margin="10dp">
-                <TextView android:id="@+id/titlename"
-                          android:layout_width="wrap_content"
-                          android:layout_height="wrap_content"
-                          android:text="@string/editor_playlist_header0title"
-                          android:textColor="?onColorPrimary"
-                          android:textSize="20sp"
-                          android:layout_centerHorizontal="true"/>
-                <RelativeLayout android:id="@+id/titleback"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_below="@id/titlename">
-                    <EditText android:id="@+id/titleedit"
-                              android:layout_width="match_parent"
-                              android:layout_height="wrap_content"
-                              android:textSize="18sp"
-                              android:textColor="?onColorPrimary"/>
+                        android:layout_height="wrap_content"
+                        android:textSize="18sp"
+                        android:textColor="?onColorPrimary" />
                 </RelativeLayout>
             </RelativeLayout>
         </RelativeLayout>

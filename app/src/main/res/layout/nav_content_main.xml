@@ -32,7 +32,7 @@
             android:textSize="16sp"
             android:text="@string/main_navigation_header0device"
             android:textColor="?onColorPrimary"
-            android:gravity="center_vertical"/>
+            android:gravity="center_vertical" />
     </LinearLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -232,6 +232,7 @@
         android:layout_marginStart="5dp"
         android:layout_marginTop="5dp"
         android:layout_marginBottom="5dp">
+
         <ImageView
             android:id="@+id/imageView18"
             android:layout_width="60dp"
@@ -241,6 +242,7 @@
             android:src="@drawable/soundcloud_logo_big_white"
             app:tint="?onColorPrimary"
             app:layout_constraintStart_toStartOf="parent" />
+
         <TextView
             android:id="@+id/textView17"
             android:layout_width="match_parent"
@@ -248,7 +250,7 @@
             android:text="@string/main_navigation_header0soundcloud"
             android:textSize="16sp"
             android:textColor="?onColorPrimary"
-            android:gravity="center_vertical"/>
+            android:gravity="center_vertical" />
     </LinearLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -332,6 +334,7 @@
         android:layout_height="50dp"
         android:layout_marginTop="10dp"
         android:background="@drawable/nav_button_background">
+
         <ImageView
             android:id="@+id/imageView25"
             android:layout_width="@dimen/nav_content_item_height"
@@ -344,6 +347,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:tint="?onColorPrimary" />
+
         <TextView
             android:id="@+id/textView26"
             android:layout_width="0dp"
@@ -370,6 +374,7 @@
         android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp"
         android:background="@drawable/nav_button_background">
+
         <ImageView
             android:id="@+id/imageView21"
             android:layout_width="@dimen/nav_content_item_height"
@@ -382,6 +387,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:tint="?onColorPrimary" />
+
         <TextView
             android:id="@+id/textView20"
             android:layout_width="0dp"

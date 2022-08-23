@@ -4,8 +4,8 @@
     android:id="@+id/settings_tab_system_soundcloud"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?colorPrimary"
-    >
+    android:background="?colorPrimary">
+
     <EditText
         android:id="@+id/edittext_soundcloudid"
         android:layout_width="match_parent"
@@ -13,5 +13,5 @@
         app:layout_constraintTop_toTopOf="parent"
         android:hint="@string/settings_soundcloud_id"
         android:textColor="?onTexBackground"
-        android:textColorHint="?onTexBackground_60"/>
+        android:textColorHint="?onTexBackground_60" />
 </androidx.constraintlayout.widget.ConstraintLayout>

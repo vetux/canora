@@ -1,45 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:layout_width="match_parent"
-             android:layout_height="wrap_content"
-             android:orientation="vertical"
-             android:background="?colorDebugUnset"
-             android:foreground="@drawable/grid_item_theme_background">
-    <RelativeLayout android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-        <LinearLayout android:id="@+id/themePreviewParent"
-                      android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      android:background="?colorDebugUnset"
-                      android:layout_centerHorizontal="true"
-                      android:padding="5dp"
-                      android:layout_marginTop="10dp">
-            <ImageView android:id="@+id/themePreview"
-                       android:layout_width="100dp"
-                       android:layout_height="100dp"
-                       android:scaleType="fitXY"
-                       android:src="@drawable/texture_camo"/>
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="?colorDebugUnset"
+    android:foreground="@drawable/grid_item_theme_background">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:id="@+id/themePreviewParent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?colorDebugUnset"
+            android:layout_centerHorizontal="true"
+            android:padding="5dp"
+            android:layout_marginTop="10dp">
+
+            <ImageView
+                android:id="@+id/themePreview"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:scaleType="fitXY"
+                android:src="@drawable/texture_camo" />
         </LinearLayout>
-        <RelativeLayout android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_below="@id/themePreviewParent"
-                        android:layout_centerHorizontal="true"
-                        android:padding="10dp">
-            <TextView android:id="@+id/themeTitle"
-                      android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      android:text="Camo"
-                      android:textColor="?colorDebugUnset"
-                      android:layout_centerVertical="true"/>
-            <TextView android:id="@+id/themePrice"
-                      android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      android:background="@drawable/background_store_textprice"
-                      android:padding="5dp"
-                      android:text="$0.00"
-                      android:layout_toEndOf="@id/themeTitle"
-                      android:layout_marginStart="20dp"
-                      android:layout_centerVertical="true"/>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/themePreviewParent"
+            android:layout_centerHorizontal="true"
+            android:padding="10dp">
+
+            <TextView
+                android:id="@+id/themeTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Camo"
+                android:textColor="?colorDebugUnset"
+                android:layout_centerVertical="true" />
+
+            <TextView
+                android:id="@+id/themePrice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/background_store_textprice"
+                android:padding="5dp"
+                android:text="$0.00"
+                android:layout_toEndOf="@id/themeTitle"
+                android:layout_marginStart="20dp"
+                android:layout_centerVertical="true" />
         </RelativeLayout>
     </RelativeLayout>
 </FrameLayout>

@@ -5,6 +5,7 @@
     android:layout_height="match_parent"
     android:background="?colorPrimary"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+
     <EditText
         android:id="@+id/edittext_youtubekey"
         android:layout_width="match_parent"
@@ -12,5 +13,5 @@
         app:layout_constraintTop_toTopOf="parent"
         android:hint="@string/settings_youtube_id"
         android:textColor="?onTexBackground"
-        android:textColorHint="?onTexBackground_60"/>
+        android:textColorHint="?onTexBackground_60" />
 </androidx.constraintlayout.widget.ConstraintLayout>
