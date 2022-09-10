@@ -484,14 +484,22 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
         setViewModelContentSelector(uiContentSelector);
 
         service.bind();
-        PlayerState playerState = service.getState().get();
-        if (playerState != null)
-            playerStateViewModel.applyPlayerState(service.getState().get());
+
         service.getState().addObserver(this);
+
         service.setVolume(settingsRepository.getFloat(FloatSetting.VOLUME));
+        service.setShuffle(settingsRepository.getBoolean(BooleanSetting.SHUFFLE));
+        service.setRepeat(settingsRepository.getBoolean(BooleanSetting.REPEAT));
         service.setEqualizerPreset(settingsRepository.getInt(IntegerSetting.EQUALIZER_PRESET_INDEX));
         service.setEqualizerEnabled(settingsRepository.getBoolean(BooleanSetting.EQUALIZER_ENABLED));
+
+        PlayerState playerState = service.getState().get();
+
+        if (playerState != null)
+            playerStateViewModel.applyPlayerState(service.getState().get());
+
         view.checkPermissions();
+
         runPresenterTask(() -> {
             deviceAudioRepository.refresh();
             mainThread.execute(() -> {
