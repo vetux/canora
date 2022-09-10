@@ -2,10 +2,11 @@
 
 
 <div align="right">
-  <img alt="API26+" src="https://img.shields.io/badge/API-26%2B-green.svg?style=flat" align="left">
-  <img alt="LICENSE_GPL2" src="https://img.shields.io/badge/license-GPL2-blue" align="left">
-  <img alt="CODE_SIZE" src="https://img.shields.io/github/languages/code-size/vetux/canora" align="left">
+  <img alt="CODE_LINES" src="https://img.shields.io/tokei/lines/github/vetux/canora" align="left">
+  <img alt="VERSION" src="https://img.shields.io/github/v/release/vetux/canora?include_prereleases" align="left">
   <img alt="LAST_COMMIT" src="https://img.shields.io/github/last-commit/vetux/canora" align="right">
+  <img alt="LICENSE" src="https://img.shields.io/github/license/vetux/canora" align="right">
+  <img alt="API26+" src="https://img.shields.io/badge/API-26%2B-green.svg?style=flat" align="right">
 </div>
 
 <br>
