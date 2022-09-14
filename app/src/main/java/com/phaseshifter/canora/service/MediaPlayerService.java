@@ -44,8 +44,9 @@ public interface MediaPlayerService {
 
     void setVolume(float vol);
 
-    void setEqualizerEnabled(boolean enabled);
-
+    /**
+     * @param preset If negative equalizer is disabled otherwise the index of the equalizer preset in android.media.audiofx.Equalizer
+     */
     void setEqualizerPreset(int preset);
 
     Observable<PlayerState> getState();

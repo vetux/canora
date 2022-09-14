@@ -14,35 +14,11 @@
         android:background="?onColorPrimary_20"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/text_enableequalizer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="10dp"
-        android:text="@string/settings_text0enableEqualizer"
-        android:textColor="?onColorPrimary"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/equalizer_line" />
-
-    <Switch
-        android:id="@+id/switch_equalizer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@null"
-        android:padding="20dp"
-        android:thumb="@drawable/switch_thumb"
-        android:track="@drawable/switch_track"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/text_enableequalizer"
-        tools:ignore="UseSwitchCompatOrMaterialXml" />
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/container_equalizer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/switch_equalizer">
+        app:layout_constraintTop_toBottomOf="@id/equalizer_line">
 
         <TextView
             android:id="@+id/eqpresetTitle"

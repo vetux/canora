@@ -30,6 +30,8 @@ public class PlayerStateViewModel {
 
     public final Observable<Float> volume = new Observable<>(0f);
 
+    public final Observable<Integer> equalizerPreset = new Observable<>(-1);
+
     public void applyPlayerState(PlayerState state) {
         if (state.isPlaying()
                 && state.getPlaybackState() != PlaybackState.STATE_READY) {
@@ -57,6 +59,8 @@ public class PlayerStateViewModel {
         isRepeating.setIfNotEqual(state.isRepeating());
 
         volume.setIfNotEqual(state.getVolume());
+
+        equalizerPreset.setIfNotEqual(state.getEqualizerPreset());
     }
 
     public void notifyObservers() {

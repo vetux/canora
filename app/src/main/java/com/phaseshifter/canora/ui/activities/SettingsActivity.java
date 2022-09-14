@@ -58,8 +58,7 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
     private final Observable<String> ytApiKey = new Observable<>();
     private final Observable<Pair<Integer, Long>> playlistData = new Observable<>();
     private final Observable<List<Pair<String, Object>>> modifiedSettings = new Observable<>();
-    private final Observable<Boolean> equalizerEnabled = new Observable<>(false);
-    private final Observable<Integer> equalizerPreset = new Observable<>(0);
+    private final Observable<Integer> equalizerPreset = new Observable<>(-1);
     private final Observable<String[]> equalizerPresets = new Observable<>(new String[0]);
 
     private SettingsContract.Presenter presenter;
@@ -317,11 +316,6 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
     }
 
     @Override
-    public void setEqualizerEnabled(boolean enabled) {
-        equalizerEnabled.set(enabled);
-    }
-
-    @Override
     public void setEqualizerPresets(String[] presets) {
         equalizerPresets.set(presets);
     }
@@ -384,15 +378,8 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
     public void setupTab(ViewGroup tab) {
         switch (tab.getId()) {
             case R.id.settings_tab_audio_equalizer:
-                Switch eSwitch = tab.findViewById(R.id.switch_equalizer);
                 ViewGroup container = tab.findViewById(R.id.container_equalizer);
                 Spinner spinner = tab.findViewById(R.id.equalizerSpinner);
-                eSwitch.setChecked(equalizerEnabled.get());
-                container.setVisibility(equalizerEnabled.get() ? View.VISIBLE : View.GONE);
-                equalizerEnabled.addObserver((obs, v) -> {
-                    eSwitch.setChecked(v);
-                    container.setVisibility(v ? View.VISIBLE : View.GONE);
-                });
                 ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.spinner_item_preset, equalizerPresets.get());
                 spinner.setAdapter(adapter);
                 equalizerPresets.addObserver((obs, v) -> {
@@ -411,12 +398,9 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
 
                     @Override
                     public void onNothingSelected(AdapterView<?> parentView) {
-                        throw new RuntimeException("Nothing selected. HOW COULD YOU");
+                        // ¯\_(ツ)_/¯
                     }
 
-                });
-                eSwitch.setOnCheckedChangeListener((CompoundButton buttonView, boolean isChecked) -> {
-                    presenter.onEqualizerEnabledChange(isChecked);
                 });
                 break;
             case R.id.settings_tab_audio_general:
@@ -593,7 +577,6 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
         modifiedSettings.removeAllObservers();
         ytApiKey.removeAllObservers();
         scClientID.removeAllObservers();
-        equalizerEnabled.removeAllObservers();
         equalizerPreset.removeAllObservers();
         equalizerPresets.removeAllObservers();
     }

@@ -491,7 +491,6 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
         service.setShuffle(settingsRepository.getBoolean(BooleanSetting.SHUFFLE));
         service.setRepeat(settingsRepository.getBoolean(BooleanSetting.REPEAT));
         service.setEqualizerPreset(settingsRepository.getInt(IntegerSetting.EQUALIZER_PRESET_INDEX));
-        service.setEqualizerEnabled(settingsRepository.getBoolean(BooleanSetting.EQUALIZER_ENABLED));
 
         PlayerState playerState = service.getState().get();
 
@@ -584,6 +583,12 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
             throw new RuntimeException("Received invalid Volume value: " + p);
         settingsRepository.putFloat(FloatSetting.VOLUME, p);
         service.setVolume(p);
+    }
+
+    @Override
+    public void onPresetSelected(int preset) {
+        settingsRepository.putInt(IntegerSetting.EQUALIZER_PRESET_INDEX, preset);
+        service.setEqualizerPreset(preset);
     }
 
     @Override

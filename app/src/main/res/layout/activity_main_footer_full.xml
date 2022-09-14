@@ -44,7 +44,7 @@
             android:background="@drawable/ripple_imagebutton_square"
             android:padding="5dp"
             android:scaleType="fitXY"
-            android:src="@drawable/baseline_volume_up_white_48dp"
+            android:src="@drawable/ic_equalizer_fill0_wght400_grad0_opsz48"
             android:tint="?onTexControlFull"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/control_anchor_top_spacer"

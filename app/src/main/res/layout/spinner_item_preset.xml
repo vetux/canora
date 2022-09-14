@@ -6,6 +6,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:ellipsize="marquee"
-    android:textAlignment="inherit"
+    android:textAlignment="center"
     android:textColor="?onColorPrimary"
     android:padding="20dp"/>

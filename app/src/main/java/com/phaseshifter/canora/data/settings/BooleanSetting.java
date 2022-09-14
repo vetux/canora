@@ -5,8 +5,7 @@ public enum BooleanSetting {
     REPEAT("BOOL_REPEAT", false),
     SHOWANIMATIONS("BOOL_SHOWANIM_CSTM", true),
     DEVELOPERMODE("BOOL_DEVMODE", false),
-    SHOWWARNING_PLAYLISTS("BOOL_WARNPL", true),
-    EQUALIZER_ENABLED("EQUALIZER_ENABLED", false);
+    SHOWWARNING_PLAYLISTS("BOOL_WARNPL", true);
 
     public final String key;
     public final boolean defaultValue;

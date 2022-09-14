@@ -15,8 +15,9 @@ public class PlayerState implements Serializable {
     private boolean shuffling;
     private long playerPosition; //Position of Player in milliseconds
     private float volume;
+    private int equalizerPreset;
 
-    public PlayerState(AudioData currentTrack, PlaybackState playbackState, boolean isPlaying, boolean isRepeating, boolean isShuffling, long playerPosition, float volume) {
+    public PlayerState(AudioData currentTrack, PlaybackState playbackState, boolean isPlaying, boolean isRepeating, boolean isShuffling, long playerPosition, float volume, int equalizerPreset) {
         this.currentTrack = currentTrack;
         this.playbackState = playbackState;
         this.playing = isPlaying;
@@ -24,9 +25,10 @@ public class PlayerState implements Serializable {
         this.shuffling = isShuffling;
         this.playerPosition = playerPosition;
         this.volume = volume;
+        this.equalizerPreset = equalizerPreset;
     }
 
-    public PlayerState(PlaybackController playbackController, ExoPlayer player, float volume, boolean loadingTrack) {
+    public PlayerState(PlaybackController playbackController, ExoPlayer player, float volume, boolean loadingTrack, int equalizerPreset) {
         this(
                 playbackController.getCurrentTrack(),
                 loadingTrack ? PlaybackState.STATE_BUFFERING : PlaybackState.fromInt(player.getPlaybackState()),
@@ -34,16 +36,17 @@ public class PlayerState implements Serializable {
                 playbackController.getRepeat(),
                 playbackController.getShuffle(),
                 player.getCurrentPosition(),
-                volume
+                volume,
+                equalizerPreset
         );
     }
 
     public PlayerState(PlayerState copy) {
-        this(copy.currentTrack, copy.playbackState, copy.playing, copy.repeating, copy.shuffling, copy.playerPosition, copy.volume);
+        this(copy.currentTrack, copy.playbackState, copy.playing, copy.repeating, copy.shuffling, copy.playerPosition, copy.volume, copy.equalizerPreset);
     }
 
     public PlayerState() {
-        this(null, null, false, false, false, 0, 0);
+        this(null, null, false, false, false, 0, 0, 0);
     }
 
     public AudioData getCurrentTrack() {
@@ -102,6 +105,14 @@ public class PlayerState implements Serializable {
         this.volume = volume;
     }
 
+    public int getEqualizerPreset() {
+        return equalizerPreset;
+    }
+
+    public void setEqualizerPreset(int value) {
+        equalizerPreset = value;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -113,12 +124,13 @@ public class PlayerState implements Serializable {
                 playerPosition == that.playerPosition &&
                 Float.compare(that.volume, volume) == 0 &&
                 Objects.equals(currentTrack, that.currentTrack) &&
-                playbackState == that.playbackState;
+                playbackState == that.playbackState
+                && equalizerPreset == that.equalizerPreset;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(currentTrack, playbackState, playing, repeating, shuffling, playerPosition, volume);
+        return Objects.hash(currentTrack, playbackState, playing, repeating, shuffling, playerPosition, volume, equalizerPreset);
     }
 
     @Override
@@ -131,6 +143,7 @@ public class PlayerState implements Serializable {
                 ", shuffling=" + shuffling +
                 ", playerPosition=" + playerPosition +
                 ", volume=" + volume +
+                ", equalizerPreset=" + equalizerPreset +
                 '}';
     }
 }

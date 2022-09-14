@@ -9,7 +9,7 @@ public enum IntegerSetting {
     SORT_DIR("INT_SRT_DIR", SORT_DIR_DOWN),
     SORT_TECH("INT_SRT_TECH", SORT_TECH_ALPHA),
     THEME("INT_THM_ID", 0),
-    EQUALIZER_PRESET_INDEX("INT_EQU_PRESET", 0),
+    EQUALIZER_PRESET_INDEX("INT_EQU_PRESET", -1),
     ;
 
     public final String key;

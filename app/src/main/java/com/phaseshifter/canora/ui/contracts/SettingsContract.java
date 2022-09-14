@@ -29,8 +29,6 @@ public interface SettingsContract {
 
         void setYoutubeApiKey(String apiKey);
 
-        void setEqualizerEnabled(boolean enabled);
-
         void setEqualizerPresets(String[] presets);
 
         void setEqualizerPreset(int preset);
@@ -42,6 +40,8 @@ public interface SettingsContract {
         void showDialog_confirmation_settingsreset(Runnable onReset);
 
         void showDialog_warning_devmode(Runnable onEnable, Runnable onCancel);
+
+        String getString(int res);
 
         void finish();
     }
@@ -70,8 +70,6 @@ public interface SettingsContract {
         void onSoundCloudClientIDChange(String clientID);
 
         void onYoutubeApiKeyChange(String apiKey);
-
-        void onEqualizerEnabledChange(boolean equalizerEnabled);
 
         void onEqualizerPresetChange(int preset);
     }

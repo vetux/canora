@@ -122,6 +122,8 @@ public interface MainContract {
 
         void onVolumeSeek(float p);
 
+        void onPresetSelected(int preset);
+
         void onSearchTextChange(String text);
 
         void onSearchTextEditingFinished();

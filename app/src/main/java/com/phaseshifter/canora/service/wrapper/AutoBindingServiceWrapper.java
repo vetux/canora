@@ -353,22 +353,6 @@ public class AutoBindingServiceWrapper implements ServiceConnection, MediaPlayer
     }
 
     @Override
-    public void setEqualizerEnabled(boolean enabled) {
-        verifyMainThread();
-        if (serviceRef.get() != null){
-            serviceRef.get().setEqualizerEnabled(enabled);
-        } else {
-            exec.execute(() -> {
-                if (requireService())
-                    mainHandler.post(() -> {
-                        if (serviceRef.get() != null)
-                            serviceRef.get().setEqualizerEnabled(enabled);
-                    });
-            });
-        }
-    }
-
-    @Override
     public void setEqualizerPreset(int preset) {
         verifyMainThread();
         if (serviceRef.get() != null){

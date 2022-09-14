@@ -106,7 +106,6 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
     private ThreadPoolExecutor pool = new ThreadPoolExecutor(1, 1, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
 
     private Equalizer equalizer;
-    private boolean equalizerEnabled = false;
     private int equalizerPreset = -1;
 
     //Binder
@@ -186,6 +185,7 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
 
             @Override
             public void onAudioSessionIdChanged(int audioSessionId) {
+                boolean equalizerEnabled = equalizerPreset >= 0;
                 equalizer = new Equalizer(100, audioSessionId);
                 equalizer.setEnabled(equalizerEnabled);
                 equalizer.usePreset((short) equalizerPreset);
@@ -385,27 +385,21 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
     }
 
     @Override
-    public void setEqualizerEnabled(boolean enabled) {
-        equalizerEnabled = enabled;
-        int id = exoPlayer.getAudioSessionId();
-        if (id != C.AUDIO_SESSION_ID_UNSET) {
-            // Equalizer does not do anything at all to the audio output in the emulator.
-            equalizer = new Equalizer(100, id);
-            equalizer.setEnabled(equalizerEnabled);
-            if (equalizerEnabled)
-                equalizer.usePreset((short) equalizerPreset);
-        }
-    }
-
-    @Override
     public void setEqualizerPreset(int preset) {
         equalizerPreset = preset;
         int id = exoPlayer.getAudioSessionId();
         if (id != C.AUDIO_SESSION_ID_UNSET) {
+            boolean equalizerEnabled = preset >= 0;
             equalizer = new Equalizer(100, id);
             equalizer.setEnabled(equalizerEnabled);
-            if (equalizerEnabled)
-                equalizer.usePreset((short) equalizerPreset);
+            if (equalizerEnabled) {
+                try {
+                    equalizer.usePreset((short) equalizerPreset);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            onStateModified();
         }
     }
 
@@ -452,7 +446,7 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
     }
 
     private void onStateModified() {
-        PlayerState newState = new PlayerState(playbackController, exoPlayer, volume, preparingTracks.get() > 0);
+        PlayerState newState = new PlayerState(playbackController, exoPlayer, volume, preparingTracks.get() > 0, equalizerPreset);
         runOnMainThread(() -> {
             boolean changed = !Objects.equals(this.state.get(), newState);
             this.state.set(newState);

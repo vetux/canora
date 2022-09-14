@@ -2,10 +2,13 @@ package com.phaseshifter.canora.ui.dialog;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.media.AudioManager;
+import android.media.audiofx.Equalizer;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.*;
+
 import com.phaseshifter.canora.R;
 import com.phaseshifter.canora.data.media.audio.AudioData;
 import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
@@ -299,17 +302,37 @@ public class MainDialogFactory {
         return ret;
     }
 
-    public static Dialog getVolumeSettings(Activity host, SeekBar.OnSeekBarChangeListener volumeListener, float initalValue) {
+    public static Dialog getAudioSettings(Activity host, SeekBar.OnSeekBarChangeListener volumeListener, AdapterView.OnItemSelectedListener presetListener, float volume, int preset) {
         Dialog ret = new Dialog(host);
         ret.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        ret.setContentView(R.layout.dialog_volume);
+        ret.setContentView(R.layout.dialog_audio);
         if (ret.getWindow() == null)
             throw new NullPointerException("Dialog Window is null");
         ret.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 
         SeekBar volBar = ret.findViewById(R.id.volBar);
         volBar.setOnSeekBarChangeListener(volumeListener);
-        volBar.setProgress((int) (volBar.getMax() * initalValue));
+        volBar.setProgress((int) (volBar.getMax() * volume));
+
+        Spinner spin = ret.findViewById(R.id.equalizerSpinner);
+        spin.setOnItemSelectedListener(presetListener);
+
+        AudioManager audioManager = host.getSystemService(AudioManager.class);
+
+        int id = audioManager.generateAudioSessionId(); // Documentation does not specify how to "ungenerate" an audio session id.
+
+        Equalizer equalizer = new Equalizer(0, id);
+        String[] presets = new String[equalizer.getNumberOfPresets() + 1];
+        presets[0] = host.getString(R.string.equalizerDefault);
+        for (short i = 0; i < equalizer.getNumberOfPresets(); i++) {
+            presets[i + 1] = equalizer.getPresetName(i);
+        }
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(host, R.layout.spinner_item_preset, presets);
+
+        spin.setAdapter(adapter);
+
+        spin.setSelection(preset + 1);
+
         return ret;
     }
 }
