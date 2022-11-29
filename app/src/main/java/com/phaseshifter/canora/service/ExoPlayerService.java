@@ -546,9 +546,15 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
                 }
                 if (playing) {
                     Log.v(LOG_TAG, "Start Foreground");
-                    if (!isForeground)
-                        startForeground(NOTIFICATION_ID, notification);
-                    isForeground = true;
+                    // For some mysterious reason when youtube stream is running while the activity is not running this call to startForeground throws ForegroundServiceStartNotAllowedException
+                    try {
+                        if (!isForeground)
+                            startForeground(NOTIFICATION_ID, notification);
+                        isForeground = true;
+                    } catch (Exception e) {
+                        Log.e(LOG_TAG, "Failed to start foreground: " + e.getMessage());
+                        isForeground = false;
+                    }
                 } else {
                     Log.v(LOG_TAG, "Stop Foreground");
                     if (isForeground)
