@@ -83,8 +83,8 @@ public class AudioDataSourceYtdl implements AudioDataSource, Serializable {
             prepare(url);
         }
 
-        private static HashMap<String, String> streamUrls = new HashMap<>();
-        private static HashMap<String, CountDownLatch> streamLatches = new HashMap<>();
+        private static final HashMap<String, String> streamUrls = new HashMap<>();
+        private static final HashMap<String, CountDownLatch> streamLatches = new HashMap<>();
         private static final ThreadPoolExecutor pool = new ThreadPoolExecutor(4, 4, 0, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
     }
 
