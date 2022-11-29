@@ -19,6 +19,13 @@ public interface AudioDataSource {
     }
 
     /**
+     * Called when the player fails to stream from the returned media sources.
+     * Network based sources can then for example refresh the url.
+     */
+    default void failed() {
+    }
+
+    /**
      * Creates a new MediaSource object based on the underlying data source.
      * The passed context could be abstracted into the AudioDataSource implementations,
      * but for this the AudioDataSource objects would have to be constructed with a persistent context (Separate "MediaBrowserService" or application),

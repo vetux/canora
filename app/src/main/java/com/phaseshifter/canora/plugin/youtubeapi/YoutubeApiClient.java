@@ -6,7 +6,6 @@ import com.phaseshifter.canora.data.media.audio.AudioData;
 import com.phaseshifter.canora.data.media.audio.metadata.AudioMetadataMemory;
 import com.phaseshifter.canora.data.media.image.ImageData;
 import com.phaseshifter.canora.data.media.image.metadata.ImageMetadataMemory;
-import com.phaseshifter.canora.data.media.image.source.ImageDataSource;
 import com.phaseshifter.canora.data.media.image.source.ImageDataSourceUri;
 import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
 import com.phaseshifter.canora.net.http.HttpClient;
@@ -24,8 +23,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.time.Period;
-import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;

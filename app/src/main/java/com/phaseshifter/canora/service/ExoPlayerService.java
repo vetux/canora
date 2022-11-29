@@ -170,6 +170,9 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
             @Override
             public void onPlayerError(@NonNull PlaybackException error) {
                 Log.v(LOG_TAG, "onPlayerError " + error);
+                if (playingTrack != null) {
+                    playingTrack.getDataSource().failed();
+                }
                 error.printStackTrace();
                 broadcastError();
                 onStateModified();
