@@ -238,5 +238,5 @@
     <string name="arrayadapter_audioplaylist_header0numberOfTracks">%1$d Tracks</string>
 
     <string name="service_download_title">Media Downloader</string>
-    <string name="service_download_message">Downloading %1$d File/s\nETA %2$.2f seconds</string>
+    <string name="service_download_message">Downloading %1$d File/s\nETA %2$.0f seconds</string>
 </resources>

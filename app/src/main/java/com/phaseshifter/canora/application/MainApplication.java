@@ -79,6 +79,7 @@ public class MainApplication extends Application {
                 YoutubeDL.getInstance().init(this);
                 FFmpeg.getInstance().init(this);
                 YoutubeDL.getInstance().updateYoutubeDL(this);
+                instanceInit = true;
             }
         } catch (Exception e) {
             Log.e("MainApplication", "" + e.getMessage());
