@@ -68,7 +68,7 @@ public class AudioDataSourceYtdl implements AudioDataSource, Serializable {
         }
 
         public static void failed(String url) {
-            if (streamLatches.containsKey(url)){
+            if (streamLatches.containsKey(url)) {
                 CountDownLatch latch = streamLatches.get(url);
                 while (latch.getCount() != 0) {
                     try {
@@ -108,13 +108,15 @@ public class AudioDataSourceYtdl implements AudioDataSource, Serializable {
 
     @Override
     public void prepare() throws Exception {
+        StreamDownloader.prepare(url);
         if (streamUrl == null) {
             streamUrl = StreamDownloader.get(url);
         }
     }
 
     @Override
-    public void finish() {}
+    public void finish() {
+    }
 
     @Override
     public void failed() {
