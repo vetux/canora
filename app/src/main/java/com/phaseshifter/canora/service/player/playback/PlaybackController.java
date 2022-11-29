@@ -1,4 +1,4 @@
-package com.phaseshifter.canora.service.playback;
+package com.phaseshifter.canora.service.player.playback;
 
 import com.phaseshifter.canora.data.media.audio.AudioData;
 

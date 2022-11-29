@@ -1,4 +1,4 @@
-package com.phaseshifter.canora.service.wrapper;
+package com.phaseshifter.canora.service.player.wrapper;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -8,9 +8,9 @@ import android.os.IBinder;
 import android.os.Looper;
 
 import com.phaseshifter.canora.data.media.audio.AudioData;
-import com.phaseshifter.canora.service.ExoPlayerService;
-import com.phaseshifter.canora.service.MediaPlayerService;
-import com.phaseshifter.canora.service.state.PlayerState;
+import com.phaseshifter.canora.service.player.ExoPlayerService;
+import com.phaseshifter.canora.service.player.MediaPlayerService;
+import com.phaseshifter.canora.service.player.state.PlayerState;
 import com.phaseshifter.canora.ui.utils.ServiceBinder;
 import com.phaseshifter.canora.utils.Observable;
 import com.phaseshifter.canora.utils.Observer;
@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
  * <p>
  * The functions return immediately and the caller will be notified via the player state callbacks.
  */
-public class AutoBindingServiceWrapper implements ServiceConnection, MediaPlayerService {
+public class AutoBindMediaService implements ServiceConnection, MediaPlayerService {
     private enum BindingState {
         IDLE,
         BINDING
@@ -53,7 +53,7 @@ public class AutoBindingServiceWrapper implements ServiceConnection, MediaPlayer
 
     private BindingState bindingState;    //Accessed only from activity_main thread.
 
-    public AutoBindingServiceWrapper(Context context) {
+    public AutoBindMediaService(Context context) {
         serviceBinder = new ServiceBinder(context, ExoPlayerService.class, this);
         mainHandler = new Handler(Looper.getMainLooper());
         stateProxy = new Observable<>();

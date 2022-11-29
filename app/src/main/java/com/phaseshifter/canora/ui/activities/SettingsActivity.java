@@ -24,7 +24,7 @@ import com.phaseshifter.canora.application.MainApplication;
 import com.phaseshifter.canora.data.theme.AppTheme;
 import com.phaseshifter.canora.model.repo.SettingsRepository;
 import com.phaseshifter.canora.model.repo.ThemeRepository;
-import com.phaseshifter.canora.service.wrapper.AutoBindingServiceWrapper;
+import com.phaseshifter.canora.service.player.wrapper.AutoBindMediaService;
 import com.phaseshifter.canora.ui.arrayadapters.SettingAdapterItem;
 import com.phaseshifter.canora.ui.arrayadapters.SettingArrayAdapter;
 import com.phaseshifter.canora.ui.arrayadapters.ThemeArrayAdapter;
@@ -67,7 +67,7 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
 
     private SettingsPagerAdapter pagerAdapter;
 
-    private AutoBindingServiceWrapper service;
+    private AutoBindMediaService service;
 
     private Context context;
 
@@ -77,7 +77,7 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_default);
-        service = new AutoBindingServiceWrapper(this);
+        service = new AutoBindMediaService(this);
         AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         presenter = new SettingsPresenter(this,
                 new SettingsRepository(this),

@@ -1,4 +1,4 @@
-package com.phaseshifter.canora.service.mediasession;
+package com.phaseshifter.canora.service.player.mediasession;
 
 import android.content.Intent;
 import android.media.session.MediaSession;
@@ -7,7 +7,7 @@ import android.os.Bundle;
 import android.os.ResultReceiver;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import com.phaseshifter.canora.service.ExoPlayerService;
+import com.phaseshifter.canora.service.player.ExoPlayerService;
 
 public class MediaSessionCallback extends MediaSession.Callback {
     private final ExoPlayerService service;

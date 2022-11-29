@@ -8,4 +8,5 @@ public class DownloadInfo implements Serializable {
     public String user;
     public int duration;
     public long size;
+    public String thumbnailUrl;
 }

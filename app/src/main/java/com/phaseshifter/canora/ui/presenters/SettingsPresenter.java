@@ -13,7 +13,7 @@ import com.phaseshifter.canora.data.theme.AppTheme;
 import com.phaseshifter.canora.model.repo.SettingsRepository;
 import com.phaseshifter.canora.model.repo.ThemeRepository;
 import com.phaseshifter.canora.model.repo.UserPlaylistRepository;
-import com.phaseshifter.canora.service.MediaPlayerService;
+import com.phaseshifter.canora.service.player.MediaPlayerService;
 import com.phaseshifter.canora.ui.contracts.SettingsContract;
 import com.phaseshifter.canora.ui.data.constants.SettingsPage;
 import com.phaseshifter.canora.utils.Pair;

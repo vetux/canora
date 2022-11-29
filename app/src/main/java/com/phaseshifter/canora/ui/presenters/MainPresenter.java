@@ -21,11 +21,11 @@ import com.phaseshifter.canora.model.formatting.ListFilter;
 import com.phaseshifter.canora.model.formatting.ListSorter;
 import com.phaseshifter.canora.model.repo.SoundCloudAudioRepository;
 import com.phaseshifter.canora.plugin.ytdl.AudioDataSourceYtdl;
-import com.phaseshifter.canora.service.state.PlayerState;
-import com.phaseshifter.canora.service.wrapper.AutoBindingServiceWrapper;
+import com.phaseshifter.canora.service.download.AutoBindDownloadService;
+import com.phaseshifter.canora.service.player.state.PlayerState;
+import com.phaseshifter.canora.service.player.wrapper.AutoBindMediaService;
 import com.phaseshifter.canora.ui.contracts.MainContract;
 import com.phaseshifter.canora.ui.data.DownloadInfo;
-import com.phaseshifter.canora.ui.data.DownloadProgress;
 import com.phaseshifter.canora.ui.data.MainPage;
 import com.phaseshifter.canora.ui.data.constants.NavigationItem;
 import com.phaseshifter.canora.ui.data.formatting.FilterOptions;
@@ -42,10 +42,8 @@ import com.phaseshifter.canora.ui.viewmodels.YoutubeDlViewModel;
 import com.phaseshifter.canora.utils.Observable;
 import com.phaseshifter.canora.utils.Observer;
 import com.yausername.youtubedl_android.YoutubeDL;
-import com.yausername.youtubedl_android.YoutubeDLRequest;
 import com.yausername.youtubedl_android.mapper.VideoInfo;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
@@ -68,7 +66,8 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
     private final SoundCloudAudioRepository scAudioDataRepo;
     private final YoutubeSearchRepository ytRepo;
 
-    private final AutoBindingServiceWrapper service;
+    private final AutoBindMediaService mediaService;
+    private final AutoBindDownloadService downloadService;
 
     private final Executor mainThread;
 
@@ -121,7 +120,8 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
 
     public MainPresenter(MainContract.View view,
                          Serializable savedState,
-                         AutoBindingServiceWrapper service,
+                         AutoBindMediaService service,
+                         AutoBindDownloadService downloadService,
                          DeviceAudioRepository audioDataRepository,
                          UserPlaylistRepository audioPlaylistRepository,
                          SettingsRepository settingsRepository,
@@ -136,7 +136,8 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                          YoutubeDlViewModel ytdlViewModel,
                          Context context) {
         this.view = view;
-        this.service = service;
+        this.mediaService = service;
+        this.downloadService = downloadService;
         this.deviceAudioRepository = audioDataRepository;
         this.userPlaylistRepository = audioPlaylistRepository;
         this.settingsRepository = settingsRepository;
@@ -161,15 +162,6 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                 }
             }
         });
-
-        MainApplication app = (MainApplication) context.getApplicationContext();
-        app.downloads.addObserver(new Observer<List<DownloadProgress>>() {
-            @Override
-            public void update(Observable<List<DownloadProgress>> observable, List<DownloadProgress> value) {
-                ytdlViewModel.downloads.set(value);
-            }
-        });
-        ytdlViewModel.downloads.set(app.downloads.get());
 
         if (savedState instanceof MainPresenterState) {
             final MainPresenterState state = (MainPresenterState) savedState;
@@ -331,7 +323,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
     }
 
     private void updateHighlightedIndex() {
-        PlayerState state = service.getState().get();
+        PlayerState state = mediaService.getState().get();
         if (state != null) {
             AudioData track = state.getCurrentTrack();
             int index = contentViewModel.visibleTracks.get().indexOf(track);
@@ -483,19 +475,19 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
 
         setViewModelContentSelector(uiContentSelector);
 
-        service.bind();
+        mediaService.bind();
 
-        service.getState().addObserver(this);
+        mediaService.getState().addObserver(this);
 
-        service.setVolume(settingsRepository.getFloat(FloatSetting.VOLUME));
-        service.setShuffle(settingsRepository.getBoolean(BooleanSetting.SHUFFLE));
-        service.setRepeat(settingsRepository.getBoolean(BooleanSetting.REPEAT));
-        service.setEqualizerPreset(settingsRepository.getInt(IntegerSetting.EQUALIZER_PRESET_INDEX));
+        mediaService.setVolume(settingsRepository.getFloat(FloatSetting.VOLUME));
+        mediaService.setShuffle(settingsRepository.getBoolean(BooleanSetting.SHUFFLE));
+        mediaService.setRepeat(settingsRepository.getBoolean(BooleanSetting.REPEAT));
+        mediaService.setEqualizerPreset(settingsRepository.getInt(IntegerSetting.EQUALIZER_PRESET_INDEX));
 
-        PlayerState playerState = service.getState().get();
+        PlayerState playerState = mediaService.getState().get();
 
         if (playerState != null)
-            playerStateViewModel.applyPlayerState(service.getState().get());
+            playerStateViewModel.applyPlayerState(mediaService.getState().get());
 
         view.checkPermissions();
 
@@ -530,51 +522,51 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
         savedState.ytSearch = ytSearch;
         view.saveState(savedState);
 
-        service.getState().removeObserver(this);
+        mediaService.getState().removeObserver(this);
     }
 
     @Override
     public void onTrackSeekStart() {
-        service.pause();
+        mediaService.pause();
     }
 
     @Override
     public void onTrackSeek(float p) {
-        service.seek(p);
+        mediaService.seek(p);
     }
 
     @Override
     public void onTrackSeekStop() {
-        service.resume();
+        mediaService.resume();
     }
 
     @Override
     public void onPrev() {
-        service.previous();
+        mediaService.previous();
     }
 
     @Override
     public void onPlay() {
-        service.pauseResume();
+        mediaService.pauseResume();
     }
 
     @Override
     public void onNext() {
-        service.next();
+        mediaService.next();
     }
 
     @Override
     public void onShuffleSwitch() {
         boolean shuffle = !playerStateViewModel.isShuffling.get();
         settingsRepository.putBoolean(BooleanSetting.SHUFFLE, shuffle);
-        service.setShuffle(shuffle);
+        mediaService.setShuffle(shuffle);
     }
 
     @Override
     public void onRepeatSwitch() {
         boolean repeat = !playerStateViewModel.isRepeating.get();
         settingsRepository.putBoolean(BooleanSetting.REPEAT, repeat);
-        service.setRepeat(repeat);
+        mediaService.setRepeat(repeat);
     }
 
     @Override
@@ -582,13 +574,13 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
         if (p > 1.0f || p < 0.0f)
             throw new RuntimeException("Received invalid Volume value: " + p);
         settingsRepository.putFloat(FloatSetting.VOLUME, p);
-        service.setVolume(p);
+        mediaService.setVolume(p);
     }
 
     @Override
     public void onPresetSelected(int preset) {
         settingsRepository.putInt(IntegerSetting.EQUALIZER_PRESET_INDEX, preset);
-        service.setEqualizerPreset(preset);
+        mediaService.setEqualizerPreset(preset);
     }
 
     @Override
@@ -740,8 +732,8 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
             if (reformat) {
                 updateVisibleContent();
             }
-            service.setContent(sortedTracks);
-            service.play(processedData.get(index).getMetadata().getId());
+            mediaService.setContent(sortedTracks);
+            mediaService.play(processedData.get(index).getMetadata().getId());
         }
     }
 
@@ -1023,6 +1015,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                 if (downloadInfo.size == 0)
                     downloadInfo.size = info.getFileSizeApproximate();
                 downloadInfo.duration = info.getDuration();
+                downloadInfo.thumbnailUrl = info.getThumbnail();
 
                 mainThread.execute(() -> {
                     ytdlViewModel.infoForUrl.set(downloadInfo);
@@ -1090,69 +1083,52 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
         }
 
         String url = ytdlViewModel.url.get();
-        ytdlViewModel.downloads.notifyObservers();
-        runPresenterTask(() -> {
-            MainApplication app = (MainApplication) context.getApplicationContext();
-            try {
-                if (downloadingAudio) {
-                    File youtubeDLDir = new File(context.getFilesDir(), "download_cache");
-                    String outputFile = new String(youtubeDLDir.getAbsolutePath() + "/temp.mp3");
-                    new File(outputFile).delete();
-                    YoutubeDLRequest request = new YoutubeDLRequest(url);
-                    request.addOption("-o", youtubeDLDir.getAbsolutePath() + "/%(title)s.%(ext)s");
-                    request.addOption("-f", "mp4");
-                    request.addOption("--no-playlist");
-                    request.addOption("--extract-audio");
-                    request.addOption("--add-metadata");
-                    request.addOption("--embed-thumbnail");
-                    request.addOption("--audio-format", "mp3");
-                    request.addOption("--output", outputFile);
-                    app.startDownload(url, uri, outputFile, request, fileStream, (e) -> {
-                                e.printStackTrace();
-                                view.showWarning(context.getString(R.string.main_download_failed, e.getMessage()));
-                            },
-                            () -> {
-                                if (view != null && context != null) {
-                                    view.showMessage(context.getString(R.string.main_download_successful));
-                                    view.scanDocument(uri, () -> {
-                                        mainThread.execute(() -> {
-                                            deviceAudioRepository.refresh();
-                                            updateVisibleContent();
-                                        });
+        try {
+            if (downloadingAudio) {
+                downloadService.downloadAudio(uri,
+                        fileStream,
+                        url,
+                        () -> {
+                            if (view != null && context != null) {
+                                view.showMessage(context.getString(R.string.main_download_successful));
+                                view.scanDocument(uri, () -> {
+                                    mainThread.execute(() -> {
+                                        deviceAudioRepository.refresh();
+                                        updateVisibleContent();
                                     });
-                                }
-                            });
-                } else if (downloadingVideo) {
-                    YoutubeDLRequest request = new YoutubeDLRequest(url);
-                    File youtubeDLDir = new File(context.getFilesDir(), "download_cache");
-                    String outputFile = new String(youtubeDLDir.getAbsolutePath() + "/temp.mp4");
-                    new File(outputFile).delete();
-                    request.addOption("-o", outputFile);
-                    request.addOption("-f", "mp4");
-                    request.addOption("--no-playlist");
-                    app.startDownload(url, uri, outputFile, request, fileStream, (e) -> {
-                                e.printStackTrace();
-                                view.showWarning(context.getString(R.string.main_download_failed, e.getMessage()));
-                            },
-                            () -> {
-                                if (view != null && context != null) {
-                                    view.showMessage(context.getString(R.string.main_download_successful));
-                                    view.scanDocument(uri, () -> {
-                                        mainThread.execute(() -> {
-                                            deviceAudioRepository.refresh();
-                                            updateVisibleContent();
-                                        });
+                                });
+                            }
+                        },
+                        (e) -> {
+                            e.printStackTrace();
+                            view.showWarning(context.getString(R.string.main_download_failed, e.getMessage()));
+                        });
+            } else if (downloadingVideo) {
+                downloadService.downloadVideo(uri,
+                        fileStream,
+                        url,
+                        () -> {
+                            if (view != null && context != null) {
+                                view.showMessage(context.getString(R.string.main_download_successful));
+                                view.scanDocument(uri, () -> {
+                                    mainThread.execute(() -> {
+                                        deviceAudioRepository.refresh();
+                                        updateVisibleContent();
                                     });
-                                }
-                            });
-                }
-                downloadingVideo = false;
-                downloadingAudio = false;
-            } catch (Exception e) {
-                e.printStackTrace();
-                view.showWarning(context.getString(R.string.main_download_failed, e.getMessage()));
+                                });
+                            }
+                        },
+                        (e) -> {
+                            e.printStackTrace();
+                            view.showWarning(context.getString(R.string.main_download_failed, e.getMessage()));
+                        });
             }
-        });
+            downloadingVideo = false;
+            downloadingAudio = false;
+        } catch (Exception e) {
+            e.printStackTrace();
+            view.showWarning(context.getString(R.string.main_download_failed, e.getMessage()));
+        }
     }
 
     //STOP Presenter Interface

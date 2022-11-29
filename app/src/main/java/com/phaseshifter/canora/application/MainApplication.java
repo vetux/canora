@@ -1,7 +1,7 @@
 package com.phaseshifter.canora.application;
 
 import android.app.Application;
-import android.os.Handler;
+import android.util.Log;
 
 import com.phaseshifter.canora.model.provider.MediaStoreContentProvider;
 import com.phaseshifter.canora.model.repo.DeviceAudioRepository;
@@ -9,24 +9,12 @@ import com.phaseshifter.canora.model.repo.UserPlaylistRepository;
 import com.phaseshifter.canora.model.repo.SoundCloudAudioRepository;
 import com.phaseshifter.canora.model.repo.YoutubeSearchRepository;
 import com.phaseshifter.canora.plugin.youtubeapi.YoutubeApiClient;
-import com.phaseshifter.canora.ui.data.DownloadProgress;
-import com.phaseshifter.canora.utils.Observable;
-import com.phaseshifter.canora.utils.RunnableArg;
 import com.phaseshifter.canora.utils.android.ContentUriFactory;
 import com.yausername.ffmpeg.FFmpeg;
 import com.yausername.youtubedl_android.YoutubeDL;
-import com.yausername.youtubedl_android.YoutubeDLException;
-import com.yausername.youtubedl_android.YoutubeDLRequest;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 public class MainApplication extends Application {
     public static MainApplication instance;
@@ -38,15 +26,10 @@ public class MainApplication extends Application {
     //Store objects passed between activities here as intent bundles cant hold more than 1MB
     private final HashMap<String, Object> bundle = new HashMap<>();
 
-    public final Observable<List<DownloadProgress>> downloads = new Observable<>(new ArrayList<>());
-
-    private final ThreadPoolExecutor downloadExec;
-
     private boolean instanceInit = false;
 
     public MainApplication() {
         instance = this;
-        this.downloadExec = new ThreadPoolExecutor(1, 4, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
     }
 
     @Override
@@ -90,54 +73,15 @@ public class MainApplication extends Application {
         bundle.put(key, value);
     }
 
-    public void startDownload(String url,
-                              String outputFile,
-                              String tempFile,
-                              YoutubeDLRequest request,
-                              OutputStream outputStream,
-                              RunnableArg<Exception> exceptionHandler,
-                              Runnable completionHandler) {
-        DownloadProgress downloadProgress = new DownloadProgress(url, outputFile);
-
-        downloads.get().add(downloadProgress);
-        downloads.notifyObservers();
-        downloadExec.submit(() -> {
-            try {
-                getYoutubeDlInstance().execute(request, (progress, etaInSeconds, line) -> {
-                    new Handler(getMainLooper()).post(() -> {
-                        downloadProgress.progress = progress;
-                        downloadProgress.etaInSeconds = etaInSeconds;
-                        downloads.notifyObservers();
-                    });
-                });
-                new Handler(getMainLooper()).post(() -> {
-                    downloadProgress.progress = 100;
-                    downloadProgress.etaInSeconds = 0;
-                    downloads.notifyObservers();
-                });
-                FileInputStream fis = new FileInputStream(tempFile);
-                byte[] buffer = new byte[1024];
-                int len;
-                while ((len = fis.read(buffer)) != -1) {
-                    outputStream.write(buffer, 0, len);
-                }
-                fis.close();
-                new Handler(getMainLooper()).post(() -> {
-                    downloads.get().remove(downloadProgress);
-                    downloads.notifyObservers();
-                    completionHandler.run();
-                });
-            } catch (Exception e) {
-                exceptionHandler.run(e);
+    public YoutubeDL getYoutubeDlInstance() {
+        try {
+            if (!instanceInit) {
+                YoutubeDL.getInstance().init(this);
+                FFmpeg.getInstance().init(this);
+                YoutubeDL.getInstance().updateYoutubeDL(this);
             }
-        });
-    }
-
-    public YoutubeDL getYoutubeDlInstance() throws YoutubeDLException {
-        if (!instanceInit) {
-            YoutubeDL.getInstance().init(this);
-            FFmpeg.getInstance().init(this);
-            YoutubeDL.getInstance().updateYoutubeDL(this);
+        } catch (Exception e) {
+            Log.e("MainApplication", "" + e.getMessage());
         }
         return YoutubeDL.getInstance();
     }

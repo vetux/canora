@@ -1,7 +1,7 @@
-package com.phaseshifter.canora.service;
+package com.phaseshifter.canora.service.player;
 
 import com.phaseshifter.canora.data.media.audio.AudioData;
-import com.phaseshifter.canora.service.state.PlayerState;
+import com.phaseshifter.canora.service.player.state.PlayerState;
 import com.phaseshifter.canora.utils.Observable;
 
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.phaseshifter.canora.service.state;
+package com.phaseshifter.canora.service.player.state;
 
 public enum PlaybackState {
     STATE_IDLE,

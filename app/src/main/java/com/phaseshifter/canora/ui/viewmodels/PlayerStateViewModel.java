@@ -1,18 +1,9 @@
 package com.phaseshifter.canora.ui.viewmodels;
 
-import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-
-import com.phaseshifter.canora.R;
-import com.phaseshifter.canora.data.media.audio.AudioData;
-import com.phaseshifter.canora.data.media.audio.metadata.AudioMetadata;
 import com.phaseshifter.canora.data.media.image.ImageData;
-import com.phaseshifter.canora.service.state.PlaybackState;
-import com.phaseshifter.canora.service.state.PlayerState;
+import com.phaseshifter.canora.service.player.state.PlaybackState;
+import com.phaseshifter.canora.service.player.state.PlayerState;
 import com.phaseshifter.canora.utils.Observable;
-
-import java.util.Objects;
 
 public class PlayerStateViewModel {
     public final Observable<Boolean> buffering = new Observable<>(false);

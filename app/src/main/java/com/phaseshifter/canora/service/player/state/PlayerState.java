@@ -1,7 +1,7 @@
-package com.phaseshifter.canora.service.state;
+package com.phaseshifter.canora.service.player.state;
 
 import com.phaseshifter.canora.data.media.audio.AudioData;
-import com.phaseshifter.canora.service.playback.PlaybackController;
+import com.phaseshifter.canora.service.player.playback.PlaybackController;
 import com.google.android.exoplayer2.ExoPlayer;
 
 import java.io.Serializable;
