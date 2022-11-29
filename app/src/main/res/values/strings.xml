@@ -105,6 +105,8 @@
     <string name="main_popup_context_item0edit">Edit</string>
     <string name="main_popup_context_item0delete">Delete</string>
     <string name="main_popup_context_item0info">Info</string>
+    <string name="main_popup_context_item0downloadAudio">Download Audio</string>
+    <string name="main_popup_context_item0downloadVideo">Download Video</string>
 
     <string name="main_popup_options_item0settings">Settings</string>
     <string name="main_popup_options_item0sort">Sort Options</string>

@@ -97,6 +97,10 @@ public class AudioDataSourceYtdl implements AudioDataSource, Serializable {
         return url;
     }
 
+    public String getStreamUrl() {
+        return streamUrl;
+    }
+
     public AudioDataSourceYtdl(String url) {
         this.url = url;
         StreamDownloader.prepare(url);

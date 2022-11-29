@@ -171,6 +171,14 @@ public class ListPopupFactory {
             popupItems.add(new ListPopupItem(context.getString(R.string.main_popup_context_item0delete)));
             actionMapping.add(ContextMenu.Action.DELETE);
         }
+        if (actions.contains(ContextMenu.Action.DOWNLOAD_AUDIO)){
+            popupItems.add(new ListPopupItem(context.getString(R.string.main_popup_context_item0downloadAudio)));
+            actionMapping.add(ContextMenu.Action.DOWNLOAD_AUDIO);
+        }
+        if (actions.contains(ContextMenu.Action.DOWNLOAD_VIDEO)){
+            popupItems.add(new ListPopupItem(context.getString(R.string.main_popup_context_item0downloadVideo)));
+            actionMapping.add(ContextMenu.Action.DOWNLOAD_VIDEO);
+        }
 
         int widthDP = 100;
 

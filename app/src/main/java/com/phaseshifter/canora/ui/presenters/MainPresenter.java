@@ -83,7 +83,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
     private final Observer<List<AudioData>> ytObserver = new Observer<List<AudioData>>() {
         @Override
         public void update(Observable<List<AudioData>> observable, List<AudioData> value) {
-            if (uiContentSelector.getPage() == MainPage.YOUTUBE_SEARCH) {
+            if (uiContentSelector.getPage() == MainPage.YOUTUBE_SEARCH_VIDEOS) {
                 isScrollLoading = false;
                 mainThread.execute(() -> {
                     updateVisibleContent();
@@ -186,7 +186,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
             case SOUNDCLOUD_SEARCH:
                 appViewModel.searchText.set(scSearch);
                 break;
-            case YOUTUBE_SEARCH:
+            case YOUTUBE_SEARCH_VIDEOS:
                 appViewModel.searchText.set(ytSearch);
                 break;
         }
@@ -264,13 +264,13 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                 case SOUNDCLOUD_CHARTS:
                     sortedTracks = scAudioDataRepo.getChartsPlaylist(uiContentSelector.getUuid()).getData();
                     break;
-                case YOUTUBE_SEARCH:
+                case YOUTUBE_SEARCH_VIDEOS:
                     sortedTracks = ytRepo.results.get();
                     break;
             }
             switch (uiContentSelector.getPage()) {
                 case SOUNDCLOUD_SEARCH:
-                case YOUTUBE_SEARCH:
+                case YOUTUBE_SEARCH_VIDEOS:
                     formattedTracks = sortedTracks;
                     break;
                 default:
@@ -290,7 +290,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
     }
 
     private void updateNotFoundText() {
-        if (uiContentSelector.getPage() == MainPage.YOUTUBE_SEARCH
+        if (uiContentSelector.getPage() == MainPage.YOUTUBE_SEARCH_VIDEOS
                 || uiContentSelector.getPage() == MainPage.SOUNDCLOUD_SEARCH) {
             if (contentViewModel.visibleTracks.get().isEmpty()) {
                 if (appViewModel.isContentLoading.get()) {
@@ -414,7 +414,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                 case SOUNDCLOUD_CHARTS:
                     contentViewModel.contentName.set(scAudioDataRepo.getChartsPlaylist(selector.getUuid()).getMetadata().getTitle());
                     break;
-                case YOUTUBE_SEARCH:
+                case YOUTUBE_SEARCH_VIDEOS:
                     contentViewModel.contentName.set(view.getStringResource(R.string.main_toolbar_title0youtube));
                     break;
                 case YOUTUBE_DL:
@@ -430,7 +430,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
             case SOUNDCLOUD_SEARCH:
                 appViewModel.searchText.set(scSearch);
                 break;
-            case YOUTUBE_SEARCH:
+            case YOUTUBE_SEARCH_VIDEOS:
                 appViewModel.searchText.set(ytSearch);
                 break;
         }
@@ -441,7 +441,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
             case SOUNDCLOUD_SEARCH:
                 scSearch = savedSearch;
                 break;
-            case YOUTUBE_SEARCH:
+            case YOUTUBE_SEARCH_VIDEOS:
                 ytSearch = savedSearch;
                 break;
         }
@@ -591,7 +591,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
             case SOUNDCLOUD_SEARCH:
                 scSearch = text;
                 break;
-            case YOUTUBE_SEARCH:
+            case YOUTUBE_SEARCH_VIDEOS:
                 ytSearch = text;
                 break;
             default:
@@ -615,7 +615,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                 mainThread.execute(this::updateVisibleContent);
             });
             updateNotFoundText();
-        } else if (uiContentSelector.getPage() == MainPage.YOUTUBE_SEARCH) {
+        } else if (uiContentSelector.getPage() == MainPage.YOUTUBE_SEARCH_VIDEOS) {
             String text = appViewModel.searchText.get();
             ytRepo.setSearchText(text);
             incrementTasks();
@@ -745,6 +745,10 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
         if (uiContentSelector.getPage() == MainPage.PLAYLISTS) {
             actions.add(ContextMenu.Action.DELETE);
         }
+        if (uiContentSelector.getPage() == MainPage.YOUTUBE_SEARCH_VIDEOS){
+            actions.add(ContextMenu.Action.DOWNLOAD_AUDIO);
+            actions.add(ContextMenu.Action.DOWNLOAD_VIDEO);
+        }
         view.showContentContextMenu(index, actions, (action) -> {
             onContextMenuAction(index, action);
         }, () -> {
@@ -820,7 +824,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                     mainThread.execute(this::updateVisibleContent);
                 });
             }
-        } else if (uiContentSelector.getPage() == MainPage.YOUTUBE_SEARCH) {
+        } else if (uiContentSelector.getPage() == MainPage.YOUTUBE_SEARCH_VIDEOS) {
             if (!isScrollLoading && !appViewModel.searchText.get().isEmpty() && !ytRepo.isSearchLimitReached()) {
                 isScrollLoading = true;
                 incrementTasks();
@@ -964,7 +968,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                 view.setTransportControlMax(false);
                 appViewModel.isSearching.set(true);
                 appViewModel.isSelecting.set(false);
-                uiContentSelector = new ContentSelector(MainPage.YOUTUBE_SEARCH, null);
+                uiContentSelector = new ContentSelector(MainPage.YOUTUBE_SEARCH_VIDEOS, null);
                 setViewModelContentSelector(uiContentSelector);
                 updateVisibleContent();
                 break;
@@ -1221,6 +1225,22 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                     });
                 }
                 break;
+            case DOWNLOAD_AUDIO: {
+                AudioData clickedTrack = contentViewModel.visibleTracks.get().get(index);
+                downloadingAudio = true;
+                downloadingVideo = false;
+                ytdlViewModel.url.set(((AudioDataSourceYtdl)clickedTrack.getDataSource()).getUrl());
+                view.createDocument("*/*", clickedTrack.getMetadata().getTitle() + "_" + clickedTrack.getMetadata().getArtist() + ".mp3");
+            }
+            break;
+            case DOWNLOAD_VIDEO: {
+                AudioData clickedTrack = contentViewModel.visibleTracks.get().get(index);
+                downloadingAudio = false;
+                downloadingVideo = true;
+                ytdlViewModel.url.set(((AudioDataSourceYtdl)clickedTrack.getDataSource()).getUrl());
+                view.createDocument("*/*", clickedTrack.getMetadata().getTitle() + "_" + clickedTrack.getMetadata().getArtist() + ".mp4");
+            }
+            break;
         }
     }
 

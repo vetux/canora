@@ -6,6 +6,8 @@ public abstract class ContextMenu {
     public enum Action {
         SELECT,
         EDIT,
-        DELETE
+        DELETE,
+        DOWNLOAD_AUDIO,
+        DOWNLOAD_VIDEO
     }
 }

@@ -45,6 +45,7 @@ public class ListPopupAdapter extends BaseAdapter {
         ImageView arrow = convertView.findViewById(R.id.subArrow);
         ImageView icon = convertView.findViewById(R.id.icon);
 
+        title.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
         ListPopupItem item = items.get(position);
 
         title.setText(item.getTitle());

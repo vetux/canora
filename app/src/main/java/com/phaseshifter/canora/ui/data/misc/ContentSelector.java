@@ -33,7 +33,7 @@ public class ContentSelector implements Serializable {
     public boolean isPlaylistView() {
         return page != MainPage.TRACKS
                 && page != MainPage.SOUNDCLOUD_SEARCH
-                && page != MainPage.YOUTUBE_SEARCH
+                && page != MainPage.YOUTUBE_SEARCH_VIDEOS
                 && page != MainPage.YOUTUBE_DL
                 && uuid == null;
     }
