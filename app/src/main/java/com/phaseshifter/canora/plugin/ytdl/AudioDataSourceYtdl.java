@@ -68,6 +68,16 @@ public class AudioDataSourceYtdl implements AudioDataSource, Serializable {
         }
 
         public static void failed(String url) {
+            if (streamLatches.containsKey(url)){
+                CountDownLatch latch = streamLatches.get(url);
+                while (latch.getCount() != 0) {
+                    try {
+                        latch.await();
+                    } catch (InterruptedException e) {
+                        Log.e("StreamDownloader", e.getMessage());
+                    }
+                }
+            }
             streamUrls.remove(url);
             streamLatches.remove(url);
             prepare(url);
