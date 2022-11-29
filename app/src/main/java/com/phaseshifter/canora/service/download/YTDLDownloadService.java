@@ -116,6 +116,8 @@ public class YTDLDownloadService extends Service implements DownloadService {
             downloads.add(download);
             downloadsLock.unlock();
 
+            new Handler(getMainLooper()).post(this::updateNotification);
+
             File youtubeDLDir = new File(getFilesDir(), "download_cache");
             String tempFile = new String(youtubeDLDir.getAbsolutePath() + getTempFile(".mp3"));
 
@@ -198,6 +200,8 @@ public class YTDLDownloadService extends Service implements DownloadService {
             downloads.add(download);
             downloadsLock.unlock();
 
+            new Handler(getMainLooper()).post(this::updateNotification);
+
             YoutubeDLRequest request = new YoutubeDLRequest(url);
             File youtubeDLDir = new File(getFilesDir(), "download_cache");
             String tempFile = new String(youtubeDLDir.getAbsolutePath() + getTempFile(".mp4"));
@@ -210,6 +214,8 @@ public class YTDLDownloadService extends Service implements DownloadService {
 
             try {
                 ytdl.execute(request, (progress, etaInSeconds, line) -> {
+                    download.progress = progress;
+                    download.etaInSeconds = etaInSeconds;
                     new Handler(getMainLooper()).post(this::updateNotification);
                 });
                 new Handler(getMainLooper()).post(this::updateNotification);
