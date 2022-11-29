@@ -41,7 +41,7 @@ public class AudioDataSourceYtdl implements AudioDataSource, Serializable {
         if (streamUrl == null) {
             YoutubeDL ytdl = MainApplication.instance.getYoutubeDlInstance();
             YoutubeDLRequest request = new YoutubeDLRequest(url);
-            request.addOption("-f", "best");
+            request.addOption("-f", "bestaudio");
             VideoInfo streamInfo = ytdl.getInfo(request);
             streamUrl = streamInfo.getUrl();
         }
