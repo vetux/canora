@@ -328,43 +328,105 @@
             app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp">
+
+        <ImageView
+            android:id="@+id/imageView26"
+            android:layout_width="60dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="10dp"
+            android:src="@drawable/ic_youtube_activity_fill0_wght400_grad0_opsz48"
+            app:layout_constraintStart_toStartOf="parent"
+            android:tint="?onColorPrimary" />
+
+        <TextView
+            android:id="@+id/textView17"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:text="@string/main_navigation_header0youtube"
+            android:textColor="?onColorPrimary"
+            android:textSize="16sp" />
+    </LinearLayout>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/nav_button_youtube_search"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_marginTop="10dp"
+        android:layout_height="wrap_content"
         android:background="@drawable/nav_button_background">
 
         <ImageView
-            android:id="@+id/imageView25"
+            android:id="@+id/imageView28"
             android:layout_width="@dimen/nav_content_item_height"
             android:layout_height="@dimen/nav_content_item_height"
-            android:layout_marginStart="3dp"
-            android:padding="5dp"
+            android:layout_marginStart="20dp"
+            android:padding="10dp"
             android:scaleType="fitXY"
-            android:src="@drawable/ic_youtube_activity_fill0_wght400_grad0_opsz48"
+            android:src="@drawable/action_search"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             android:tint="?onColorPrimary" />
 
         <TextView
-            android:id="@+id/textView26"
+            android:id="@+id/textView29"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
             android:layout_marginEnd="20dp"
             android:gravity="center_horizontal|center_vertical"
-            android:text="@string/main_navigation_item_title0youtube_search"
+            android:text="@string/main_navigation_item_title0youtube_search_videos"
             android:textColor="?onColorPrimary"
             android:textSize="@dimen/nav_content_item_textSize"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/imageView25"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.0" />
+            app:layout_constraintStart_toEndOf="@+id/imageView28"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/nav_button_youtube_search_playlists"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/nav_button_background">
+
+        <ImageView
+            android:id="@+id/imageView30"
+            android:layout_width="@dimen/nav_content_item_height"
+            android:layout_height="@dimen/nav_content_item_height"
+            android:layout_marginStart="20dp"
+            android:padding="10dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/outline_queue_music_white_48dp"
+            android:tint="?onColorPrimary"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="20dp"
+            android:gravity="center_horizontal|center_vertical"
+            android:text="@string/main_navigation_item_title0youtube_search_playlists"
+            android:textColor="?onColorPrimary"
+            android:textSize="@dimen/nav_content_item_textSize"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/imageView30"
+            app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout

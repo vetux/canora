@@ -123,7 +123,9 @@
     <string name="main_navigation_header0device">Local Device</string>
     <string name="main_navigation_header0soundcloud">SoundCloud</string>
 
-    <string name="main_navigation_item_title0youtube_search">Search YouTube</string>
+    <string name="main_navigation_header0youtube">YouTube</string>
+    <string name="main_navigation_item_title0youtube_search_videos">Search Videos</string>
+    <string name="main_navigation_item_title0youtube_search_playlists">Search Playlists</string>
     <string name="main_navigation_item_title0youtube_dl">YouTubeDL</string>
 
     <string name="main_navigation_item_title0search">Search</string>
