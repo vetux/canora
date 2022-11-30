@@ -94,7 +94,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:padding="10dp">
+        android:padding="10dp"
+        android:layout_marginBottom="30dp">
 
         <TextView
             android:id="@+id/control_text_songtext"
