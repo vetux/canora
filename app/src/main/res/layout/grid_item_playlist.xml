@@ -13,75 +13,71 @@
         android:src="?colorPrimaryAlt"
         app:automaticAnimation="false"
         app:corners="0"
-        app:ratioLock="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:ratioLock="true" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/data"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:id="@+id/textBackground"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="?colorPrimary_60"
         android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="@id/playlistImage"
+        app:layout_constraintEnd_toEndOf="@id/playlistImage"
+        app:layout_constraintStart_toStartOf="@id/playlistImage"
+        app:layout_constraintTop_toTopOf="@id/sidePart" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/sidePart"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        android:padding="5dp"
-        android:background="?colorPrimary_60">
+        app:layout_constraintStart_toStartOf="parent">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/sidePart"
+        <TextView
+            android:id="@+id/subMenuTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_margin="5dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="PLACEHOLDER"
+            android:textColor="?onColorPrimary"
+            android:textSize="22sp"
+            app:layout_constraintBottom_toTopOf="@id/subMenuTracks"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/subMenuTracks"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/subMenuTitle"
+            android:layout_marginStart="3dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="PLACEHOLDER"
+            android:textColor="?onColorPrimary"
+            android:textSize="13sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/checkbox"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/subMenuTitle" />
+
+        <CheckBox
+            android:id="@+id/checkbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:buttonTint="?colorSecondary"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <TextView
-                android:id="@+id/subMenuTitle"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:text="PLACEHOLDER"
-                android:textColor="?onColorPrimary"
-                android:textSize="22sp"
-                app:layout_constraintBottom_toTopOf="@id/subMenuTracks"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
-                android:id="@+id/subMenuTracks"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/subMenuTitle"
-                android:layout_marginStart="3dp"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:text="PLACEHOLDER"
-                android:textColor="?onColorPrimary"
-                android:textSize="13sp"
-                app:layout_constraintTop_toBottomOf="@id/subMenuTitle"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/checkbox"/>
-
-            <CheckBox
-                android:id="@+id/checkbox"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:buttonTint="?colorSecondary"
-                android:focusable="false"
-                android:focusableInTouchMode="false"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"/>
-        </androidx.constraintlayout.widget.ConstraintLayout>
+            app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -2,6 +2,7 @@ package com.phaseshifter.canora.ui.arrayadapters;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +10,8 @@ import android.view.ViewGroup;
 import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
+
 import com.phaseshifter.canora.R;
 import com.phaseshifter.canora.data.media.image.ImageData;
 import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
@@ -100,6 +103,7 @@ public class AudioPlaylistArrayAdapter extends ArrayAdapter<AudioPlaylist> imple
         TextView subCount = listItem.findViewById(R.id.subMenuTracks);
         CustomImageView plImg = listItem.findViewById(R.id.playlistImage);
         CheckBox box = listItem.findViewById(R.id.checkbox);
+        ConstraintLayout bg = listItem.findViewById(R.id.textBackground);
 
         AudioPlaylist playlist = contentRef.get(position);
         //SetValues
@@ -129,11 +133,10 @@ public class AudioPlaylistArrayAdapter extends ArrayAdapter<AudioPlaylist> imple
 
         if (playingIndex != null && playingIndex.equals(position)) {
             //Highlight
-            plImg.setBackgroundColor(getColorForAtt(R.attr.colorSecondaryAlt, C));
-            plImg.setPadding(6, 6, 6, 6);
+            plImg.setImageTintList(ColorStateList.valueOf(getColorForAtt(R.attr.colorSecondary_20, C)));
+            plImg.setImageTintMode(PorterDuff.Mode.ADD);
         } else {
-            plImg.setBackgroundColor(0);
-            plImg.setPadding(0, 0, 0, 0);
+            plImg.setImageTintList(null);
         }
         return listItem;
     }
