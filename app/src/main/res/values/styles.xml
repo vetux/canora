@@ -5,6 +5,8 @@
     <style name="Base" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Main Styling Attributes -->
         <item name="colorPrimary">?colorDebugUnset</item>
+        <item name="colorPrimary_20">?colorDebugUnset</item>
+        <item name="colorPrimary_60">?colorDebugUnset</item>
         <item name="colorPrimaryAlt">?colorDebugUnset</item>
         <item name="colorSecondary">?colorDebugUnset</item>
         <item name="colorSecondary_20">?colorDebugUnset</item>
@@ -24,9 +26,6 @@
         <item name="texBackground">?colorDebugUnset</item>
         <item name="texControl">?colorDebugUnset</item>
         <item name="texControlFull">?colorDebugUnset</item>
-        <item name="texNotification">?colorDebugUnset</item>
-        <item name="texWindow">?colorDebugUnset</item>
-        <item name="texSurface">?colorDebugUnset</item>
         <item name="texNavHeader">?colorDebugUnset</item>
 
         <item name="onTexToolbar">?colorDebugUnset</item>
@@ -37,8 +36,6 @@
         <item name="onTexControl">?colorDebugUnset</item>
         <item name="onTexControlFull">?colorDebugUnset</item>
         <item name="onTexControlFull_60">?colorDebugUnset</item>
-        <item name="onTexNotification">?colorDebugUnset</item>
-        <item name="onTexSurface">?colorDebugUnset</item>
         <item name="onTexNavHeader">?colorDebugUnset</item>
 
         <!-- These tinting values affect the corresponding textures when a dynamic bitmap is applied. Such as album artwork etc. -->
@@ -50,9 +47,6 @@
         <item name="scaleTexBackgroundContent">@integer/ImageView_scaleType_fitXY</item>
         <item name="scaleTexControl">@integer/ImageView_scaleType_fitXY</item>
         <item name="scaleTexControlFull">@integer/ImageView_scaleType_fitXY</item>
-        <item name="scaleTexNotification">@integer/ImageView_scaleType_fitXY</item>
-        <item name="scaleTexWindow">@integer/ImageView_scaleType_fitXY</item>
-        <item name="scaleTexSurface">@integer/ImageView_scaleType_fitXY</item>
         <item name="scaleTexNavHeader">@integer/ImageView_scaleType_fitXY</item>
 
         <!-- Debug -->
@@ -71,7 +65,9 @@
     </style>
 
     <style name="MarineBlue" parent="Base">
-        <item name="colorPrimary">#0b243b</item>
+        <item name="colorPrimary">#0B2237</item>
+        <item name="colorPrimary_20">#140B2237</item>
+        <item name="colorPrimary_60">#820B2237</item>
         <item name="colorPrimaryAlt">#001428</item>
         <item name="colorSecondary">#00FFD9</item>
         <item name="colorSecondary_20">#3300FFD9</item>
@@ -91,9 +87,6 @@
         <item name="texBackground">?colorPrimary</item>
         <item name="texControl">?colorPrimaryAlt</item>
         <item name="texControlFull">?colorPrimaryAlt</item>
-        <item name="texNotification">?colorDebugUnset</item>
-        <item name="texWindow">?colorPrimaryAlt</item>
-        <item name="texSurface">?colorPrimaryAlt</item>
         <item name="texNavHeader">?colorPrimaryAlt</item>
 
         <item name="onTexToolbar">#fff</item>
@@ -104,8 +97,6 @@
         <item name="onTexControl">#fff</item>
         <item name="onTexControlFull">#fff</item>
         <item name="onTexControlFull_60">#3CFFFFFF</item>
-        <item name="onTexNotification">?colorDebugUnset</item>
-        <item name="onTexSurface">#fff</item>
         <item name="onTexNavHeader">#fff</item>
 
         <item name="tintTexControl">#4D000000</item>
@@ -117,6 +108,8 @@
 
     <style name="Camo" parent="Base">
         <item name="colorPrimary">#2E2E2E</item>
+        <item name="colorPrimary_20">#142E2E2E</item>
+        <item name="colorPrimary_60">#822E2E2E</item>
         <item name="colorPrimaryAlt">#1F1F1F</item>
         <item name="colorSecondary">#00FFD9</item>
         <item name="colorSecondary_20">#3300FFD9</item>
@@ -136,14 +129,11 @@
         <item name="texBackground">@drawable/texture_camo_1</item>
         <item name="texControl">@android:color/transparent</item>
         <item name="texControlFull">@android:color/transparent</item>
-        <item name="texNotification">?colorDebugUnset</item>
-        <item name="texWindow">?colorPrimaryAlt</item>
-        <item name="texSurface">@drawable/texture_camo_2</item>
         <item name="texNavHeader">@drawable/texture_camo_navheader</item>
 
-        <item name="scaleTexSurface">@integer/ImageView_scaleType_centerCrop</item>
-        <item name="scaleTexControlFull">@integer/ImageView_scaleType_fitStart</item>
-        <item name="scaleTexControl">@integer/ImageView_scaleType_fitEnd</item>
+        <item name="scaleTexToolbar">@integer/ImageView_scaleType_centerCrop</item>
+        <item name="scaleTexBackground">@integer/ImageView_scaleType_centerCrop</item>
+        <item name="scaleTexNavHeader">@integer/ImageView_scaleType_centerCrop</item>
 
         <item name="onTexToolbar">#fff</item>
         <item name="onTexToolbar_60">#3CFFFFFF</item>
@@ -153,8 +143,6 @@
         <item name="onTexControl">#fff</item>
         <item name="onTexControlFull">#fff</item>
         <item name="onTexControlFull_60">#3CFFFFFF</item>
-        <item name="onTexNotification">?colorDebugUnset</item>
-        <item name="onTexSurface">#fff</item>
         <item name="onTexNavHeader">#fff</item>
 
         <item name="tintTexControl">#4D000000</item>
@@ -166,6 +154,8 @@
 
     <style name="Dark" parent="Base">
         <item name="colorPrimary">#303030</item>
+        <item name="colorPrimary_20">#14303030</item>
+        <item name="colorPrimary_60">#82303030</item>
         <item name="colorPrimaryAlt">#191919</item>
         <item name="colorSecondary">#1beaea</item>
         <item name="colorSecondary_20">#331BEAEA</item>
@@ -185,9 +175,6 @@
         <item name="texBackground">?colorPrimary</item>
         <item name="texControl">?colorPrimaryAlt</item>
         <item name="texControlFull">?colorPrimaryAlt</item>
-        <item name="texNotification">?colorDebugUnset</item>
-        <item name="texWindow">?colorPrimaryAlt</item>
-        <item name="texSurface">?colorPrimaryAlt</item>
         <item name="texNavHeader">?colorPrimaryAlt</item>
 
         <item name="onTexToolbar">#fff</item>
@@ -198,8 +185,6 @@
         <item name="onTexControl">#fff</item>
         <item name="onTexControlFull">#fff</item>
         <item name="onTexControlFull_60">#3CFFFFFF</item>
-        <item name="onTexNotification">#fff</item>
-        <item name="onTexSurface">#fff</item>
         <item name="onTexNavHeader">#fff</item>
 
         <item name="tintTexControl">#4D000000</item>
@@ -211,6 +196,8 @@
 
     <style name="Light" parent="Base">
         <item name="colorPrimary">#FFFFFF</item>
+        <item name="colorPrimary_20">#14FFFFFF</item>
+        <item name="colorPrimary_60">#82FFFFFF</item>
         <item name="colorPrimaryAlt">#DDDDDD</item>
         <item name="colorSecondary">#0b57d0</item>
         <item name="colorSecondary_20">#1433B5E5</item>
@@ -230,9 +217,6 @@
         <item name="texBackground">?colorPrimary</item>
         <item name="texControl">?colorPrimaryAlt</item>
         <item name="texControlFull">?colorPrimaryAlt</item>
-        <item name="texNotification">?colorDebugUnset</item>
-        <item name="texWindow">?colorPrimaryAlt</item>
-        <item name="texSurface">?colorPrimaryAlt</item>
         <item name="texNavHeader">?colorPrimaryAlt</item>
 
         <item name="onTexToolbar">?onColorPrimaryAlt</item>
@@ -243,8 +227,6 @@
         <item name="onTexControl">?onColorPrimaryAlt</item>
         <item name="onTexControlFull">?onColorPrimaryAlt</item>
         <item name="onTexControlFull_60">#3CFFFFFF</item>
-        <item name="onTexNotification">?colorDebugUnset</item>
-        <item name="onTexSurface">?onColorPrimaryAlt</item>
         <item name="onTexNavHeader">?onColorPrimaryAlt</item>
 
         <item name="tintTexControl">?colorDebugUnset</item>

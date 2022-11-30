@@ -12,58 +12,71 @@
         android:layout_height="match_parent"
         android:fitsSystemWindows="false"
         tools:openDrawer="start">
-
-        <com.phaseshifter.canora.ui.widgets.CustomImageView
-            android:id="@+id/display_imageview_background"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scaleType="?scaleTexBackgroundContent"
-            android:src="?texBackground"
-            app:automaticAnimation="true"
-            android:elevation="-1dp" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
-
-            <include layout="@layout/activity_main_toolbar" />
-
-            <RelativeLayout
+            android:layout_height="match_parent">
+            <com.phaseshifter.canora.ui.widgets.CustomImageView
+                android:id="@+id/display_imageview_background"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="vertical">
+                android:scaleType="?scaleTexBackgroundContent"
+                android:src="?texBackground"
+                app:automaticAnimation="true"
+                android:elevation="-1dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
 
-                <include
-                    layout="@layout/activity_main_content"
-                    android:id="@+id/include_content_main"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_above="@id/include_footer_main" />
+            <include layout="@layout/activity_main_toolbar"
+                android:id="@+id/include_content_toolbar"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
 
-                <include
-                    layout="@layout/activity_main_youtubedl"
-                    android:id="@+id/include_content_youtubedl"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_above="@id/include_footer_main" />
+            <include
+                layout="@layout/activity_main_content"
+                android:id="@+id/include_content_main"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/include_content_toolbar"
+                app:layout_constraintBottom_toTopOf="@id/include_content_youtubedl"/>
 
-                <include
-                    layout="@layout/activity_main_footer"
-                    android:id="@+id/include_footer_main"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentBottom="true" />
+            <include
+                layout="@layout/activity_main_youtubedl"
+                android:id="@+id/include_content_youtubedl"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+               app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/include_content_main"
+                app:layout_constraintBottom_toTopOf="@id/include_footer_main"/>
 
-                <include
-                    layout="@layout/activity_main_footer_full"
-                    android:id="@+id/include_footer_full_main"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_alignParentBottom="true"
-                    android:visibility="invisible" />
-            </RelativeLayout>
-        </LinearLayout>
+            <include
+                layout="@layout/activity_main_footer"
+                android:id="@+id/include_footer_main"
+                android:layout_width="0dp"
+                android:layout_height="75dp"
+                app:layout_constraintTop_toBottomOf="@id/include_content_youtubedl"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
+            <include
+                layout="@layout/activity_main_footer_full"
+                android:id="@+id/include_footer_full_main"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintTop_toBottomOf="@id/include_content_toolbar"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:visibility="invisible"/>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <LinearLayout
             android:layout_width="280dp"

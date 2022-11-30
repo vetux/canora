@@ -3,18 +3,31 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main_footer"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="75dp">
 
     <com.phaseshifter.canora.ui.widgets.CustomImageView
         android:id="@+id/control_imageview_background"
-        android:layout_width="match_parent"
-        android:layout_height="75dp"
-        android:scaleType="?scaleTexControl"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:scaleType="centerCrop"
         android:src="?texControl"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        android:elevation="-1dp" />
+        android:tint="?colorPrimary_60"/>
+
+    <com.phaseshifter.canora.ui.widgets.CustomImageView
+        android:id="@+id/control_imageview_cover"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:scaleType="fitXY"
+        android:src="@drawable/artwork_unset"
+        android:padding="5dp"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintTop_toBottomOf="@id/control_seekbar_progressstatic"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <ImageButton
         android:id="@+id/control_button_open"
@@ -25,16 +38,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/control_button_prev" />
-
-    <View
-        android:id="@+id/control_guide_center"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="@id/control_imageview_background"
-        app:layout_constraintEnd_toEndOf="@id/control_imageview_background"
-        app:layout_constraintStart_toStartOf="@id/control_imageview_background"
-        app:layout_constraintTop_toTopOf="@id/control_imageview_background"
-        app:layout_constraintWidth_max="1dp" />
 
     <SeekBar
         android:id="@+id/control_seekbar_progressstatic"
@@ -49,28 +52,9 @@
         android:progress="1000"
         android:progressDrawable="@drawable/seekbar_progress_playercontrols"
         android:thumb="@null"
-        app:layout_constraintEnd_toEndOf="@id/control_imageview_background"
-        app:layout_constraintStart_toStartOf="@id/control_imageview_background"
-        app:layout_constraintTop_toTopOf="@id/control_imageview_background" />
-
-    <com.phaseshifter.canora.ui.widgets.CustomImageView
-        android:id="@+id/control_imageview_cover"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginStart="5dp"
-        android:layout_marginTop="5dp"
-        android:layout_marginEnd="5dp"
-        android:layout_marginBottom="5dp"
-        android:scaleType="fitXY"
-        android:src="@drawable/artwork_unset"
-        app:corners="18"
-        app:layout_constraintBottom_toBottomOf="@id/control_imageview_background"
-        app:layout_constraintDimensionRatio="1:1"
-        app:layout_constraintEnd_toStartOf="@id/control_text_title"
-        app:layout_constraintHorizontal_chainStyle="spread_inside"
-        app:layout_constraintStart_toStartOf="@id/control_imageview_background"
-        app:layout_constraintTop_toBottomOf="@id/control_seekbar_progressstatic"
-        app:ratioLock="true" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/control_text_title"
@@ -80,17 +64,14 @@
         android:ellipsize="marquee"
         android:gravity="center_vertical"
         android:includeFontPadding="false"
-        android:paddingStart="10dp"
-        android:paddingEnd="10dp"
         android:singleLine="true"
         android:text="TITLE_TITLE_TITLE"
         android:textColor="?onTexControl"
         android:textSize="18sp"
-        app:layout_constraintBottom_toTopOf="@id/control_text_artist"
-        app:layout_constraintEnd_toStartOf="@id/control_button_prev"
-        app:layout_constraintHorizontal_weight="1"
-        app:layout_constraintStart_toEndOf="@id/control_imageview_cover"
         app:layout_constraintTop_toBottomOf="@id/control_seekbar_progressstatic"
+        app:layout_constraintBottom_toTopOf="@id/control_text_artist"
+        app:layout_constraintStart_toEndOf="@id/control_imageview_cover"
+        app:layout_constraintEnd_toStartOf="@id/control_progressbar_playbackload"
         app:layout_constraintVertical_chainStyle="packed" />
 
     <TextView
@@ -101,16 +82,14 @@
         android:ellipsize="marquee"
         android:gravity="center_vertical"
         android:includeFontPadding="false"
-        android:paddingStart="10dp"
-        android:paddingEnd="10dp"
         android:singleLine="true"
         android:text="ARTIST_ARTIST_ARTIST"
         android:textColor="?onTexControl"
         android:textSize="18sp"
-        app:layout_constraintBottom_toBottomOf="@id/control_imageview_background"
-        app:layout_constraintEnd_toStartOf="@id/control_button_prev"
-        app:layout_constraintStart_toStartOf="@id/control_text_title"
-        app:layout_constraintTop_toBottomOf="@id/control_text_title" />
+        app:layout_constraintTop_toBottomOf="@id/control_text_title"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/control_imageview_cover"
+        app:layout_constraintEnd_toStartOf="@id/control_progressbar_playbackload"/>
 
     <ProgressBar
         android:id="@+id/control_progressbar_playbackload"
@@ -120,10 +99,10 @@
         android:indeterminateTint="?colorSecondary"
         android:indeterminateTintMode="src_atop"
         android:padding="10dp"
-        app:layout_constraintBottom_toBottomOf="@id/control_imageview_cover"
-        app:layout_constraintEnd_toEndOf="@id/control_imageview_cover"
-        app:layout_constraintStart_toStartOf="@id/control_imageview_cover"
-        app:layout_constraintTop_toTopOf="@id/control_imageview_cover" />
+        app:layout_constraintTop_toBottomOf="@id/control_seekbar_progressstatic"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/control_text_title"
+        app:layout_constraintEnd_toStartOf="@id/control_button_prev"/>
 
     <ImageButton
         android:id="@+id/control_button_prev"
@@ -134,9 +113,10 @@
         android:scaleType="fitXY"
         android:padding="5dp"
         android:tint="?onTexControl"
-        app:layout_constraintBottom_toBottomOf="@id/control_imageview_background"
-        app:layout_constraintEnd_toStartOf="@id/control_button_play"
-        app:layout_constraintTop_toBottomOf="@id/control_seekbar_progressstatic" />
+        app:layout_constraintTop_toBottomOf="@id/control_seekbar_progressstatic"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/control_progressbar_playbackload"
+        app:layout_constraintEnd_toStartOf="@id/control_button_play"/>
 
     <ImageButton
         android:id="@+id/control_button_play"
@@ -147,9 +127,10 @@
         android:scaleType="fitXY"
         android:padding="2dp"
         android:tint="?onTexControl"
-        app:layout_constraintBottom_toBottomOf="@id/control_imageview_background"
-        app:layout_constraintEnd_toStartOf="@id/control_button_next"
-        app:layout_constraintTop_toBottomOf="@id/control_seekbar_progressstatic" />
+        app:layout_constraintTop_toBottomOf="@id/control_seekbar_progressstatic"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/control_button_prev"
+        app:layout_constraintEnd_toStartOf="@id/control_button_next"/>
 
     <ImageButton
         android:id="@+id/control_button_next"
@@ -160,7 +141,8 @@
         android:scaleType="fitXY"
         android:padding="5dp"
         android:tint="?onTexControl"
-        app:layout_constraintBottom_toBottomOf="@id/control_imageview_background"
-        app:layout_constraintEnd_toEndOf="@id/control_imageview_background"
-        app:layout_constraintTop_toBottomOf="@id/control_seekbar_progressstatic" />
+        app:layout_constraintTop_toBottomOf="@id/control_seekbar_progressstatic"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/control_button_play"
+        app:layout_constraintEnd_toEndOf="parent"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

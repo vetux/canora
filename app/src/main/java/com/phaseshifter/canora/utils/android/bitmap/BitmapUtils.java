@@ -39,16 +39,4 @@ public class BitmapUtils {
             return null;
         }
     }
-
-    public static Bitmap getBlurredBitmap(Bitmap source) {
-        if (source == null)
-            return null;
-        try {
-            Bitmap mutableBitmap = source.copy(Bitmap.Config.ARGB_8888, true);
-            return BlurBuilder.blurJava(mutableBitmap);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
 }

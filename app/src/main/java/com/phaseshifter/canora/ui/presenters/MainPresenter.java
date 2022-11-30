@@ -828,6 +828,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
             if (!isScrollLoading && !appViewModel.searchText.get().isEmpty() && !ytRepo.isSearchLimitReached()) {
                 isScrollLoading = true;
                 incrementTasks();
+                ytRepo.setSearchText(appViewModel.searchText.get());
                 ytRepo.loadNextPage(this::decrementTasks,
                         (e) -> {
                             decrementTasks();

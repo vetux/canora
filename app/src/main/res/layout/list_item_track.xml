@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/root"
     android:layout_width="match_parent"
@@ -12,91 +12,103 @@
         android:id="@+id/highlight"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
         android:src="@drawable/list_item_background"
         android:tint="?colorSecondary"
         android:visibility="gone"
-        android:focusable="false"
-        android:focusableInTouchMode="false" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <com.phaseshifter.canora.ui.widgets.CustomImageView
         android:id="@+id/cover"
-        android:layout_width="55dp"
-        android:layout_height="55dp"
-        android:src="@drawable/artwork_unset"
-        android:scaleType="fitXY"
-        android:layout_marginStart="5dp"
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="5dp"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
         android:layout_toEndOf="@id/checkbox"
-        android:layout_centerVertical="true"
         android:focusable="false"
         android:focusableInTouchMode="false"
-        app:corners="20" />
+        android:scaleType="fitXY"
+        android:src="@drawable/artwork_unset"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:ratioLock="true"
+        android:padding="0dp"/>
 
-    <CheckBox
-        android:id="@+id/checkbox"
-        android:layout_width="wrap_content"
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:clickable="false"
+        android:ellipsize="end"
         android:focusable="false"
         android:focusableInTouchMode="false"
-        android:buttonTint="?colorSecondary"
-        android:background="@null"
-        android:visibility="gone"
-        android:layout_alignParentStart="true"
-        android:layout_centerVertical="true" />
+        android:gravity="center_vertical"
+        android:maxLines="1"
+        android:paddingStart="5dp"
+        android:paddingEnd="5dp"
+        android:singleLine="true"
+        android:text="PLACEHOLDER"
+        android:textColor="?onTexBackground"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toTopOf="@id/artist"
+        app:layout_constraintEnd_toStartOf="@id/length"
+        app:layout_constraintStart_toEndOf="@id/cover"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed"/>
 
-    <RelativeLayout
-        android:layout_width="wrap_content"
+    <TextView
+        android:id="@+id/artist"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@id/cover"
-        android:layout_toStartOf="@id/length"
-        android:layout_centerVertical="true"
+        android:layout_below="@id/title"
+        android:ellipsize="end"
         android:focusable="false"
-        android:focusableInTouchMode="false">
-
-        <TextView
-            android:id="@+id/title"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:text="PLACEHOLDER"
-            android:textSize="20sp"
-            android:textColor="?onTexBackground"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:singleLine="true"
-            android:paddingStart="5dp"
-            android:paddingEnd="5dp"
-            android:focusable="false"
-            android:focusableInTouchMode="false" />
-
-        <TextView
-            android:id="@+id/artist"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="PLACEHOLDER"
-            android:textSize="15sp"
-            android:textColor="?onTexBackground"
-            android:maxLines="1"
-            android:singleLine="true"
-            android:ellipsize="end"
-            android:paddingStart="5dp"
-            android:paddingEnd="5dp"
-            android:layout_below="@id/title"
-            android:focusable="false"
-            android:focusableInTouchMode="false" />
-    </RelativeLayout>
+        android:focusableInTouchMode="false"
+        android:maxLines="1"
+        android:paddingStart="5dp"
+        android:paddingEnd="5dp"
+        android:singleLine="true"
+        android:text="PLACEHOLDER"
+        android:textColor="?onTexBackground"
+        android:textSize="15sp"
+        app:layout_constraintEnd_toStartOf="@id/length"
+        app:layout_constraintStart_toEndOf="@id/cover"
+        app:layout_constraintTop_toBottomOf="@id/title"
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
     <TextView
         android:id="@+id/length"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="00:00"
-        android:textColor="?onTexBackground"
-        android:singleLine="true"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
         android:focusable="false"
-        android:focusableInTouchMode="false" />
-</RelativeLayout>
+        android:focusableInTouchMode="false"
+        android:singleLine="true"
+        android:text="00:00"
+        android:textColor="?onTexBackground"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/title"
+        app:layout_constraintEnd_toStartOf="@id/checkbox"/>
+
+    <CheckBox
+        android:id="@+id/checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:background="@null"
+        android:buttonTint="?colorSecondary"
+        android:clickable="false"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/length"
+        app:layout_constraintEnd_toEndOf="parent"/>
+</androidx.constraintlayout.widget.ConstraintLayout>

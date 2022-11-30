@@ -27,7 +27,7 @@
                 android:layout_height="100dp"
                 android:scaleType="fitXY"
                 app:corners="10"
-                android:src="@drawable/texture_camo" />
+                android:src="@drawable/green_camouflage" />
         </RelativeLayout>
 
         <TextView

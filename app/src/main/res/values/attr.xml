@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <resources>
     <attr name="colorPrimary" format="color" />
+    <attr name="colorPrimary_20" format="color" />
+    <attr name="colorPrimary_60" format="color" />
     <attr name="colorPrimaryAlt" format="color" />
     <attr name="colorSecondary" format="color" />
     <attr name="colorSecondary_20" format="color" />
@@ -19,9 +21,6 @@
     <attr name="texBackground" format="reference|color" />
     <attr name="texControl" format="reference|color" />
     <attr name="texControlFull" format="reference|color" />
-    <attr name="texNotification" format="reference|color" />
-    <attr name="texWindow" format="reference|color" />
-    <attr name="texSurface" format="reference|color" />
     <attr name="texNavHeader" format="reference|color" />
 
     <attr name="onTexToolbar" format="color" />
@@ -32,8 +31,6 @@
     <attr name="onTexControl" format="color" />
     <attr name="onTexControlFull" format="color" />
     <attr name="onTexControlFull_60" format="color" />
-    <attr name="onTexNotification" format="color" />
-    <attr name="onTexSurface" format="color" />
     <attr name="onTexNavHeader" format="color" />
 
     <attr name="tintTexControl" format="color" />
@@ -44,9 +41,6 @@
     <attr name="scaleTexBackgroundContent" format="integer" />
     <attr name="scaleTexControl" format="integer" />
     <attr name="scaleTexControlFull" format="integer" />
-    <attr name="scaleTexNotification" format="integer" />
-    <attr name="scaleTexWindow" format="integer" />
-    <attr name="scaleTexSurface" format="integer" />
     <attr name="scaleTexNavHeader" format="integer" />
 
     <attr name="colorDebugUnset" format="color" />

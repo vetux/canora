@@ -8,10 +8,7 @@ import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicBlur;
 
 public class BlurBuilder {
-    private static final float BITMAP_SCALE = 0.4f;
-    private static final float BLUR_RADIUS = 7.5f;
-
-    public static Bitmap blurRenderScript(Context context, Bitmap bitmap) {
+    public static Bitmap blurRenderScript(Context context, Bitmap bitmap, float BITMAP_SCALE, float BLUR_RADIUS) {
         int width = Math.round(bitmap.getWidth() * BITMAP_SCALE);
         int height = Math.round(bitmap.getHeight() * BITMAP_SCALE);
 
@@ -58,7 +55,7 @@ public class BlurBuilder {
      * the following line:
      * Stack Blur Algorithm by Mario Klingemann <mario@quasimondo.com>
      */
-    public static Bitmap blurJava(Bitmap bitmap) {
+    public static Bitmap blurJava(Bitmap bitmap, float BITMAP_SCALE, float BLUR_RADIUS) {
         if (bitmap == null)
             throw new IllegalArgumentException();
         int radius = (int) BLUR_RADIUS;

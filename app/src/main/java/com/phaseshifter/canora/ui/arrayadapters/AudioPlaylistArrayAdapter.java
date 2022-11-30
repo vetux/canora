@@ -96,10 +96,9 @@ public class AudioPlaylistArrayAdapter extends ArrayAdapter<AudioPlaylist> imple
         if (listItem == null || listItem.findViewById(R.id.subMenuTitle) == null)
             listItem = LayoutInflater.from(C).inflate(R.layout.grid_item_playlist, parent, false);
         //Get Relevant Views
-        CustomImageView background = listItem.findViewById(R.id.grid_item_background);
         TextView subTitle = listItem.findViewById(R.id.subMenuTitle);
         TextView subCount = listItem.findViewById(R.id.subMenuTracks);
-        ImageView plImg = listItem.findViewById(R.id.playlistImage);
+        CustomImageView plImg = listItem.findViewById(R.id.playlistImage);
         CheckBox box = listItem.findViewById(R.id.checkbox);
 
         AudioPlaylist playlist = contentRef.get(position);
@@ -130,13 +129,11 @@ public class AudioPlaylistArrayAdapter extends ArrayAdapter<AudioPlaylist> imple
 
         if (playingIndex != null && playingIndex.equals(position)) {
             //Highlight
-            background.setImageTintList(ColorStateList.valueOf(getColorForAtt(R.attr.colorSecondaryAlt, C)));
-            subTitle.setTextColor(getColorForAtt(R.attr.onColorSecondaryAlt, C));
-            subCount.setTextColor(getColorForAtt(R.attr.onColorSecondaryAlt, C));
+            plImg.setBackgroundColor(getColorForAtt(R.attr.colorSecondaryAlt, C));
+            plImg.setPadding(6, 6, 6, 6);
         } else {
-            background.setImageTintList(null);
-            subTitle.setTextColor(getColorForAtt(R.attr.onTexSurface, C));
-            subCount.setTextColor(getColorForAtt(R.attr.onTexSurface, C));
+            plImg.setBackgroundColor(0);
+            plImg.setPadding(0, 0, 0, 0);
         }
         return listItem;
     }

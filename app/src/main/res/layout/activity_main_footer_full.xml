@@ -4,13 +4,24 @@
     android:id="@+id/main_footer_full"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+    <com.phaseshifter.canora.ui.widgets.CustomImageView
+        android:id="@+id/control_imageview_background_full"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:scaleType="centerCrop"
+        android:src="?texControlFull"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:tint="?colorPrimary_60"/>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/control_anchor_top"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintEnd_toStartOf="parent"
-        app:layout_constraintStart_toEndOf="parent"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageButton
@@ -23,8 +34,19 @@
             android:scaleType="fitXY"
             android:src="@drawable/arrow_down"
             android:tint="?onTexControlFull"
-            app:layout_constraintEnd_toStartOf="@id/control_anchor_top_spacer"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/control_anchor_top_spacer"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ProgressBar
+            android:id="@+id/control_progressbar_playbackload_full"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:indeterminate="true"
+            android:indeterminateTint="?colorSecondary"
+            android:indeterminateTintMode="src_atop"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/control_button_close"
             app:layout_constraintTop_toTopOf="parent" />
 
         <View
@@ -51,53 +73,28 @@
             app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/control_anchor_middle"
-        android:layout_width="match_parent"
+    <com.phaseshifter.canora.ui.widgets.CustomImageView
+        android:id="@+id/control_imageview_cover_full"
+        android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@id/control_anchor_bottom"
-        app:layout_constraintEnd_toStartOf="parent"
-        app:layout_constraintStart_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/control_anchor_top">
-
-        <com.phaseshifter.canora.ui.widgets.CustomImageView
-            android:id="@+id/control_imageview_cover_full"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:scaleType="fitXY"
-            android:src="@drawable/artwork_unset"
-            app:corners="18"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="20dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintDimensionRatio="1:1"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:ratioLock="true" />
-
-        <ProgressBar
-            android:id="@+id/control_progressbar_playbackload_full"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:indeterminate="true"
-            android:indeterminateTint="?colorSecondary"
-            android:indeterminateTintMode="src_atop"
-            android:padding="70dp"
-            app:layout_constraintBottom_toBottomOf="@id/control_imageview_cover_full"
-            app:layout_constraintEnd_toEndOf="@id/control_imageview_cover_full"
-            app:layout_constraintStart_toStartOf="@id/control_imageview_cover_full"
-            app:layout_constraintTop_toTopOf="@id/control_imageview_cover_full" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        android:scaleType="centerCrop"
+        android:src="@drawable/artwork_unset"
+        app:layout_constraintDimensionRatio="1:1"
+        android:layout_margin="20dp"
+        app:corners="18"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/control_anchor_top"
+        app:layout_constraintBottom_toTopOf="@id/control_anchor_bottom"/>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/control_anchor_bottom"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/control_anchor_middle">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:padding="10dp">
 
         <TextView
             android:id="@+id/control_text_songtext"
@@ -181,7 +178,6 @@
             android:id="@+id/control_buttons"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="40dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@id/control_seekbaranddigits">
 
@@ -276,15 +272,4 @@
                 app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <com.phaseshifter.canora.ui.widgets.CustomImageView
-        android:id="@+id/control_imageview_background"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:elevation="-1dp"
-        android:scaleType="?scaleTexControl"
-        android:src="?texControl"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>
