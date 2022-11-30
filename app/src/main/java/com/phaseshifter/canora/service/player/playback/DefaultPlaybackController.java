@@ -66,7 +66,7 @@ public class DefaultPlaybackController implements PlaybackController {
             return currentTrack;
         } else if (shuffle) {
             Log.v(LOG_TAG, "SHUFFLE ON");
-            if (nextRandom < 0) {
+            if (nextRandom < 0 || nextRandom >= shuffleCache.size()) {
                 nextRandom = rand.nextInt(shuffleCache.size());
             }
             currentTrack = shuffleCache.get(nextRandom);
