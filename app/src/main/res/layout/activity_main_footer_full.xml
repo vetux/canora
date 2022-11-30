@@ -81,7 +81,6 @@
         android:src="@drawable/artwork_unset"
         app:layout_constraintDimensionRatio="1:1"
         android:layout_margin="20dp"
-        app:corners="18"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/control_anchor_top"
