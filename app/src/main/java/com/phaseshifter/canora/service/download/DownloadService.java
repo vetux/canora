@@ -18,6 +18,7 @@ public interface DownloadService {
         public String tempFile;
         public float progress;
         public float etaInSeconds;
+        public String progressLine;
         public CountDownLatch latch;
     }
 

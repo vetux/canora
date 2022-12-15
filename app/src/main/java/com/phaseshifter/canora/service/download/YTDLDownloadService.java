@@ -24,6 +24,7 @@ import com.yausername.youtubedl_android.YoutubeDLRequest;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
@@ -37,7 +38,6 @@ public class YTDLDownloadService extends Service implements DownloadService {
     private static final String LOG_TAG = "DownloadService";
 
     private static final String NOTIFICATION_CHANNEL = "DownloadChannel";
-    private static final int NOTIFICATION_ID = 0;
 
     private final ThreadPoolExecutor pool = new ThreadPoolExecutor(4,
             4,
@@ -50,6 +50,9 @@ public class YTDLDownloadService extends Service implements DownloadService {
     private final Lock downloadsLock = new ReentrantLock();
 
     private final IBinder mBinder = new YTDLDownloadService.LocalBinder();
+
+    private int notificationIdCounter = 0;
+    private ArrayList<Integer> notificationIdCache = new ArrayList<Integer>();
 
     public class LocalBinder extends Binder {
         public YTDLDownloadService getService() {
@@ -89,6 +92,8 @@ public class YTDLDownloadService extends Service implements DownloadService {
                               String url,
                               Runnable completionCallback,
                               RunnableArg<Exception> exceptionCallback) {
+        int id = createNotificationID();
+
         pool.submit(() -> {
             Download download = new Download();
             download.type = Download.Type.AUDIO;
@@ -116,7 +121,9 @@ public class YTDLDownloadService extends Service implements DownloadService {
             downloads.add(download);
             downloadsLock.unlock();
 
-            new Handler(getMainLooper()).post(this::updateNotification);
+            new Handler(getMainLooper()).post(() -> {
+                updateNotification(id, download);
+            });
 
             File youtubeDLDir = new File(getFilesDir(), "download_cache");
             String tempFile = new String(youtubeDLDir.getAbsolutePath() + getTempFile(".mp3"));
@@ -136,9 +143,14 @@ public class YTDLDownloadService extends Service implements DownloadService {
                 ytdl.execute(request, (progress, etaInSeconds, line) -> {
                     download.progress = progress;
                     download.etaInSeconds = etaInSeconds;
-                    new Handler(getMainLooper()).post(this::updateNotification);
+                    download.progressLine = line;
+                    new Handler(getMainLooper()).post(() -> {
+                        updateNotification(id, download);
+                    });
                 });
-                new Handler(getMainLooper()).post(this::updateNotification);
+                new Handler(getMainLooper()).post(() -> {
+                    updateNotification(id, download);
+                });
                 FileInputStream fis = new FileInputStream(tempFile);
                 byte[] buffer = new byte[1024];
                 int len;
@@ -146,7 +158,9 @@ public class YTDLDownloadService extends Service implements DownloadService {
                     outputStream.write(buffer, 0, len);
                 }
                 fis.close();
-                new Handler(getMainLooper()).post(this::updateNotification);
+                new Handler(getMainLooper()).post(() -> {
+                    updateNotification(id, download);
+                });
             } catch (Exception e) {
                 exceptionCallback.run(e);
 
@@ -163,6 +177,11 @@ public class YTDLDownloadService extends Service implements DownloadService {
             downloads.remove(download);
             downloadsLock.unlock();
 
+            new Handler(getMainLooper()).post(() -> {
+                closeNotification(id);
+                destroyNotificationId(id);
+            });
+
             completionCallback.run();
         });
     }
@@ -173,6 +192,8 @@ public class YTDLDownloadService extends Service implements DownloadService {
                               String url,
                               Runnable completionCallback,
                               RunnableArg<Exception> exceptionCallback) {
+        int id = createNotificationID();
+
         pool.submit(() -> {
             Download download = new Download();
             download.type = Download.Type.VIDEO;
@@ -200,7 +221,9 @@ public class YTDLDownloadService extends Service implements DownloadService {
             downloads.add(download);
             downloadsLock.unlock();
 
-            new Handler(getMainLooper()).post(this::updateNotification);
+            new Handler(getMainLooper()).post(() -> {
+                updateNotification(id, download);
+            });
 
             YoutubeDLRequest request = new YoutubeDLRequest(url);
             File youtubeDLDir = new File(getFilesDir(), "download_cache");
@@ -216,9 +239,14 @@ public class YTDLDownloadService extends Service implements DownloadService {
                 ytdl.execute(request, (progress, etaInSeconds, line) -> {
                     download.progress = progress;
                     download.etaInSeconds = etaInSeconds;
-                    new Handler(getMainLooper()).post(this::updateNotification);
+                    download.progressLine = line;
+                    new Handler(getMainLooper()).post(() -> {
+                        updateNotification(id, download);
+                    });
                 });
-                new Handler(getMainLooper()).post(this::updateNotification);
+                new Handler(getMainLooper()).post(() -> {
+                    updateNotification(id, download);
+                });
                 FileInputStream fis = new FileInputStream(tempFile);
                 byte[] buffer = new byte[1024];
                 int len;
@@ -226,7 +254,9 @@ public class YTDLDownloadService extends Service implements DownloadService {
                     outputStream.write(buffer, 0, len);
                 }
                 fis.close();
-                new Handler(getMainLooper()).post(this::updateNotification);
+                new Handler(getMainLooper()).post(() -> {
+                    updateNotification(id, download);
+                });
             } catch (Exception e) {
                 exceptionCallback.run(e);
 
@@ -245,6 +275,11 @@ public class YTDLDownloadService extends Service implements DownloadService {
             downloads.remove(download);
             downloadsLock.unlock();
 
+            new Handler(getMainLooper()).post(() -> {
+                closeNotification(id);
+                destroyNotificationId(id);
+            });
+
             completionCallback.run();
         });
     }
@@ -255,46 +290,54 @@ public class YTDLDownloadService extends Service implements DownloadService {
         return ret;
     }
 
-    private void updateNotification() {
-        int count = 0;
-        float eta = 0;
-        downloadsLock.lock();
-        count = downloads.size();
-        for (Download d : downloads) {
-            if (d.etaInSeconds > 0){
-                eta += d.etaInSeconds;
-            }
-        }
-        downloadsLock.unlock();
-
+    private void updateNotification(int id, Download d) {
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
 
-        if (count > 0) {
-            String message = getString(R.string.service_download_message, count, eta);
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
 
-            Intent intent = new Intent(this, MainActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL)
+                .setSmallIcon(R.drawable.notification_smallicon)
+                .setContentTitle(getString(R.string.service_download_title, d.url))
+                .setContentText(d.progressLine)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setContentIntent(pendingIntent)
+                .setProgress(100, (int)d.progress, false)
+                .setAutoCancel(true);
 
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL)
-                    .setSmallIcon(R.drawable.notification_smallicon)
-                    .setContentTitle(getString(R.string.service_download_title))
-                    .setContentText(message)
-                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                    .setContentIntent(pendingIntent)
-                    .setAutoCancel(true);
+        String channelId = NOTIFICATION_CHANNEL;
+        NotificationChannel channel = new NotificationChannel(
+                channelId,
+                "Canora Downloads",
+                NotificationManager.IMPORTANCE_LOW);
+        notificationManager.createNotificationChannel(channel);
+        builder.setChannelId(channelId);
 
-            String channelId = NOTIFICATION_CHANNEL;
-            NotificationChannel channel = new NotificationChannel(
-                    channelId,
-                    "Canora Downloads",
-                    NotificationManager.IMPORTANCE_LOW);
-            notificationManager.createNotificationChannel(channel);
-            builder.setChannelId(channelId);
+        notificationManager.notify(id, builder.build());
+    }
 
-            notificationManager.notify(NOTIFICATION_ID, builder.build());
+    private void closeNotification(int id) {
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+
+        notificationManager.cancel(id);
+    }
+
+    private int createNotificationID() {
+        if (notificationIdCache.isEmpty()) {
+            if (notificationIdCounter == Integer.MAX_VALUE) {
+                throw new ArithmeticException("No more notification ids available.");
+            } else {
+                return notificationIdCounter++;
+            }
         } else {
-            notificationManager.cancel(NOTIFICATION_ID);
+            int ret = notificationIdCache.get(0);
+            notificationIdCache.remove(0);
+            return ret;
         }
+    }
+
+    private void destroyNotificationId(int id) {
+        notificationIdCache.add(id);
     }
 }
