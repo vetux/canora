@@ -3,6 +3,7 @@ package com.phaseshifter.canora.service.download;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.ServiceConnection;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -90,7 +91,7 @@ public class AutoBindDownloadService implements ServiceConnection, DownloadServi
     }
 
     @Override
-    public void downloadAudio(String outputUri,
+    public void downloadAudio(Uri outputUri,
                               OutputStream outputStream,
                               String url,
                               Runnable completionCallback,
@@ -111,7 +112,7 @@ public class AutoBindDownloadService implements ServiceConnection, DownloadServi
     }
 
     @Override
-    public void downloadVideo(String outputUri, OutputStream outputStream, String url, Runnable completionCallback, RunnableArg<Exception> exceptionCallback) {
+    public void downloadVideo(Uri outputUri, OutputStream outputStream, String url, Runnable completionCallback, RunnableArg<Exception> exceptionCallback) {
         verifyMainThread();
         if (serviceRef.get() != null) {
             serviceRef.get().downloadAudio(outputUri, outputStream, url, completionCallback, exceptionCallback);

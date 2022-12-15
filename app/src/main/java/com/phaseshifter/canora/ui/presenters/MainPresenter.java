@@ -1,6 +1,7 @@
 package com.phaseshifter.canora.ui.presenters;
 
 import android.content.Context;
+import android.net.Uri;
 import android.util.Log;
 
 import com.phaseshifter.canora.R;
@@ -1078,7 +1079,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
     }
 
     @Override
-    public void onDocumentCreated(String uri) {
+    public void onDocumentCreated(Uri uri) {
         OutputStream fileStream;
         try {
             fileStream = view.openDocument(uri);

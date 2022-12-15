@@ -94,9 +94,9 @@ public interface MainContract {
 
         void createDocument(String mime, String fileName);
 
-        OutputStream openDocument(String uri) throws FileNotFoundException;
+        OutputStream openDocument(Uri uri) throws FileNotFoundException;
 
-        void scanDocument(String uri, Runnable onScanComplete);
+        void scanDocument(Uri uri, Runnable onScanComplete);
     }
 
     interface Presenter {
@@ -170,6 +170,6 @@ public interface MainContract {
 
         void onAddToPlaylistClick();
 
-        void onDocumentCreated(String uri);
+        void onDocumentCreated(Uri uri);
     }
 }

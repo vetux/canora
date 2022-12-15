@@ -1,5 +1,7 @@
 package com.phaseshifter.canora.service.download;
 
+import android.net.Uri;
+
 import com.phaseshifter.canora.utils.RunnableArg;
 
 import java.io.OutputStream;
@@ -13,7 +15,7 @@ public interface DownloadService {
             VIDEO
         }
         public Type type;
-        public String outputUri;
+        public Uri outputUri;
         public String url;
         public String tempFile;
         public float progress;
@@ -24,13 +26,13 @@ public interface DownloadService {
 
     void getDownloads(RunnableArg<HashSet<Download>> callback);
 
-    void downloadAudio(String outputUri,
+    void downloadAudio(Uri outputUri,
                        OutputStream outputStream,
                        String url,
                        Runnable completionCallback,
                        RunnableArg<Exception> exceptionCallback);
 
-    void downloadVideo(String outputUri,
+    void downloadVideo(Uri outputUri,
                        OutputStream outputStream,
                        String url,
                        Runnable completionCallback,

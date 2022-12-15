@@ -6,6 +6,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -87,7 +88,7 @@ public class YTDLDownloadService extends Service implements DownloadService {
     }
 
     @Override
-    public void downloadAudio(String outputUri,
+    public void downloadAudio(Uri outputUri,
                               OutputStream outputStream,
                               String url,
                               Runnable completionCallback,
@@ -100,6 +101,10 @@ public class YTDLDownloadService extends Service implements DownloadService {
             download.latch = new CountDownLatch(1);
             download.outputUri = outputUri;
             download.url = url;
+
+            new Handler(getMainLooper()).post(() -> {
+                updateNotification(id, download);
+            });
 
             downloadsLock.lock();
 
@@ -141,7 +146,8 @@ public class YTDLDownloadService extends Service implements DownloadService {
             request.addOption("--output", tempFile);
             try {
                 ytdl.execute(request, (progress, etaInSeconds, line) -> {
-                    download.progress = progress;
+                    if (progress > download.progress)
+                        download.progress = progress;
                     download.etaInSeconds = etaInSeconds;
                     download.progressLine = line;
                     new Handler(getMainLooper()).post(() -> {
@@ -178,6 +184,7 @@ public class YTDLDownloadService extends Service implements DownloadService {
             downloadsLock.unlock();
 
             new Handler(getMainLooper()).post(() -> {
+                revokeUriPermission(outputUri, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                 closeNotification(id);
                 destroyNotificationId(id);
             });
@@ -187,7 +194,7 @@ public class YTDLDownloadService extends Service implements DownloadService {
     }
 
     @Override
-    public void downloadVideo(String outputUri,
+    public void downloadVideo(Uri outputUri,
                               OutputStream outputStream,
                               String url,
                               Runnable completionCallback,
@@ -200,6 +207,10 @@ public class YTDLDownloadService extends Service implements DownloadService {
             download.latch = new CountDownLatch(1);
             download.outputUri = outputUri;
             download.url = url;
+
+            new Handler(getMainLooper()).post(() -> {
+                updateNotification(id, download);
+            });
 
             downloadsLock.lock();
 
@@ -237,7 +248,8 @@ public class YTDLDownloadService extends Service implements DownloadService {
 
             try {
                 ytdl.execute(request, (progress, etaInSeconds, line) -> {
-                    download.progress = progress;
+                    if (progress > download.progress)
+                        download.progress = progress;
                     download.etaInSeconds = etaInSeconds;
                     download.progressLine = line;
                     new Handler(getMainLooper()).post(() -> {
@@ -276,6 +288,7 @@ public class YTDLDownloadService extends Service implements DownloadService {
             downloadsLock.unlock();
 
             new Handler(getMainLooper()).post(() -> {
+                revokeUriPermission(outputUri, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                 closeNotification(id);
                 destroyNotificationId(id);
             });
@@ -303,7 +316,7 @@ public class YTDLDownloadService extends Service implements DownloadService {
                 .setContentText(d.progressLine)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setContentIntent(pendingIntent)
-                .setProgress(100, (int)d.progress, false)
+                .setProgress(100, (int) d.progress, false)
                 .setAutoCancel(true);
 
         String channelId = NOTIFICATION_CHANNEL;
