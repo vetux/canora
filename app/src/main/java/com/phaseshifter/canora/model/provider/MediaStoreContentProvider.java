@@ -3,15 +3,19 @@ package com.phaseshifter.canora.model.provider;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.Cursor;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.util.Log;
+
 import androidx.core.util.Pair;
+
 import com.phaseshifter.canora.data.media.audio.AudioData;
 import com.phaseshifter.canora.data.media.audio.metadata.AudioMetadataMemory;
 import com.phaseshifter.canora.data.media.audio.source.AudioDataSourceUri;
 import com.phaseshifter.canora.data.media.image.ImageData;
 import com.phaseshifter.canora.data.media.image.metadata.ImageMetadataMemory;
+import com.phaseshifter.canora.data.media.image.source.ImageDataSourceByteArray;
 import com.phaseshifter.canora.data.media.image.source.ImageDataSourceUri;
 import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
 import com.phaseshifter.canora.data.media.playlist.metadata.PlaylistMetadata;
@@ -70,19 +74,24 @@ public class MediaStoreContentProvider implements IContentProvider {
                         throw new RuntimeException("UUID Collision !!!");
                     usedUUIDS.add(genUUID);
                     int audioID = mediaCursor.getInt(indexID);
-                    ImageMetadataMemory imageMetadata = new ImageMetadataMemory(UUID.randomUUID());
-                    ImageDataSourceUri imageSource = new ImageDataSourceUri(uriFactory.getAlbumArtworkUriFromAlbumId(mediaCursor.getInt(indexAlbumID)));
-                    ImageData image = new ImageData(imageMetadata, imageSource);
+
+                    Uri trackUri = uriFactory.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, audioID);
+
+                    ImageData image = getTrackArtwork(trackUri);
+
+                    String durationStr = mediaCursor.getString(indexDuration);
+                    long duration = durationStr == null ? 0 : Long.parseLong(durationStr);
+
                     AudioMetadataMemory metadata = new AudioMetadataMemory(
                             genUUID,
                             mediaCursor.getString(indexTitle),
                             mediaCursor.getString(indexArtist),
                             mediaCursor.getString(indexAlbum),
                             null,
-                            Long.parseLong(mediaCursor.getString(indexDuration)),
+                            duration,
                             image
                     );
-                    AudioDataSourceUri source = new AudioDataSourceUri(uriFactory.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, audioID));
+                    AudioDataSourceUri source = new AudioDataSourceUri(trackUri);
                     ret.add(new AudioData(metadata, source));
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -210,9 +219,10 @@ public class MediaStoreContentProvider implements IContentProvider {
 
                 int audioID = mediaCursor.getInt(indexID);
 
-                ImageMetadataMemory imageMetadata = new ImageMetadataMemory(UUID.randomUUID());
-                ImageDataSourceUri imageSource = new ImageDataSourceUri(uriFactory.getAlbumArtworkUriFromAlbumId(mediaCursor.getInt(indexAlbumID)));
-                ImageData image = new ImageData(imageMetadata, imageSource);
+                Uri trackUri = uriFactory.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, audioID);
+
+                ImageData image = getTrackArtwork(trackUri);
+
                 AudioMetadataMemory metadata = new AudioMetadataMemory(
                         genUUID,
                         mediaCursor.getString(indexTitle),
@@ -221,7 +231,7 @@ public class MediaStoreContentProvider implements IContentProvider {
                         null,
                         Long.parseLong(mediaCursor.getString(indexDuration)),
                         image);
-                AudioDataSourceUri source = new AudioDataSourceUri(uriFactory.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, audioID));
+                AudioDataSourceUri source = new AudioDataSourceUri(trackUri);
                 ret.add(new AudioData(metadata, source));
             } catch (Exception e) {
                 e.printStackTrace();
@@ -256,5 +266,24 @@ public class MediaStoreContentProvider implements IContentProvider {
             }
         }
         return ret;
+    }
+
+    private ImageData getTrackArtwork(Uri trackUri) {
+        // Because media store does not index artworks of the tracks i am forced to use MediaMetadataRetriever to read the raw image bytes into memory.
+        try {
+            MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+            byte[] rawArt;
+            mmr.setDataSource(C.getApplicationContext(), trackUri);
+            rawArt = mmr.getEmbeddedPicture();
+
+            if (rawArt != null) {
+                ImageMetadataMemory imageMetadata = new ImageMetadataMemory(UUID.randomUUID());
+                ImageDataSourceByteArray imageSource = new ImageDataSourceByteArray(rawArt);
+                return new ImageData(imageMetadata, imageSource);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

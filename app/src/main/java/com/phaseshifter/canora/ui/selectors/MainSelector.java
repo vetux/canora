@@ -38,11 +38,11 @@ public abstract class MainSelector {
             return null;
     }
 
-    public static List<AudioData> getTracksForIndicator(ContentSelector indicator,
-                                                        SortingOptions sortOpt,
-                                                        DeviceAudioRepository audioDataRepository,
-                                                        UserPlaylistRepository audioPlaylistRepository,
-                                                        SoundCloudAudioRepository scAudioDataRepo) {
+    public static List<AudioData> getTracksForSelector(ContentSelector indicator,
+                                                       SortingOptions sortOpt,
+                                                       DeviceAudioRepository audioDataRepository,
+                                                       UserPlaylistRepository audioPlaylistRepository,
+                                                       SoundCloudAudioRepository scAudioDataRepo) {
         switch (indicator.getPage()) {
             case TRACKS:
                 return ListSorter.sortAudioData(audioDataRepository.getTracks(), sortOpt);
@@ -63,10 +63,10 @@ public abstract class MainSelector {
         }
     }
 
-    public static AudioPlaylist getPlaylistForIndicator(ContentSelector indicator, DeviceAudioRepository audioDataRepository, UserPlaylistRepository audioPlaylistRepository) {
+    public static AudioPlaylist getPlaylistForSelector(ContentSelector indicator, DeviceAudioRepository audioDataRepository, UserPlaylistRepository audioPlaylistRepository) {
+        if (indicator == null)
+            return null;
         switch (indicator.getPage()) {
-            case TRACKS:
-                return null;
             case PLAYLISTS:
                 return audioPlaylistRepository.get(indicator.getUuid());
             case ARTISTS:
@@ -75,12 +75,8 @@ public abstract class MainSelector {
                 return audioDataRepository.getAlbum(indicator.getUuid());
             case GENRES:
                 return audioDataRepository.getGenre(indicator.getUuid());
-            case SOUNDCLOUD_SEARCH:
-                return null;
-            case SOUNDCLOUD_CHARTS:
-                return null;
             default:
-                throw new RuntimeException("INVALID SELECTOR: " + indicator.getPage());
+                return null;
         }
     }
 

@@ -54,7 +54,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import static com.phaseshifter.canora.ui.selectors.MainSelector.getPlaylistForIndicator;
+import static com.phaseshifter.canora.ui.selectors.MainSelector.getPlaylistForSelector;
 
 public class MainPresenter implements MainContract.Presenter, Observer<PlayerState> {
     private final String LOG_TAG = "MainPresenter";
@@ -451,7 +451,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
 
     @Override
     public void update(Observable<PlayerState> observable, PlayerState value) {
-        playerStateViewModel.applyPlayerState(value);
+        playerStateViewModel.applyPlayerState(value, getPlaylistForSelector(playingContentSelector, deviceAudioRepository, userPlaylistRepository));
         updateHighlightedIndex();
     }
 
@@ -488,7 +488,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
         PlayerState playerState = mediaService.getState().get();
 
         if (playerState != null)
-            playerStateViewModel.applyPlayerState(mediaService.getState().get());
+            playerStateViewModel.applyPlayerState(mediaService.getState().get(), getPlaylistForSelector(playingContentSelector, deviceAudioRepository, userPlaylistRepository));
 
         view.checkPermissions();
 
@@ -1209,7 +1209,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                             () -> {
                             });
                 } else {
-                    AudioPlaylist currentPlaylist = MainSelector.getPlaylistForIndicator(uiContentSelector, deviceAudioRepository, userPlaylistRepository);
+                    AudioPlaylist currentPlaylist = MainSelector.getPlaylistForSelector(uiContentSelector, deviceAudioRepository, userPlaylistRepository);
                     if (currentPlaylist == null)
                         throw new AssertionError();
                     List<AudioData> tracks = contentViewModel.visibleTracks.get();
@@ -1358,7 +1358,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                 contentViewModel.contentTracksSelection.notifyObservers();
                 break;
             case EDIT_PLAYLIST:
-                AudioPlaylist playlist = getPlaylistForIndicator(uiContentSelector, deviceAudioRepository, userPlaylistRepository);
+                AudioPlaylist playlist = getPlaylistForSelector(uiContentSelector, deviceAudioRepository, userPlaylistRepository);
                 view.startEditor(playlist, theme);
                 break;
             case DELETE:
@@ -1387,7 +1387,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                         }, () -> {
                         });
                     } else {
-                        AudioPlaylist currentPlaylist = getPlaylistForIndicator(uiContentSelector, deviceAudioRepository, userPlaylistRepository);
+                        AudioPlaylist currentPlaylist = getPlaylistForSelector(uiContentSelector, deviceAudioRepository, userPlaylistRepository);
                         if (currentPlaylist != null) {
                             List<AudioData> tracksToDelete = new ArrayList<>();
                             for (AudioData track : currentPlaylist.getData()) {
@@ -1409,7 +1409,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                         }
                     }
                 } else {
-                    AudioPlaylist playlistToDelete = getPlaylistForIndicator(uiContentSelector, deviceAudioRepository, userPlaylistRepository);
+                    AudioPlaylist playlistToDelete = getPlaylistForSelector(uiContentSelector, deviceAudioRepository, userPlaylistRepository);
 
                     List<AudioPlaylist> data = new ArrayList<>();
                     data.add(playlistToDelete);

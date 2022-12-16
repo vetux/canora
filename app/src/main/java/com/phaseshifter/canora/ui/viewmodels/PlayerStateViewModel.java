@@ -1,6 +1,7 @@
 package com.phaseshifter.canora.ui.viewmodels;
 
 import com.phaseshifter.canora.data.media.image.ImageData;
+import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
 import com.phaseshifter.canora.service.player.state.PlaybackState;
 import com.phaseshifter.canora.service.player.state.PlayerState;
 import com.phaseshifter.canora.utils.Observable;
@@ -23,7 +24,7 @@ public class PlayerStateViewModel {
 
     public final Observable<Integer> equalizerPreset = new Observable<>(-1);
 
-    public void applyPlayerState(PlayerState state) {
+    public void applyPlayerState(PlayerState state, AudioPlaylist playingPlaylist) {
         if (state.isPlaying()
                 && state.getPlaybackState() != PlaybackState.STATE_READY) {
             buffering.setIfNotEqual(true);
@@ -39,7 +40,12 @@ public class PlayerStateViewModel {
         } else {
             trackTitle.setIfNotEqual(state.getCurrentTrack().getMetadata().getTitle());
             trackArtist.setIfNotEqual(state.getCurrentTrack().getMetadata().getArtist());
-            trackArtwork.setIfNotEqual(state.getCurrentTrack().getMetadata().getArtwork());
+            if (state.getCurrentTrack().getMetadata().getArtwork() == null
+                    && playingPlaylist != null) {
+                trackArtwork.setIfNotEqual(playingPlaylist.getMetadata().getArtwork());
+            } else {
+                trackArtwork.setIfNotEqual(state.getCurrentTrack().getMetadata().getArtwork());
+            }
             trackLength.setIfNotEqual(state.getCurrentTrack().getMetadata().getLength());
         }
 

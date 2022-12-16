@@ -7,6 +7,7 @@ import com.phaseshifter.canora.model.comparison.AudioDataComparsion;
 
 import java.util.*;
 
+//TODO: Refactor playback controller
 public class DefaultPlaybackController implements PlaybackController {
     private final String LOG_TAG = "PlaybackManager";
 
@@ -66,11 +67,19 @@ public class DefaultPlaybackController implements PlaybackController {
             return currentTrack;
         } else if (shuffle) {
             Log.v(LOG_TAG, "SHUFFLE ON");
-            if (nextRandom < 0 || nextRandom >= shuffleCache.size()) {
-                nextRandom = rand.nextInt(shuffleCache.size());
+            if (!shuffleCache.isEmpty() && (nextRandom < 0 || nextRandom >= shuffleCache.size())) {
+                    nextRandom = rand.nextInt(shuffleCache.size());
             }
-            currentTrack = shuffleCache.get(nextRandom);
-            shuffleCache.remove(nextRandom);
+            if (shuffleCache.isEmpty()) {
+                // This path is reached if a playlist with only one track is playing with shuffle enabled
+                if (content.isEmpty()){
+                    throw new IllegalStateException("getNext called without set content.");
+                }
+                currentTrack = content.get(0);
+            } else {
+                currentTrack = shuffleCache.get(nextRandom);
+                shuffleCache.remove(nextRandom);
+            }
             currentIndex = getIndexOfID(currentTrack.getMetadata().getId());
             if (shuffleCache.size() <= 0) {
                 shuffleCache.addAll(content);
