@@ -29,7 +29,7 @@
         android:layout_toEndOf="@id/checkbox"
         android:focusable="false"
         android:focusableInTouchMode="false"
-        android:scaleType="fitXY"
+        android:scaleType="centerCrop"
         android:src="@drawable/artwork_unset"
         app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintStart_toStartOf="parent"

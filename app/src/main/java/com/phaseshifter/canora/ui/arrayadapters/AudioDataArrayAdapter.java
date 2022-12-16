@@ -116,8 +116,9 @@ public class AudioDataArrayAdapter extends ArrayAdapter<AudioData> implements Se
                             .diskCacheStrategyOf(DiskCacheStrategy.NONE))
                     .load(imageData)
                     .override(Target.SIZE_ORIGINAL)
-                    .placeholder(defaultArt)
+                   // .placeholder(defaultArt) Using placeholder here causes the images to not be centerCrop'ed
                     .transition(DrawableTransitionOptions.withCrossFade())
+                    .centerCrop()
                     .into(new NonFocusStealingDrawableImageViewTarget(cover));
         } else {
             cover.setImageResource(R.drawable.artwork_unset);
