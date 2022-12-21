@@ -271,7 +271,7 @@ public class MediaStoreContentProvider implements IContentProvider {
 
     private ImageData getTrackArtwork(Uri trackUri) {
         ImageMetadataMemory imageMetadata = new ImageMetadataMemory(UUID.randomUUID());
-        AlbumCoverDataSource imageSource = new AlbumCoverDataSource(C, trackUri);
+        AlbumCoverDataSource imageSource = new AlbumCoverDataSource(trackUri.toString());
         return new ImageData(imageMetadata, imageSource);
     }
 }

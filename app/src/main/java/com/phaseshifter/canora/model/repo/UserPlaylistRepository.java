@@ -29,7 +29,7 @@ public class UserPlaylistRepository {
             throw new IllegalArgumentException();
         serializer = new ObjectSerializer();
         this.playlistsDirectory = playlistsDirectory;
-        if (!playlistsDirectory.mkdirs()) {
+        if (!playlistsDirectory.isDirectory() && !playlistsDirectory.mkdirs()) {
             Log.v(LOG_TAG, "Failed to create playlists directory at " + playlistsDirectory);
         }
         playlists.putAll(readPlaylists());

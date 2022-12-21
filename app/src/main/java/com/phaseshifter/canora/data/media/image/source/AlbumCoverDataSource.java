@@ -10,20 +10,21 @@ import com.phaseshifter.canora.utils.RunnableArg;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class AlbumCoverDataSource implements ImageDataSource {
-    private final Uri trackUri;
-    private final Context context;
+public class AlbumCoverDataSource implements ImageDataSource, Serializable {
+    private static final long serialVersionUID = 1;
+
+    private final String trackUri;
 
     private boolean imageLoaded = false;
     private byte[] imageData = null;
 
     private static ExecutorService pool = Executors.newSingleThreadExecutor();
 
-    public AlbumCoverDataSource(Context context, Uri trackUri) {
-        this.context = context;
+    public AlbumCoverDataSource(String trackUri) {
         this.trackUri = trackUri;
     }
 
@@ -33,7 +34,7 @@ public class AlbumCoverDataSource implements ImageDataSource {
             if (!imageLoaded) {
                 try{
                     MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-                    mmr.setDataSource(context.getApplicationContext(), trackUri);
+                    mmr.setDataSource(context.getApplicationContext(), Uri.parse(trackUri));
                     imageData = mmr.getEmbeddedPicture();
                     imageLoaded = true;
                 } catch(Exception e){
@@ -57,7 +58,7 @@ public class AlbumCoverDataSource implements ImageDataSource {
     @Override
     public InputStream getStream(Context context) throws Exception {
         MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-        mmr.setDataSource(context.getApplicationContext(), trackUri);
+        mmr.setDataSource(context.getApplicationContext(), Uri.parse(trackUri));
         imageData = mmr.getEmbeddedPicture();
         if (imageData != null){
             return new ByteArrayInputStream(imageData);
