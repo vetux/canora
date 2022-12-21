@@ -32,11 +32,11 @@ public class AlbumCoverDataSource implements ImageDataSource, Serializable {
     public void getBitmap(Context context, RunnableArg<Bitmap> onReady, RunnableArg<Exception> onError) {
         pool.submit(() -> {
             if (!imageLoaded) {
+                imageLoaded = true;
                 try{
                     MediaMetadataRetriever mmr = new MediaMetadataRetriever();
                     mmr.setDataSource(context.getApplicationContext(), Uri.parse(trackUri));
                     imageData = mmr.getEmbeddedPicture();
-                    imageLoaded = true;
                 } catch(Exception e){
                     e.printStackTrace();
                 }
