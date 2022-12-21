@@ -8,6 +8,8 @@ import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
 
+import com.phaseshifter.canora.utils.RunnableArg;
+
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -35,30 +37,34 @@ public class ImageDataSourceUri implements ImageDataSource, Serializable {
     }
 
     @Override
-    public Bitmap getBitmap(Context context) throws IOException {
+    public void getBitmap(Context context,
+                          RunnableArg<Bitmap> onReady,
+                          RunnableArg<Exception> onError) {
         if (context == null)
             throw new IllegalArgumentException();
         Uri uri = getUri();
         if (uri.getScheme().equals("https")
                 || uri.getScheme().equals("http")) {
-            AtomicReference<Bitmap> bitmap = new AtomicReference<>();
-            Future<?> f = pool.submit(() -> {
+            pool.submit(() -> {
+                Bitmap bitmap = null;
                 try {
                     URL url = new URL(uri.toString());
-                    bitmap.set(BitmapFactory.decodeStream(url.openConnection().getInputStream()));
+                    bitmap = BitmapFactory.decodeStream(url.openConnection().getInputStream());
                 } catch (Exception e) {
                     e.printStackTrace();
+                    onError.run(e);
+                }
+                onReady.run(bitmap);
+            });
+        } else {
+            pool.submit(() ->  {
+                if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    ImageDecoder.Source src = ImageDecoder.createSource(context.getContentResolver(), uri);
+                    return ImageDecoder.decodeBitmap(src);
+                } else {
+                    return MediaStore.Images.Media.getBitmap(context.getContentResolver(), uri);
                 }
             });
-            while (!f.isDone()) {}
-            return bitmap.get();
-        } else {
-            if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                ImageDecoder.Source src = ImageDecoder.createSource(context.getContentResolver(), uri);
-                return ImageDecoder.decodeBitmap(src);
-            } else {
-                return MediaStore.Images.Media.getBitmap(context.getContentResolver(), uri);
-            }
         }
     }
 

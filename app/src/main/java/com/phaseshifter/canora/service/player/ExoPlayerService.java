@@ -29,6 +29,7 @@ import com.phaseshifter.canora.service.player.playback.DefaultPlaybackController
 import com.phaseshifter.canora.service.player.state.PlayerState;
 import com.phaseshifter.canora.ui.activities.MainActivity;
 import com.phaseshifter.canora.utils.Observable;
+import com.phaseshifter.canora.utils.RunnableArg;
 import com.phaseshifter.canora.utils.android.bitmap.BitmapUtils;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.Player;
@@ -459,113 +460,147 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
     private void updateNotification(PlayerState state) {
         pool.submit(() -> {
             AudioData track = state.getCurrentTrack();
-            Bitmap artworkBitmap = null;
-            if (track != null) {
-                try {
-                    if (track.getMetadata().getArtwork() != null)
-                        artworkBitmap = track.getMetadata().getArtwork().getDataSource().getBitmap(this);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                if (artworkBitmap == null)
-                    artworkBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.artwork_unset);
+            if (track != null && track.getMetadata().getArtwork() != null) {
+                track.getMetadata().getArtwork().getDataSource().getBitmap(this, (bitmap) -> {
+                            if (bitmap != null) {
+                                showNotification(state.isPlaying(), track, bitmap);
+                            } else {
+                                showNotification(state.isPlaying(), track, BitmapUtils.getBitmapForResource(this, R.drawable.artwork_unset));
+                            }
+                        },
+                        (exception) -> {
+                            showNotification(state.isPlaying(), track, BitmapUtils.getBitmapForResource(this, R.drawable.artwork_unset));
+                        });
             } else {
-                artworkBitmap = BitmapUtils.getBitmapForResource(this, R.drawable.artwork_unset);
+                showNotification(state.isPlaying(), track, BitmapUtils.getBitmapForResource(this, R.drawable.artwork_unset));
             }
-            boolean playing = state.isPlaying();
+        });
+    }
 
-            final Bitmap artwork = artworkBitmap;
+    private void showNotification(boolean playing, AudioData track, Bitmap artwork) {
+        runOnMainThread(() -> {
+            final Notification.Builder notificationBuilder;
+            notificationBuilder = new Notification.Builder(this, NOTIFICATION_CHANNEL_ID)
+                    .addAction(new Notification.Action.Builder(
+                            Icon.createWithResource(this, R.drawable.skip_previous),
+                            "prev", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_PREV), PendingIntent.FLAG_IMMUTABLE)
+                    ).build());
+            if (playing) {
+                notificationBuilder.addAction(new Notification.Action.Builder(
+                        Icon.createWithResource(this, R.drawable.pause),
+                        "pause", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_PLAYBACK_PAUSE), PendingIntent.FLAG_IMMUTABLE))
+                        .build());
+            } else {
+                notificationBuilder.addAction(new Notification.Action.Builder(
+                        Icon.createWithResource(this, R.drawable.play_arrow),
+                        "play", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_PLAYBACK_RESUME), PendingIntent.FLAG_IMMUTABLE))
+                        .build());
+            }
+            notificationBuilder.addAction(new Notification.Action.Builder(
+                    Icon.createWithResource(this, R.drawable.skip_next),
+                    "next", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_NEXT), PendingIntent.FLAG_IMMUTABLE))
+                    .build());
 
-            runOnMainThread(() -> {
-                final Notification.Builder notificationBuilder;
-                if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    notificationBuilder = new Notification.Builder(this, NOTIFICATION_CHANNEL_ID)
-                            .addAction(new Notification.Action.Builder(
-                                    Icon.createWithResource(this, R.drawable.skip_previous),
-                                    "prev", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_PREV), PendingIntent.FLAG_IMMUTABLE)
-                            ).build());
-                    if (playing) {
-                        notificationBuilder.addAction(new Notification.Action.Builder(
-                                Icon.createWithResource(this, R.drawable.pause),
-                                "pause", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_PLAYBACK_PAUSE), PendingIntent.FLAG_IMMUTABLE))
-                                .build());
-                    } else {
-                        notificationBuilder.addAction(new Notification.Action.Builder(
-                                Icon.createWithResource(this, R.drawable.play_arrow),
-                                "play", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_PLAYBACK_RESUME), PendingIntent.FLAG_IMMUTABLE))
-                                .build());
-                    }
-                    notificationBuilder.addAction(new Notification.Action.Builder(
-                            Icon.createWithResource(this, R.drawable.skip_next),
-                            "next", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_NEXT), PendingIntent.FLAG_IMMUTABLE))
-                            .build());
-                } else {
-                    notificationBuilder = new Notification.Builder(this)
-                            .addAction(R.drawable.skip_previous, "prev", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_PREV), PendingIntent.FLAG_IMMUTABLE));
-                    if (playing) {
-                        notificationBuilder.addAction(R.drawable.pause, "pause", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_PLAYBACK_PAUSE), PendingIntent.FLAG_IMMUTABLE));
-                    } else {
-                        notificationBuilder.addAction(R.drawable.play_arrow, "play", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_PLAYBACK_RESUME), PendingIntent.FLAG_IMMUTABLE));
-                    }
-                    notificationBuilder.addAction(R.drawable.skip_next, "next", PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_NEXT), PendingIntent.FLAG_IMMUTABLE));
-                }
+            notificationBuilder.setStyle(new Notification.MediaStyle()
+                    .setMediaSession(mediaSession.getSessionToken())
+                    .setShowActionsInCompactView(0, 1, 2));
 
-                notificationBuilder.setStyle(new Notification.MediaStyle()
-                        .setMediaSession(mediaSession.getSessionToken())
-                        .setShowActionsInCompactView(0, 1, 2));
-                if (track != null) {
-                    notificationBuilder
-                            .setContentTitle(track.getMetadata().getTitle())
-                            .setContentText(track.getMetadata().getArtist());
-                } else {
-                    notificationBuilder
-                            .setContentTitle("")
-                            .setContentText("");
-                }
+            if (track != null) {
+                notificationBuilder
+                        .setContentTitle(track.getMetadata().getTitle())
+                        .setContentText(track.getMetadata().getArtist());
+            } else {
+                notificationBuilder
+                        .setContentTitle("")
+                        .setContentText("");
+            }
 
-                if (artwork != null) {
-                    notificationBuilder.setLargeIcon(artwork);
-                }
+            if (artwork != null) {
+                notificationBuilder.setLargeIcon(artwork);
+            }
 
-                notificationBuilder.setSmallIcon(R.drawable.notification_smallicon);
+            notificationBuilder.setSmallIcon(R.drawable.notification_smallicon);
 
-                Intent resultIntent = new Intent(this, MainActivity.class);
-                resultIntent.setAction("android.intent.action.MAIN");
-                resultIntent.addCategory("android.intent.category.LAUNCHER");
-                notificationBuilder.setContentIntent(PendingIntent.getActivity(this, 0, resultIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE));
-                notificationBuilder.setDeleteIntent(PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_QUIT), PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE));
+            Intent resultIntent = new Intent(this, MainActivity.class);
+            resultIntent.setAction("android.intent.action.MAIN");
+            resultIntent.addCategory("android.intent.category.LAUNCHER");
+            notificationBuilder.setContentIntent(PendingIntent.getActivity(this, 0, resultIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE));
+            notificationBuilder.setDeleteIntent(PendingIntent.getBroadcast(this, 0, new Intent(COMMAND_QUIT), PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE));
 
-                Notification notification = notificationBuilder.build();
+            Notification notification = notificationBuilder.build();
 
 
-                NotificationManager nfm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                if (nfm != null) {
-                    nfm.notify(NOTIFICATION_ID, notification);
-                }
-                if (playing) {
-                    Log.v(LOG_TAG, "Start Foreground");
-                    // For some mysterious reason when youtube stream is running while the activity is not running this call to startForeground throws ForegroundServiceStartNotAllowedException
-                    try {
-                        if (!isForeground)
-                            startForeground(NOTIFICATION_ID, notification);
-                        isForeground = true;
-                    } catch (Exception e) {
-                        Log.e(LOG_TAG, "Failed to start foreground: " + e.getMessage());
-                        isForeground = false;
-                    }
-                } else {
-                    Log.v(LOG_TAG, "Stop Foreground");
-                    if (isForeground)
-                        stopForeground(false);
+            NotificationManager nfm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            if (nfm != null) {
+                nfm.notify(NOTIFICATION_ID, notification);
+            }
+            if (playing) {
+                Log.v(LOG_TAG, "Start Foreground");
+                // For some mysterious reason when youtube stream is running while the activity is not running this call to startForeground throws ForegroundServiceStartNotAllowedException
+                try {
+                    if (!isForeground)
+                        startForeground(NOTIFICATION_ID, notification);
+                    isForeground = true;
+                } catch (Exception e) {
+                    Log.e(LOG_TAG, "Failed to start foreground: " + e.getMessage());
                     isForeground = false;
                 }
-            });
+            } else {
+                Log.v(LOG_TAG, "Stop Foreground");
+                if (isForeground)
+                    stopForeground(false);
+                isForeground = false;
+            }
         });
     }
 
     private void updateMediaSession(PlayerState state) {
-        mediaSession.setMetadata(getMediaSessionMetadata(state.getCurrentTrack()));
-        mediaSession.setPlaybackState(getMediaSessionState(state.isPlaying(), state.getPlayerPosition()));
+        AudioData track = state.getCurrentTrack();
+
+        if (track != null) {
+            final String title = track.getMetadata().getTitle();
+            final String artist = track.getMetadata().getArtist();
+            if (track.getMetadata().getArtwork() != null) {
+                track.getMetadata().getArtwork().getDataSource().getBitmap(this, (bitmap) -> {
+                            runOnMainThread(() -> {
+                                if (bitmap != null) {
+                                    MediaMetadata.Builder b = new MediaMetadata.Builder()
+                                            .putString(MediaMetadata.METADATA_KEY_TITLE, title)
+                                            .putString(MediaMetadata.METADATA_KEY_ARTIST, artist);
+                                    b.putBitmap(MediaMetadata.METADATA_KEY_ART, bitmap)
+                                            .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, bitmap);
+
+                                    mediaSession.setMetadata(b.build());
+                                } else {
+                                    Bitmap defBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.artwork_unset);
+
+                                    MediaMetadata.Builder b = new MediaMetadata.Builder()
+                                            .putString(MediaMetadata.METADATA_KEY_TITLE, title)
+                                            .putString(MediaMetadata.METADATA_KEY_ARTIST, artist);
+                                    b.putBitmap(MediaMetadata.METADATA_KEY_ART, defBitmap)
+                                            .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, defBitmap);
+
+                                    mediaSession.setMetadata(b.build());
+                                }
+                                mediaSession.setPlaybackState(getMediaSessionState(state.isPlaying(), state.getPlayerPosition()));
+                            });
+                        },
+                        (exception) -> {
+                            runOnMainThread(() -> {
+                                Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.artwork_unset);
+
+                                MediaMetadata.Builder b = new MediaMetadata.Builder()
+                                        .putString(MediaMetadata.METADATA_KEY_TITLE, title)
+                                        .putString(MediaMetadata.METADATA_KEY_ARTIST, artist);
+                                b.putBitmap(MediaMetadata.METADATA_KEY_ART, bitmap)
+                                        .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, bitmap);
+
+                                mediaSession.setMetadata(b.build());
+                                mediaSession.setPlaybackState(getMediaSessionState(state.isPlaying(), state.getPlayerPosition()));
+                            });
+                        });
+            }
+        }
     }
 
     private PlaybackState getMediaSessionState(boolean playing, long pos) {
@@ -577,33 +612,6 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
                         | PlaybackState.ACTION_SKIP_TO_PREVIOUS
                         | PlaybackState.ACTION_PLAY_PAUSE)
                 .build();
-    }
-
-    private MediaMetadata getMediaSessionMetadata(AudioData track) {
-        String title = null;
-        String artist = null;
-        Bitmap artwork = null;
-        if (track != null) {
-            title = track.getMetadata().getTitle();
-            artist = track.getMetadata().getArtist();
-            try {
-                if (track.getMetadata().getArtwork() != null)
-                    artwork = track.getMetadata().getArtwork().getDataSource().getBitmap(this);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        //Load default artwork into media session?
-        /*if (artwork == null)
-            artwork = BitmapFactory.decodeResource(getResources(), R.drawable.artwork_unset);*/
-        MediaMetadata.Builder b = new MediaMetadata.Builder()
-                .putString(MediaMetadata.METADATA_KEY_TITLE, title)
-                .putString(MediaMetadata.METADATA_KEY_ARTIST, artist);
-        if (artwork != null) {
-            b.putBitmap(MediaMetadata.METADATA_KEY_ART, artwork)
-                    .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, artwork);
-        }
-        return b.build();
     }
 
     private void clearNotification() {

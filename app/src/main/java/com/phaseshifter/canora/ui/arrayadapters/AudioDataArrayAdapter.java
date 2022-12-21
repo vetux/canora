@@ -119,6 +119,9 @@ public class AudioDataArrayAdapter extends ArrayAdapter<AudioData> implements Se
                    // .placeholder(defaultArt) Using placeholder here causes the images to not be centerCrop'ed
                     .transition(DrawableTransitionOptions.withCrossFade())
                     .centerCrop()
+                    .fallback(R.drawable.artwork_unset)
+                    .error(R.drawable.artwork_unset)
+                    .placeholder(R.drawable.artwork_unset)
                     .into(new NonFocusStealingDrawableImageViewTarget(cover));
         } else {
             cover.setImageResource(R.drawable.artwork_unset);

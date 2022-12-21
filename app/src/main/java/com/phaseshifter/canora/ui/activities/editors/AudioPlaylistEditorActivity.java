@@ -9,7 +9,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.*;
+
 import androidx.annotation.Nullable;
+
 import com.phaseshifter.canora.R;
 import com.phaseshifter.canora.application.MainApplication;
 import com.phaseshifter.canora.data.media.image.ImageData;
@@ -66,16 +68,6 @@ public class AudioPlaylistEditorActivity extends Activity {
 
         bundle = (ActivityBundle) bundleObject;
         editingPlaylist = bundle.data;
-
-        if (editingPlaylist.getMetadata().getArtwork() != null) {
-            try {
-                Bitmap bitmap = editingPlaylist.getMetadata().getArtwork().getDataSource().getBitmap(AudioPlaylistEditorActivity.this);
-                if (bitmap != null)
-                    compressBitmapToSelectedArtwork(bitmap);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
 
         setTheme(bundle.theme.styleResID);
         setContentView(R.layout.activity_editor_playlist);
@@ -146,12 +138,20 @@ public class AudioPlaylistEditorActivity extends Activity {
         });
 
         if (editingPlaylist.getMetadata().getArtwork() != null) {
-            try {
-                img.setImageBitmap(editingPlaylist.getMetadata().getArtwork().getDataSource().getBitmap(this));
-            } catch (Exception e) {
-                e.printStackTrace();
-                img.setImageResource(R.drawable.artwork_unset);
-            }
+            editingPlaylist.getMetadata().getArtwork().getDataSource().getBitmap(this, (bitmap) -> {
+                        runOnUiThread(() -> {
+                            if (bitmap != null) {
+                                img.setImageBitmap(bitmap);
+                            } else {
+                                img.setImageResource(R.drawable.artwork_unset);
+                            }
+                        });
+                    },
+                    (exception) -> {
+                        runOnUiThread(() -> {
+                            img.setImageResource(R.drawable.artwork_unset);
+                        });
+                    });
         } else {
             img.setImageResource(R.drawable.artwork_unset);
         }

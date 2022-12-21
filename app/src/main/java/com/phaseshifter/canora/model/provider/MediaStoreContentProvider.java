@@ -15,6 +15,7 @@ import com.phaseshifter.canora.data.media.audio.metadata.AudioMetadataMemory;
 import com.phaseshifter.canora.data.media.audio.source.AudioDataSourceUri;
 import com.phaseshifter.canora.data.media.image.ImageData;
 import com.phaseshifter.canora.data.media.image.metadata.ImageMetadataMemory;
+import com.phaseshifter.canora.data.media.image.source.AlbumCoverDataSource;
 import com.phaseshifter.canora.data.media.image.source.ImageDataSourceByteArray;
 import com.phaseshifter.canora.data.media.image.source.ImageDataSourceUri;
 import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
@@ -269,21 +270,8 @@ public class MediaStoreContentProvider implements IContentProvider {
     }
 
     private ImageData getTrackArtwork(Uri trackUri) {
-        // Because media store does not index artworks of the tracks i am forced to use MediaMetadataRetriever to read the raw image bytes into memory.
-        try {
-            MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-            byte[] rawArt;
-            mmr.setDataSource(C.getApplicationContext(), trackUri);
-            rawArt = mmr.getEmbeddedPicture();
-
-            if (rawArt != null) {
-                ImageMetadataMemory imageMetadata = new ImageMetadataMemory(UUID.randomUUID());
-                ImageDataSourceByteArray imageSource = new ImageDataSourceByteArray(rawArt);
-                return new ImageData(imageMetadata, imageSource);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
+        ImageMetadataMemory imageMetadata = new ImageMetadataMemory(UUID.randomUUID());
+        AlbumCoverDataSource imageSource = new AlbumCoverDataSource(C, trackUri);
+        return new ImageData(imageMetadata, imageSource);
     }
 }

@@ -20,7 +20,7 @@ public class ImageDataModelLoader implements ModelLoader<ImageData, InputStream>
     @Nullable
     @Override
     public LoadData<InputStream> buildLoadData(@NonNull ImageData imageData, int width, int height, @NonNull Options options) {
-        return new LoadData<>(new ObjectKey(imageData.getMetadata().getId()), new ImageDataDataFetcher(imageData, context));
+        return new LoadData<>(new ObjectKey(imageData.getMetadata().getId()), new ImageDataFetcher(imageData, context));
     }
 
     @Override

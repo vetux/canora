@@ -10,13 +10,13 @@ import com.bumptech.glide.load.data.DataFetcher;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class ImageDataDataFetcher implements DataFetcher<InputStream> {
+public class ImageDataFetcher implements DataFetcher<InputStream> {
     private final ImageData imageData;
     private final Context context;
 
     private InputStream stream;
 
-    public ImageDataDataFetcher(ImageData imageData, Context context) {
+    public ImageDataFetcher(ImageData imageData, Context context) {
         this.imageData = imageData;
         this.context = context;
     }
@@ -33,6 +33,7 @@ public class ImageDataDataFetcher implements DataFetcher<InputStream> {
         try {
             stream = imageData.getDataSource().getStream(context);
             callback.onDataReady(stream);
+
         } catch (Exception e) {
             e.printStackTrace();
             callback.onLoadFailed(e);
