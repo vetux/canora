@@ -12,7 +12,6 @@ import com.phaseshifter.canora.R;
 import com.phaseshifter.canora.data.media.audio.AudioData;
 import com.phaseshifter.canora.data.media.image.ImageData;
 import com.phaseshifter.canora.ui.utils.glide.GlideApp;
-import com.phaseshifter.canora.ui.utils.glide.target.NonFocusStealingDrawableImageViewTarget;
 import com.phaseshifter.canora.utils.Pair;
 import com.phaseshifter.canora.utils.android.AttributeConversion;
 import com.phaseshifter.canora.utils.android.Miscellaneous;
@@ -122,7 +121,7 @@ public class AudioDataArrayAdapter extends ArrayAdapter<AudioData> implements Se
                     .fallback(R.drawable.artwork_unset)
                     .error(R.drawable.artwork_unset)
                     .placeholder(R.drawable.artwork_unset)
-                    .into(new NonFocusStealingDrawableImageViewTarget(cover));
+                    .into(cover);
         } else {
             cover.setImageResource(R.drawable.artwork_unset);
         }

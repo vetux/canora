@@ -16,7 +16,6 @@ import com.phaseshifter.canora.R;
 import com.phaseshifter.canora.data.media.image.ImageData;
 import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
 import com.phaseshifter.canora.ui.utils.glide.GlideApp;
-import com.phaseshifter.canora.ui.utils.glide.target.NonFocusStealingDrawableImageViewTarget;
 import com.phaseshifter.canora.ui.widgets.CustomImageView;
 import com.phaseshifter.canora.utils.Pair;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -126,7 +125,7 @@ public class AudioPlaylistArrayAdapter extends ArrayAdapter<AudioPlaylist> imple
                     .override(Target.SIZE_ORIGINAL)
                     .placeholder(defaultArt)
                     .transition(DrawableTransitionOptions.withCrossFade())
-                    .into(new NonFocusStealingDrawableImageViewTarget(plImg));
+                    .into(plImg);
         } else {
             plImg.setImageResource(R.drawable.artwork_unset);
         }
