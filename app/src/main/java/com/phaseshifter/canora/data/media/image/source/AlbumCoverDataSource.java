@@ -19,8 +19,8 @@ public class AlbumCoverDataSource implements ImageDataSource, Serializable {
 
     private final String trackUri;
 
-    private boolean imageLoaded = false;
-    private byte[] imageData = null;
+    private transient boolean imageLoaded = false;
+    private transient byte[] imageData = null;
 
     private static ExecutorService pool = Executors.newSingleThreadExecutor();
 
