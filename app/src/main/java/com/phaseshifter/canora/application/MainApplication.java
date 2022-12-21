@@ -139,8 +139,6 @@ public class MainApplication extends Application {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        throw new RuntimeException();
     }
 
     public DeviceAudioRepository getAudioDataRepo() {
