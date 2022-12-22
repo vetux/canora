@@ -100,9 +100,13 @@ public interface MainContract {
     }
 
     interface Presenter {
-        void start();
+        void onCreate(Serializable savedState);
 
-        void stop();
+        void onDestroy();
+
+        void onStart();
+
+        void onStop();
 
         void onTrackSeekStart();
 

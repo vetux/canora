@@ -120,7 +120,6 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
     private String ytSearch = "";
 
     public MainPresenter(MainContract.View view,
-                         Serializable savedState,
                          AutoBindMediaService service,
                          AutoBindDownloadService downloadService,
                          DeviceAudioRepository audioDataRepository,
@@ -153,44 +152,6 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
         this.ytdlViewModel = ytdlViewModel;
         this.context = context;
         this.presExec = new ThreadPoolExecutor(1, 1, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
-
-        scAudioDataRepo.clientID.addObserver(new Observer<String>() {
-            @Override
-            public void update(Observable<String> observable, String value) {
-                if (!Objects.equals(settingsRepository.getString(StringSetting.SC_CLIENTID), value)) {
-                    settingsRepository.putString(StringSetting.SC_CLIENTID, value);
-                    view.showMessage(context.getString(R.string.main_soundcloud_clientidchange, value));
-                }
-            }
-        });
-
-        if (savedState instanceof MainPresenterState) {
-            final MainPresenterState state = (MainPresenterState) savedState;
-            // Repositories are stored application wide so the saved indicator uuid should be valid.
-            uiContentSelector = state.uiIndicator;
-            playingContentSelector = state.contentIndicator;
-            ytdlViewModel.url.set(state.url);
-            ytdlViewModel.infoForUrl.set(state.info);
-            downloadingVideo = state.downloadingVideo;
-            downloadingAudio = state.downloadingAudio;
-            contentSearch = state.contentSearch;
-            scSearch = state.scSearch;
-            ytSearch = state.ytSearch;
-        }
-
-        appViewModel.contentSelector.set(uiContentSelector);
-
-        switch (uiContentSelector.getPage()) {
-            default:
-                appViewModel.searchText.set(contentSearch);
-                break;
-            case SOUNDCLOUD_SEARCH:
-                appViewModel.searchText.set(scSearch);
-                break;
-            case YOUTUBE_SEARCH_VIDEOS:
-                appViewModel.searchText.set(ytSearch);
-                break;
-        }
     }
 
     private void runPresenterTask(Runnable task) {
@@ -458,7 +419,45 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
     //START Presenter Interface
 
     @Override
-    public synchronized void start() {
+    public void onCreate(Serializable savedState) {
+        scAudioDataRepo.clientID.addObserver(new Observer<String>() {
+            @Override
+            public void update(Observable<String> observable, String value) {
+                if (!Objects.equals(settingsRepository.getString(StringSetting.SC_CLIENTID), value)) {
+                    settingsRepository.putString(StringSetting.SC_CLIENTID, value);
+                    view.showMessage(context.getString(R.string.main_soundcloud_clientidchange, value));
+                }
+            }
+        });
+
+        if (savedState instanceof MainPresenterState) {
+            final MainPresenterState state = (MainPresenterState) savedState;
+            // Repositories are stored application wide so the saved indicator uuid should be valid.
+            uiContentSelector = state.uiIndicator;
+            playingContentSelector = state.contentIndicator;
+            ytdlViewModel.url.set(state.url);
+            ytdlViewModel.infoForUrl.set(state.info);
+            downloadingVideo = state.downloadingVideo;
+            downloadingAudio = state.downloadingAudio;
+            contentSearch = state.contentSearch;
+            scSearch = state.scSearch;
+            ytSearch = state.ytSearch;
+        }
+
+        appViewModel.contentSelector.set(uiContentSelector);
+
+        switch (uiContentSelector.getPage()) {
+            default:
+                appViewModel.searchText.set(contentSearch);
+                break;
+            case SOUNDCLOUD_SEARCH:
+                appViewModel.searchText.set(scSearch);
+                break;
+            case YOUTUBE_SEARCH_VIDEOS:
+                appViewModel.searchText.set(ytSearch);
+                break;
+        }
+
         ytRepo.setApiKey(settingsRepository.getString(StringSetting.YOUTUBE_API_KEY));
         ytRepo.results.addObserver(ytObserver);
 
@@ -506,7 +505,8 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
     }
 
     @Override
-    public synchronized void stop() {
+    public void onDestroy() {
+        scAudioDataRepo.clientID.removeAllObservers();
         ytRepo.results.removeObserver(ytObserver);
 
         settingsRepository.putString(StringSetting.SC_CLIENTID, scAudioDataRepo.clientID.get());
@@ -524,6 +524,38 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
         view.saveState(savedState);
 
         mediaService.getState().removeObserver(this);
+    }
+
+    @Override
+    public synchronized void onStart() {
+        ytRepo.setApiKey(settingsRepository.getString(StringSetting.YOUTUBE_API_KEY));
+        scAudioDataRepo.setClientID(settingsRepository.getString(StringSetting.SC_CLIENTID));
+
+        theme = themeRepository.get(settingsRepository.getInt(IntegerSetting.THEME));
+
+        sortingOptions.sortby = settingsRepository.getInt(IntegerSetting.SORT_BY);
+        sortingOptions.sortdir = settingsRepository.getInt(IntegerSetting.SORT_DIR);
+        sortingOptions.sorttech = settingsRepository.getInt(IntegerSetting.SORT_TECH);
+
+        filterBy = settingsRepository.getInt(IntegerSetting.FILTER_BY);
+
+        appViewModel.devMode.set(settingsRepository.getBoolean(BooleanSetting.DEVELOPERMODE));
+
+        setViewModelContentSelector(uiContentSelector);
+
+        mediaService.setVolume(settingsRepository.getFloat(FloatSetting.VOLUME));
+        mediaService.setShuffle(settingsRepository.getBoolean(BooleanSetting.SHUFFLE));
+        mediaService.setRepeat(settingsRepository.getBoolean(BooleanSetting.REPEAT));
+        mediaService.setEqualizerPreset(settingsRepository.getInt(IntegerSetting.EQUALIZER_PRESET_INDEX));
+
+        PlayerState playerState = mediaService.getState().get();
+
+        if (playerState != null)
+            playerStateViewModel.applyPlayerState(mediaService.getState().get(), getPlaylistForSelector(playingContentSelector, deviceAudioRepository, userPlaylistRepository));
+    }
+
+    @Override
+    public synchronized void onStop() {
     }
 
     @Override
