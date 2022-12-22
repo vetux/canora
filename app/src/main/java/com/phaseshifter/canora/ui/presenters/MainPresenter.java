@@ -552,6 +552,13 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
 
         if (playerState != null)
             playerStateViewModel.applyPlayerState(mediaService.getState().get(), getPlaylistForSelector(playingContentSelector, deviceAudioRepository, userPlaylistRepository));
+
+        view.setTheme(theme);
+        appViewModel.notifyObservers();
+        contentViewModel.notifyObservers();
+        playerStateViewModel.notifyObservers();
+        ytdlViewModel.notifyObservers();
+        updateVisibleContent();
     }
 
     @Override
