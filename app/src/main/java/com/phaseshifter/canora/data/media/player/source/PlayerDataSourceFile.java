@@ -1,4 +1,4 @@
-package com.phaseshifter.canora.data.media.audio.source;
+package com.phaseshifter.canora.data.media.player.source;
 
 import android.content.Context;
 import android.net.Uri;
@@ -16,15 +16,13 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
-public class AudioDataSourceFile implements AudioDataSource, Serializable {
+public class PlayerDataSourceFile implements PlayerDataSource, Serializable {
     private static final long serialVersionUID = 1;
 
     private final File file;
 
-    public AudioDataSourceFile(File file) {
+    public PlayerDataSourceFile(File file) {
         this.file = file;
     }
 
@@ -54,7 +52,7 @@ public class AudioDataSourceFile implements AudioDataSource, Serializable {
     @Override
     public boolean equals(Object o) {
         if (!super.equals(o)) return false;
-        AudioDataSourceFile audioFile = (AudioDataSourceFile) o;
+        PlayerDataSourceFile audioFile = (PlayerDataSourceFile) o;
         return Objects.equals(file, audioFile.file);
     }
 

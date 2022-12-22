@@ -9,7 +9,7 @@ import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.phaseshifter.canora.R;
-import com.phaseshifter.canora.data.media.audio.AudioData;
+import com.phaseshifter.canora.data.media.player.PlayerData;
 import com.phaseshifter.canora.data.media.image.ImageData;
 import com.phaseshifter.canora.ui.utils.glide.GlideApp;
 import com.phaseshifter.canora.utils.Pair;
@@ -24,9 +24,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-public class AudioDataArrayAdapter extends ArrayAdapter<AudioData> implements SectionIndexer {
+public class AudioDataArrayAdapter extends ArrayAdapter<PlayerData> implements SectionIndexer {
     private final Context context;
-    private final List<AudioData> contentRef;
+    private final List<PlayerData> contentRef;
     private final HashSet<Integer> selection;
 
     private final Drawable defaultArt;
@@ -40,7 +40,7 @@ public class AudioDataArrayAdapter extends ArrayAdapter<AudioData> implements Se
 
     private boolean isEnabled = true;
 
-    public AudioDataArrayAdapter(Context context, List<AudioData> list) {
+    public AudioDataArrayAdapter(Context context, List<PlayerData> list) {
         super(context, 0, list);
         contentRef = list;
         this.context = context;
@@ -69,7 +69,7 @@ public class AudioDataArrayAdapter extends ArrayAdapter<AudioData> implements Se
         return selection;
     }
 
-    public List<AudioData> getContentRef() {
+    public List<PlayerData> getContentRef() {
         return contentRef;
     }
 
@@ -100,12 +100,12 @@ public class AudioDataArrayAdapter extends ArrayAdapter<AudioData> implements Se
         ImageView highlight = listItem.findViewById(R.id.highlight);
         ImageView cover = listItem.findViewById(R.id.cover);
 
-        AudioData track = contentRef.get(position);
+        PlayerData track = contentRef.get(position);
 
         //Set values
         title.setText(track.getMetadata().getTitle());
         artist.setText(track.getMetadata().getArtist());
-        length.setText(Miscellaneous.digitize(track.getMetadata().getLength()));
+        length.setText(Miscellaneous.digitize(track.getMetadata().getDuration()));
 
         ImageData imageData = track.getMetadata().getArtwork();
         GlideApp.with(context).clear(cover);
@@ -154,14 +154,14 @@ public class AudioDataArrayAdapter extends ArrayAdapter<AudioData> implements Se
         sectionToPosition.clear();
         sectionChars.clear();
         if (contentRef.size() > 0) {
-            AudioData track = contentRef.get(0);
+            PlayerData track = contentRef.get(0);
             String c = ("" + track.getMetadata().getTitle().charAt(0)).toUpperCase();
             positionToSection.add(new Pair<>(c, 0));
             sectionToPosition.add(0);
             sectionChars.add(c);
         }
         for (int i = 1; i < contentRef.size(); i++) {
-            AudioData track = contentRef.get(i);
+            PlayerData track = contentRef.get(i);
             String c = ("" + track.getMetadata().getTitle().charAt(0)).toUpperCase();
             int sectionIndex = positionToSection.get(positionToSection.size() - 1).second;
             if (sectionChars.contains(c)) {

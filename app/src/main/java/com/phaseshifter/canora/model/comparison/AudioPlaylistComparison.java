@@ -1,6 +1,6 @@
 package com.phaseshifter.canora.model.comparison;
 
-import com.phaseshifter.canora.data.media.audio.AudioData;
+import com.phaseshifter.canora.data.media.player.PlayerData;
 import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
 
 import java.util.ArrayList;
@@ -21,9 +21,9 @@ public class AudioPlaylistComparison {
     public static boolean isEqualPermissive(AudioPlaylist pl0, AudioPlaylist pl1) {
         if (!isEqual_exclude_UUID_Tracks(pl0, pl1))
             return false;
-        List<AudioData> unique = new ArrayList<>();
+        List<PlayerData> unique = new ArrayList<>();
         List<Integer> occurences = new ArrayList<>();
-        for (AudioData track : pl0.getData()) {
+        for (PlayerData track : pl0.getData()) {
             int index = unique.indexOf(track);
             if (index != -1) {
                 if (occurences.size() <= index)
@@ -36,9 +36,9 @@ public class AudioPlaylistComparison {
                 occurences.add(1);
             }
         }
-        List<AudioData> uniquePl = new ArrayList<>();
+        List<PlayerData> uniquePl = new ArrayList<>();
         List<Integer> occurencesPl = new ArrayList<>();
-        for (AudioData track : pl1.getData()) {
+        for (PlayerData track : pl1.getData()) {
             int index = uniquePl.indexOf(track);
             if (index != -1) {
                 if (occurencesPl.size() <= index)
@@ -54,10 +54,10 @@ public class AudioPlaylistComparison {
         if (unique.size() != uniquePl.size())
             return false;
         boolean matchFlag = true;
-        for (AudioData uni : unique) {
-            AudioData uniPlf = null;
+        for (PlayerData uni : unique) {
+            PlayerData uniPlf = null;
             boolean uniFound = false;
-            for (AudioData uniPl : uniquePl) {
+            for (PlayerData uniPl : uniquePl) {
                 if (AudioDataComparsion.isEqual_exclude_UUID(uniPl, uni)) {
                     uniPlf = uniPl;
                     uniFound = true;

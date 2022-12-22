@@ -1,4 +1,4 @@
-package com.phaseshifter.canora.data.media.audio.source;
+package com.phaseshifter.canora.data.media.player.source;
 
 import android.content.Context;
 import android.net.Uri;
@@ -10,7 +10,6 @@ import com.google.android.exoplayer2.upstream.ContentDataSource;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.phaseshifter.canora.utils.RunnableArg;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,12 +24,12 @@ import java.util.Objects;
  * Therefore there are 2 options: Simply ignore the uri inconsistency and use uris to persistenly identify data,
  * or save the whole audio data inside the playlists which would of course duplicate the data.
  */
-public class AudioDataSourceUri implements AudioDataSource, Serializable {
+public class PlayerDataSourceUri implements PlayerDataSource, Serializable {
     private static final long serialVersionUID = 1;
 
     private String uriStr;
 
-    public AudioDataSourceUri(Uri uri) {
+    public PlayerDataSourceUri(Uri uri) {
         this.uriStr = uri.toString();
     }
 
@@ -56,7 +55,7 @@ public class AudioDataSourceUri implements AudioDataSource, Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        AudioDataSourceUri that = (AudioDataSourceUri) o;
+        PlayerDataSourceUri that = (PlayerDataSourceUri) o;
         return Objects.equals(uriStr, that.uriStr);
     }
 

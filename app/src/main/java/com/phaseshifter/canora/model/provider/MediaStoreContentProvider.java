@@ -3,21 +3,18 @@ package com.phaseshifter.canora.model.provider;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.Cursor;
-import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.util.Log;
 
 import androidx.core.util.Pair;
 
-import com.phaseshifter.canora.data.media.audio.AudioData;
-import com.phaseshifter.canora.data.media.audio.metadata.AudioMetadataMemory;
-import com.phaseshifter.canora.data.media.audio.source.AudioDataSourceUri;
+import com.phaseshifter.canora.data.media.player.PlayerData;
+import com.phaseshifter.canora.data.media.player.metadata.PlayerMetadataMemory;
+import com.phaseshifter.canora.data.media.player.source.PlayerDataSourceUri;
 import com.phaseshifter.canora.data.media.image.ImageData;
 import com.phaseshifter.canora.data.media.image.metadata.ImageMetadataMemory;
 import com.phaseshifter.canora.data.media.image.source.AlbumCoverDataSource;
-import com.phaseshifter.canora.data.media.image.source.ImageDataSourceByteArray;
-import com.phaseshifter.canora.data.media.image.source.ImageDataSourceUri;
 import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
 import com.phaseshifter.canora.data.media.playlist.metadata.PlaylistMetadata;
 import com.phaseshifter.canora.data.media.playlist.metadata.PlaylistMetadataMemory;
@@ -41,9 +38,9 @@ public class MediaStoreContentProvider implements IContentProvider {
     //MediaStore.Audio.Media.DURATION suddenly "Added in API 29" but it works perfectly fine on API 21.
     @SuppressLint("InlinedApi")
     @Override
-    public List<AudioData> getTracks() {
+    public List<PlayerData> getTracks() {
         Log.v(LOG_TAG, "Get Tracks");
-        List<AudioData> ret = new ArrayList<>();
+        List<PlayerData> ret = new ArrayList<>();
         String[] mediaProjection = {
                 MediaStore.Audio.Media._ID,
                 MediaStore.Audio.Media.ARTIST,
@@ -83,7 +80,7 @@ public class MediaStoreContentProvider implements IContentProvider {
                     String durationStr = mediaCursor.getString(indexDuration);
                     long duration = durationStr == null ? 0 : Long.parseLong(durationStr);
 
-                    AudioMetadataMemory metadata = new AudioMetadataMemory(
+                    PlayerMetadataMemory metadata = new PlayerMetadataMemory(
                             genUUID,
                             mediaCursor.getString(indexTitle),
                             mediaCursor.getString(indexArtist),
@@ -92,8 +89,8 @@ public class MediaStoreContentProvider implements IContentProvider {
                             duration,
                             image
                     );
-                    AudioDataSourceUri source = new AudioDataSourceUri(trackUri);
-                    ret.add(new AudioData(metadata, source));
+                    PlayerDataSourceUri source = new PlayerDataSourceUri(trackUri);
+                    ret.add(new PlayerData(metadata, source));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -106,19 +103,19 @@ public class MediaStoreContentProvider implements IContentProvider {
     }
 
     @Override
-    public List<AudioPlaylist> getAlbums(List<AudioData> cache) {
+    public List<AudioPlaylist> getAlbums(List<PlayerData> cache) {
         Log.v(LOG_TAG, "Get Albums");
         if (cache == null)
             throw new IllegalArgumentException();
-        HashMap<String, List<AudioData>> albums = new HashMap<>();
-        for (AudioData track : cache) {
+        HashMap<String, List<PlayerData>> albums = new HashMap<>();
+        for (PlayerData track : cache) {
             String title = track.getMetadata().getAlbum();
             if (title != null && title.length() > 0) {
-                List<AudioData> albumTracks = albums.get(title);
+                List<PlayerData> albumTracks = albums.get(title);
                 if (albumTracks != null) {
                     albumTracks.add(track);
                 } else {
-                    List<AudioData> tracks = new ArrayList<>();
+                    List<PlayerData> tracks = new ArrayList<>();
                     tracks.add(track);
                     albums.put(title, tracks);
                 }
@@ -128,19 +125,19 @@ public class MediaStoreContentProvider implements IContentProvider {
     }
 
     @Override
-    public List<AudioPlaylist> getArtists(List<AudioData> cache) {
+    public List<AudioPlaylist> getArtists(List<PlayerData> cache) {
         Log.v(LOG_TAG, "Get Artists");
         if (cache == null)
             throw new IllegalArgumentException();
-        HashMap<String, List<AudioData>> artists = new HashMap<>();
-        for (AudioData track : cache) {
+        HashMap<String, List<PlayerData>> artists = new HashMap<>();
+        for (PlayerData track : cache) {
             String title = track.getMetadata().getArtist();
             if (title != null && title.length() > 0) {
-                List<AudioData> artistTracks = artists.get(title);
+                List<PlayerData> artistTracks = artists.get(title);
                 if (artistTracks != null) {
                     artistTracks.add(track);
                 } else {
-                    List<AudioData> tracks = new ArrayList<>();
+                    List<PlayerData> tracks = new ArrayList<>();
                     tracks.add(track);
                     artists.put(title, tracks);
                 }
@@ -182,7 +179,7 @@ public class MediaStoreContentProvider implements IContentProvider {
         return ret;
     }
 
-    private List<AudioData> getTracksOfGenreID(Long genreID) {
+    private List<PlayerData> getTracksOfGenreID(Long genreID) {
         if (genreID == null)
             return null;
 
@@ -209,7 +206,7 @@ public class MediaStoreContentProvider implements IContentProvider {
         final int indexDuration = mediaCursor.getColumnIndex(MediaStore.Audio.Genres.Members.DURATION);
 
         List<UUID> usedUUIDS = new ArrayList<>();
-        List<AudioData> ret = new ArrayList<>();
+        List<PlayerData> ret = new ArrayList<>();
 
         while (mediaCursor.moveToNext()) {
             try {
@@ -224,7 +221,7 @@ public class MediaStoreContentProvider implements IContentProvider {
 
                 ImageData image = getTrackArtwork(trackUri);
 
-                AudioMetadataMemory metadata = new AudioMetadataMemory(
+                PlayerMetadataMemory metadata = new PlayerMetadataMemory(
                         genUUID,
                         mediaCursor.getString(indexTitle),
                         mediaCursor.getString(indexArtist),
@@ -232,8 +229,8 @@ public class MediaStoreContentProvider implements IContentProvider {
                         null,
                         Long.parseLong(mediaCursor.getString(indexDuration)),
                         image);
-                AudioDataSourceUri source = new AudioDataSourceUri(trackUri);
-                ret.add(new AudioData(metadata, source));
+                PlayerDataSourceUri source = new PlayerDataSourceUri(trackUri);
+                ret.add(new PlayerData(metadata, source));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -242,12 +239,12 @@ public class MediaStoreContentProvider implements IContentProvider {
         return ret;
     }
 
-    private List<AudioPlaylist> getPlaylists(HashMap<String, List<AudioData>> data) {
+    private List<AudioPlaylist> getPlaylists(HashMap<String, List<PlayerData>> data) {
         List<UUID> usedUUIDS = new ArrayList<>();
         List<AudioPlaylist> ret = new ArrayList<>();
-        for (Map.Entry<String, List<AudioData>> entry : data.entrySet()) {
+        for (Map.Entry<String, List<PlayerData>> entry : data.entrySet()) {
             String playlistTitle = entry.getKey();
-            List<AudioData> playlistTracks = entry.getValue();
+            List<PlayerData> playlistTracks = entry.getValue();
             if (playlistTracks != null) {
                 UUID playlistID = UUID.randomUUID();
                 if (usedUUIDS.contains(playlistID))

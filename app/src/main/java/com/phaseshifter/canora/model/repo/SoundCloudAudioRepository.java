@@ -2,8 +2,8 @@ package com.phaseshifter.canora.model.repo;
 
 import android.net.Uri;
 
-import com.phaseshifter.canora.data.media.audio.AudioData;
-import com.phaseshifter.canora.data.media.audio.metadata.AudioMetadataMemory;
+import com.phaseshifter.canora.data.media.player.PlayerData;
+import com.phaseshifter.canora.data.media.player.metadata.PlayerMetadataMemory;
 import com.phaseshifter.canora.plugin.soundcloud.AudioDataSourceSC;
 import com.phaseshifter.canora.data.media.image.ImageData;
 import com.phaseshifter.canora.data.media.image.metadata.ImageMetadataMemory;
@@ -32,7 +32,7 @@ import java.util.UUID;
 public class SoundCloudAudioRepository {
     private SCV2Client client = null;
 
-    private final List<AudioData> searchResults = new ArrayList<>();
+    private final List<PlayerData> searchResults = new ArrayList<>();
 
     private final HashMap<SCGenre, Integer> chartPages = new HashMap<>();
 
@@ -189,7 +189,7 @@ public class SoundCloudAudioRepository {
         throw new RuntimeException("Invalid uuid " + uuid);
     }
 
-    public List<AudioData> getSearchResults() {
+    public List<PlayerData> getSearchResults() {
         return searchResults;
     }
 
@@ -221,9 +221,9 @@ public class SoundCloudAudioRepository {
         return client;
     }
 
-    private AudioData getAudioData(SCV2Track track) {
+    private PlayerData getAudioData(SCV2Track track) {
         if (track.getPublisher_metadata() == null) {
-            return new AudioData(new AudioMetadataMemory(UUID.randomUUID(),
+            return new PlayerData(new PlayerMetadataMemory(UUID.randomUUID(),
                     track.getTitle(),
                     track.getUser().getId(),
                     "<unknown>",
@@ -232,7 +232,7 @@ public class SoundCloudAudioRepository {
                     new ImageData(new ImageMetadataMemory(UUID.randomUUID()), new ImageDataSourceUri(Uri.parse(track.getArtwork_url())))),
                     new AudioDataSourceSC(track.getCodings()));
         } else {
-            return new AudioData(new AudioMetadataMemory(UUID.randomUUID(),
+            return new PlayerData(new PlayerMetadataMemory(UUID.randomUUID(),
                     track.getTitle(),
                     track.getPublisher_metadata().getArtist(),
                     track.getPublisher_metadata().getAlbum_title(),
@@ -243,16 +243,16 @@ public class SoundCloudAudioRepository {
         }
     }
 
-    private List<AudioData> getTracks(SCV2Charts c) {
-        ArrayList<AudioData> t = new ArrayList<>();
+    private List<PlayerData> getTracks(SCV2Charts c) {
+        ArrayList<PlayerData> t = new ArrayList<>();
         for (SCV2ChartTrack track : c.getTracks()) {
             t.add(getAudioData(track.getTrack()));
         }
         return t;
     }
 
-    private List<AudioData> getTracks(List<SCV2Track> tracks) {
-        List<AudioData> ret = new ArrayList<>();
+    private List<PlayerData> getTracks(List<SCV2Track> tracks) {
+        List<PlayerData> ret = new ArrayList<>();
         for (SCV2Track track : tracks) {
             ret.add(getAudioData(track));
         }

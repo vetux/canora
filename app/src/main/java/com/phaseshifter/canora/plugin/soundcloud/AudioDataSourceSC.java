@@ -9,7 +9,7 @@ import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.source.hls.HlsMediaSource;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
-import com.phaseshifter.canora.data.media.audio.source.AudioDataSource;
+import com.phaseshifter.canora.data.media.player.source.PlayerDataSource;
 import com.phaseshifter.canora.plugin.soundcloud.api.exceptions.SCConnectionException;
 import com.phaseshifter.canora.plugin.soundcloud.api.exceptions.SCParsingException;
 import com.phaseshifter.canora.plugin.soundcloud.api_v2.client.SCV2Client;
@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class AudioDataSourceSC implements AudioDataSource, Serializable {
+public class AudioDataSourceSC implements PlayerDataSource, Serializable {
     private static final long serialVersionUID = 1;
 
     private static SCV2Client client;

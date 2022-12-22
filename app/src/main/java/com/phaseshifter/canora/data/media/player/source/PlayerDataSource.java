@@ -1,4 +1,4 @@
-package com.phaseshifter.canora.data.media.audio.source;
+package com.phaseshifter.canora.data.media.player.source;
 
 import android.content.Context;
 
@@ -7,7 +7,7 @@ import com.phaseshifter.canora.utils.RunnableArg;
 
 import java.util.List;
 
-public interface AudioDataSource {
+public interface PlayerDataSource {
     /**
      * Prepare the data source for playback.
      * <p>

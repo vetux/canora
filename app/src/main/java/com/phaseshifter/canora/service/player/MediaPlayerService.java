@@ -1,6 +1,6 @@
 package com.phaseshifter.canora.service.player;
 
-import com.phaseshifter.canora.data.media.audio.AudioData;
+import com.phaseshifter.canora.data.media.player.PlayerData;
 import com.phaseshifter.canora.service.player.state.PlayerState;
 import com.phaseshifter.canora.utils.Observable;
 
@@ -14,7 +14,7 @@ public interface MediaPlayerService {
      */
     void shutdown();
 
-    void setContent(List<AudioData> pl);
+    void setContent(List<PlayerData> pl);
 
     void play(UUID id);
 

@@ -6,10 +6,10 @@ import android.util.Log;
 
 import com.phaseshifter.canora.R;
 import com.phaseshifter.canora.application.MainApplication;
-import com.phaseshifter.canora.data.media.audio.AudioData;
-import com.phaseshifter.canora.data.media.audio.metadata.AudioMetadataMemory;
-import com.phaseshifter.canora.data.media.audio.source.AudioDataSource;
-import com.phaseshifter.canora.data.media.audio.source.AudioDataSourceUri;
+import com.phaseshifter.canora.data.media.player.PlayerData;
+import com.phaseshifter.canora.data.media.player.metadata.PlayerMetadataMemory;
+import com.phaseshifter.canora.data.media.player.source.PlayerDataSource;
+import com.phaseshifter.canora.data.media.player.source.PlayerDataSourceUri;
 import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
 import com.phaseshifter.canora.data.media.playlist.metadata.PlaylistMetadataMemory;
 import com.phaseshifter.canora.data.settings.BooleanSetting;
@@ -81,9 +81,9 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
 
     private final AudioMetadataEditor metadataEditor;
 
-    private final Observer<List<AudioData>> ytObserver = new Observer<List<AudioData>>() {
+    private final Observer<List<PlayerData>> ytObserver = new Observer<List<PlayerData>>() {
         @Override
-        public void update(Observable<List<AudioData>> observable, List<AudioData> value) {
+        public void update(Observable<List<PlayerData>> observable, List<PlayerData> value) {
             if (uiContentSelector.getPage() == MainPage.YOUTUBE_SEARCH_VIDEOS) {
                 isScrollLoading = false;
                 mainThread.execute(() -> {
@@ -103,7 +103,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
 
     private HashSet<UUID> selection = new HashSet<>();
 
-    private List<AudioData> sortedTracks = new ArrayList<>();
+    private List<PlayerData> sortedTracks = new ArrayList<>();
     private List<AudioPlaylist> sortedPlaylists = new ArrayList<>();
 
     private boolean downloadingAudio = false;
@@ -177,7 +177,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
 
     private void updateVisibleContent() {
         // TODO: Preformat content
-        List<AudioData> formattedTracks = new ArrayList<>();
+        List<PlayerData> formattedTracks = new ArrayList<>();
         List<AudioPlaylist> formattedPlaylists = new ArrayList<>();
         if (uiContentSelector.isPlaylistView()) {
             switch (uiContentSelector.getPage()) {
@@ -287,7 +287,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
     private void updateHighlightedIndex() {
         PlayerState state = mediaService.getState().get();
         if (state != null) {
-            AudioData track = state.getCurrentTrack();
+            PlayerData track = state.getCurrentTrack();
             int index = contentViewModel.visibleTracks.get().indexOf(track);
             if (track != null
                     && uiContentSelector.equals(playingContentSelector)
@@ -752,7 +752,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
 
     @Override
     public void onTrackContentClick(int index) {
-        List<AudioData> processedData = contentViewModel.visibleTracks.get();
+        List<PlayerData> processedData = contentViewModel.visibleTracks.get();
 
         if (processedData == null || index > processedData.size() - 1)
             throw new AssertionError();
@@ -886,16 +886,16 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
     }
 
     @Override
-    public void onEditorResult(AudioData data, boolean error, boolean canceled, boolean delete) {
+    public void onEditorResult(PlayerData data, boolean error, boolean canceled, boolean delete) {
         Log.v(LOG_TAG, "onEditorResult " + data + " " + error + " " + canceled + " " + delete);
         if (data == null)
             return;
         if (!error && !canceled) {
             if (!delete) {
-                if (data.getDataSource() instanceof AudioDataSourceUri) {
+                if (data.getDataSource() instanceof PlayerDataSourceUri) {
                     Log.v(LOG_TAG, "Writing Uri ...");
                     try {
-                        metadataEditor.writeMetadata(((AudioDataSourceUri) data.getDataSource()).getUri(), data.getMetadata());
+                        metadataEditor.writeMetadata(((PlayerDataSourceUri) data.getDataSource()).getUri(), data.getMetadata());
                         deviceAudioRepository.refresh();
                         updateVisibleContent();
                     } catch (IOException e) {
@@ -905,7 +905,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                         view.handleSecurityException(se, () -> {
                             Log.v(LOG_TAG, "OnHandledSecurityException: " + se);
                             try {
-                                metadataEditor.writeMetadata(((AudioDataSourceUri) data.getDataSource()).getUri(), data.getMetadata());
+                                metadataEditor.writeMetadata(((PlayerDataSourceUri) data.getDataSource()).getUri(), data.getMetadata());
                                 deviceAudioRepository.refresh();
                                 updateVisibleContent();
                             } catch (IOException e) {
@@ -1093,14 +1093,14 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
     @Override
     public void onAddToPlaylistClick() {
         DownloadInfo info = ytdlViewModel.infoForUrl.get();
-        AudioMetadataMemory trackMetadata = new AudioMetadataMemory();
+        PlayerMetadataMemory trackMetadata = new PlayerMetadataMemory();
         trackMetadata.setId(UUID.randomUUID());
         trackMetadata.setTitle(info.title);
         trackMetadata.setArtist(info.user);
         trackMetadata.setLength(info.duration * 1000L);
-        AudioDataSource trackSource = new AudioDataSourceYtdl(ytdlViewModel.url.get());
-        AudioData track = new AudioData(trackMetadata, trackSource);
-        List<AudioData> tracks = new ArrayList<>();
+        PlayerDataSource trackSource = new AudioDataSourceYtdl(ytdlViewModel.url.get());
+        PlayerData track = new PlayerData(trackMetadata, trackSource);
+        List<PlayerData> tracks = new ArrayList<>();
         tracks.add(track);
         view.showAddSelectionMenu(userPlaylistRepository.getAll(),
                 () -> {
@@ -1181,7 +1181,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
     private HashSet<Integer> getSelectedTrackIndices() {
         HashSet<Integer> indices = new HashSet<>();
         for (UUID id : selection) {
-            List<AudioData> list = contentViewModel.visibleTracks.get();
+            List<PlayerData> list = contentViewModel.visibleTracks.get();
             for (int i = 0; i < list.size(); i++) {
                 if (list.get(i).getMetadata().getId().equals(id)) {
                     indices.add(i);
@@ -1217,7 +1217,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                         selection.add(clickedPlaylist.getMetadata().getId());
                     contentViewModel.contentPlaylistsSelection.set(getSelectedPlaylistIndices());
                 } else {
-                    AudioData clickedTrack = contentViewModel.visibleTracks.get().get(index);
+                    PlayerData clickedTrack = contentViewModel.visibleTracks.get().get(index);
                     if (selection.contains(clickedTrack.getMetadata().getId()))
                         selection.remove(clickedTrack.getMetadata().getId());
                     else
@@ -1231,7 +1231,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                 if (uiContentSelector.isPlaylistView()) {
                     view.startEditor(contentViewModel.visiblePlaylists.get().get(index), theme);
                 } else {
-                    AudioData track = contentViewModel.visibleTracks.get().get(index);
+                    PlayerData track = contentViewModel.visibleTracks.get().get(index);
                     view.startEditor(track, metadataEditor.getMask(track), theme);
                 }
                 break;
@@ -1251,12 +1251,12 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                     AudioPlaylist currentPlaylist = MainSelector.getPlaylistForSelector(uiContentSelector, deviceAudioRepository, userPlaylistRepository);
                     if (currentPlaylist == null)
                         throw new AssertionError();
-                    List<AudioData> tracks = contentViewModel.visibleTracks.get();
-                    List<AudioData> tracksToDelete = new ArrayList<>();
+                    List<PlayerData> tracks = contentViewModel.visibleTracks.get();
+                    List<PlayerData> tracksToDelete = new ArrayList<>();
                     tracksToDelete.add(tracks.get(index));
                     view.showDialog_DeleteTracksFromPlaylist(currentPlaylist, tracksToDelete, () -> {
-                        List<AudioData> cleanTracks = currentPlaylist.getData();
-                        for (AudioData delTrack : tracksToDelete)
+                        List<PlayerData> cleanTracks = currentPlaylist.getData();
+                        for (PlayerData delTrack : tracksToDelete)
                             cleanTracks.remove(delTrack);
                         AudioPlaylist clean = new AudioPlaylist(currentPlaylist.getMetadata(), cleanTracks);
                         userPlaylistRepository.replace(currentPlaylist.getMetadata().getId(), clean);
@@ -1267,7 +1267,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                 }
                 break;
             case DOWNLOAD_AUDIO: {
-                AudioData clickedTrack = contentViewModel.visibleTracks.get().get(index);
+                PlayerData clickedTrack = contentViewModel.visibleTracks.get().get(index);
                 downloadingAudio = true;
                 downloadingVideo = false;
                 ytdlViewModel.url.set(((AudioDataSourceYtdl) clickedTrack.getDataSource()).getUrl());
@@ -1275,7 +1275,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
             }
             break;
             case DOWNLOAD_VIDEO: {
-                AudioData clickedTrack = contentViewModel.visibleTracks.get().get(index);
+                PlayerData clickedTrack = contentViewModel.visibleTracks.get().get(index);
                 downloadingAudio = false;
                 downloadingVideo = true;
                 ytdlViewModel.url.set(((AudioDataSourceYtdl) clickedTrack.getDataSource()).getUrl());
@@ -1318,14 +1318,14 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
             case ADD_SELECTION:
                 view.showAddSelectionMenu(ListSorter.sortAudioPlaylist(userPlaylistRepository.getAll(), sortingOptions),
                         () -> {
-                            List<AudioData> selectedData = new ArrayList<>();
+                            List<PlayerData> selectedData = new ArrayList<>();
                             if (uiContentSelector.isPlaylistView()) {
                                 for (AudioPlaylist playlist : sortedPlaylists) {
                                     if (selection.contains(playlist.getMetadata().getId()))
                                         selectedData.addAll(playlist.getData());
                                 }
                             } else {
-                                for (AudioData track : sortedTracks) {
+                                for (PlayerData track : sortedTracks) {
                                     if (selection.contains(track.getMetadata().getId()))
                                         selectedData.add(track);
                                 }
@@ -1345,14 +1345,14 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                                     });
                         },
                         (targetPlaylist) -> {
-                            List<AudioData> selectedData = new ArrayList<>();
+                            List<PlayerData> selectedData = new ArrayList<>();
                             if (uiContentSelector.isPlaylistView()) {
                                 for (AudioPlaylist playlist : sortedPlaylists) {
                                     if (selection.contains(playlist.getMetadata().getId()))
                                         selectedData.addAll(playlist.getData());
                                 }
                             } else {
-                                for (AudioData track : sortedTracks) {
+                                for (PlayerData track : sortedTracks) {
                                     if (selection.contains(track.getMetadata().getId()))
                                         selectedData.add(track);
                                 }
@@ -1386,7 +1386,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                     }
                     contentViewModel.contentPlaylistsSelection.set(getSelectedPlaylistIndices());
                 } else {
-                    for (AudioData track : sortedTracks) {
+                    for (PlayerData track : sortedTracks) {
                         selection.add(track.getMetadata().getId());
                     }
                     contentViewModel.contentTracksSelection.set(getSelectedTrackIndices());
@@ -1428,16 +1428,16 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                     } else {
                         AudioPlaylist currentPlaylist = getPlaylistForSelector(uiContentSelector, deviceAudioRepository, userPlaylistRepository);
                         if (currentPlaylist != null) {
-                            List<AudioData> tracksToDelete = new ArrayList<>();
-                            for (AudioData track : currentPlaylist.getData()) {
+                            List<PlayerData> tracksToDelete = new ArrayList<>();
+                            for (PlayerData track : currentPlaylist.getData()) {
                                 if (selection.contains(track.getMetadata().getId())) {
                                     tracksToDelete.add(track);
                                 }
                             }
                             appViewModel.isSelecting.set(false);
                             view.showDialog_DeleteTracksFromPlaylist(currentPlaylist, tracksToDelete, () -> {
-                                List<AudioData> cleanTracks = currentPlaylist.getData();
-                                for (AudioData delTrack : tracksToDelete)
+                                List<PlayerData> cleanTracks = currentPlaylist.getData();
+                                for (PlayerData delTrack : tracksToDelete)
                                     cleanTracks.remove(delTrack);
                                 AudioPlaylist clean = new AudioPlaylist(currentPlaylist.getMetadata(), cleanTracks);
                                 userPlaylistRepository.replace(currentPlaylist.getMetadata().getId(), clean);

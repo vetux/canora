@@ -1,4 +1,4 @@
-package com.phaseshifter.canora.data.media.audio.metadata;
+package com.phaseshifter.canora.data.media.player.metadata;
 
 import com.phaseshifter.canora.data.media.image.ImageData;
 
@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.UUID;
 
-public class AudioMetadataMemory implements AudioMetadata, Serializable {
+public class PlayerMetadataMemory implements PlayerMetadata, Serializable {
     private static final long serialVersionUID = 1;
 
     protected UUID id;
@@ -18,7 +18,7 @@ public class AudioMetadataMemory implements AudioMetadata, Serializable {
     protected long length;
     protected ImageData artwork;
 
-    public AudioMetadataMemory(UUID id, String title, String artist, String album, String[] genres, long length, ImageData artwork) {
+    public PlayerMetadataMemory(UUID id, String title, String artist, String album, String[] genres, long length, ImageData artwork) {
         this.id = id;
         this.title = title;
         this.artist = artist;
@@ -28,15 +28,15 @@ public class AudioMetadataMemory implements AudioMetadata, Serializable {
         this.artwork = artwork;
     }
 
-    public AudioMetadataMemory(AudioMetadataMemory copy) {
+    public PlayerMetadataMemory(PlayerMetadataMemory copy) {
         this(copy.id, copy.title, copy.artist, copy.album, copy.genres, copy.length, copy.artwork);
     }
 
-    public AudioMetadataMemory(AudioMetadata copy) {
-        this(copy.getId(), copy.getTitle(), copy.getArtist(), copy.getAlbum(), copy.getGenres(), copy.getLength(), copy.getArtwork());
+    public PlayerMetadataMemory(PlayerMetadata copy) {
+        this(copy.getId(), copy.getTitle(), copy.getArtist(), copy.getAlbum(), copy.getGenres(), copy.getDuration(), copy.getArtwork());
     }
 
-    public AudioMetadataMemory() {
+    public PlayerMetadataMemory() {
         this(null, null, null, null, null, 0, null);
     }
 
@@ -95,7 +95,7 @@ public class AudioMetadataMemory implements AudioMetadata, Serializable {
     }
 
     @Override
-    public long getLength() {
+    public long getDuration() {
         return length;
     }
 
@@ -107,7 +107,7 @@ public class AudioMetadataMemory implements AudioMetadata, Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        AudioMetadataMemory that = (AudioMetadataMemory) o;
+        PlayerMetadataMemory that = (PlayerMetadataMemory) o;
         return length == that.length &&
                 Objects.equals(id, that.id) &&
                 Objects.equals(title, that.title) &&

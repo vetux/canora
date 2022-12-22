@@ -1,10 +1,9 @@
-package com.phaseshifter.canora.data.media.audio.source;
+package com.phaseshifter.canora.data.media.player.source;
 
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.media.MediaDataSource;
 import android.net.Uri;
-import android.os.Build;
 
 import androidx.annotation.Nullable;
 
@@ -22,12 +21,12 @@ import java.util.List;
 import java.util.Objects;
 
 @TargetApi(23)
-public class AudioDataSourceMediaDataSource implements AudioDataSource, Serializable {
+public class PlayerDataSourceMediaDataSource implements PlayerDataSource, Serializable {
     private static final long serialVersionUID = 1;
 
     private final MediaDataSource mediaDataSource;
 
-    public AudioDataSourceMediaDataSource(MediaDataSource mediaDataSource) {
+    public PlayerDataSourceMediaDataSource(MediaDataSource mediaDataSource) {
         this.mediaDataSource = mediaDataSource;
     }
 
@@ -78,7 +77,7 @@ public class AudioDataSourceMediaDataSource implements AudioDataSource, Serializ
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        AudioDataSourceMediaDataSource that = (AudioDataSourceMediaDataSource) o;
+        PlayerDataSourceMediaDataSource that = (PlayerDataSourceMediaDataSource) o;
         return Objects.equals(mediaDataSource, that.mediaDataSource);
     }
 

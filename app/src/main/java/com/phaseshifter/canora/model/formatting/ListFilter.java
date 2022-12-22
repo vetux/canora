@@ -2,7 +2,7 @@ package com.phaseshifter.canora.model.formatting;
 
 import android.util.Log;
 
-import com.phaseshifter.canora.data.media.audio.AudioData;
+import com.phaseshifter.canora.data.media.player.PlayerData;
 import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
 import com.phaseshifter.canora.ui.data.formatting.FilterOptions;
 
@@ -14,37 +14,37 @@ import static com.phaseshifter.canora.ui.data.formatting.FilterOptions.*;
 public class ListFilter {
     private static final String LOG_TAG = "ListFilter";
 
-    public static List<AudioData> filterAudioData(List<AudioData> content, FilterOptions def) {
+    public static List<PlayerData> filterAudioData(List<PlayerData> content, FilterOptions def) {
         if (content == null)
             return null;
         Log.v(LOG_TAG, "filterAudioData");
         if (def.filterFor.length() > 0) {
             Log.v(LOG_TAG, "CONTENT SIZE BEFORE FILTER: " + content.size());
-            List<AudioData> ret = new ArrayList<>();
+            List<PlayerData> ret = new ArrayList<>();
             switch (def.filterBy) {
                 case FILTER_TITLE:
-                    for (AudioData f : content) {
+                    for (PlayerData f : content) {
                         if (f.getMetadata().getTitle() != null && f.getMetadata().getTitle().toLowerCase().contains(def.filterFor.toLowerCase())) {
                             ret.add(f);
                         }
                     }
                     break;
                 case FILTER_ALBUM:
-                    for (AudioData f : content) {
+                    for (PlayerData f : content) {
                         if (f.getMetadata().getAlbum() != null && f.getMetadata().getAlbum().toLowerCase().contains(def.filterFor.toLowerCase())) {
                             ret.add(f);
                         }
                     }
                     break;
                 case FILTER_ARTIST:
-                    for (AudioData f : content) {
+                    for (PlayerData f : content) {
                         if (f.getMetadata().getArtist() != null && f.getMetadata().getArtist().toLowerCase().contains(def.filterFor.toLowerCase())) {
                             ret.add(f);
                         }
                     }
                     break;
                 case FILTER_GENRE:
-                    for (AudioData f : content) {
+                    for (PlayerData f : content) {
                         String genreString = concatStringArray(f.getMetadata().getGenres());
                         if (genreString.toLowerCase().contains(def.filterFor.toLowerCase())) {
                             ret.add(f);
@@ -52,7 +52,7 @@ public class ListFilter {
                     }
                     break;
                 case FILTER_TITLE_ARTIST:
-                    for (AudioData f : content) {
+                    for (PlayerData f : content) {
                         if (f.getMetadata().getTitle() != null
                                 && (f.getMetadata().getTitle().toLowerCase().contains(def.filterFor.toLowerCase())
                                 || f.getMetadata().getArtist().toLowerCase().contains(def.filterFor.toLowerCase()))) {
@@ -61,7 +61,7 @@ public class ListFilter {
                     }
                     break;
                 case FILTER_ANY:
-                    for (AudioData f : content) {
+                    for (PlayerData f : content) {
                         String genreString = concatStringArray(f.getMetadata().getGenres());
                         if ((f.getMetadata().getTitle() != null && f.getMetadata().getTitle().toLowerCase().contains(def.filterFor.toLowerCase())) ||
                                 (f.getMetadata().getAlbum() != null && f.getMetadata().getAlbum().toLowerCase().contains(def.filterFor.toLowerCase())) ||

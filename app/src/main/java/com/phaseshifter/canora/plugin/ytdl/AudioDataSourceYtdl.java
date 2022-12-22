@@ -10,7 +10,7 @@ import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.phaseshifter.canora.application.MainApplication;
-import com.phaseshifter.canora.data.media.audio.source.AudioDataSource;
+import com.phaseshifter.canora.data.media.player.source.PlayerDataSource;
 import com.phaseshifter.canora.utils.RunnableArg;
 import com.yausername.youtubedl_android.YoutubeDL;
 import com.yausername.youtubedl_android.YoutubeDLRequest;
@@ -18,17 +18,12 @@ import com.yausername.youtubedl_android.mapper.VideoInfo;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
-public class AudioDataSourceYtdl implements AudioDataSource, Serializable {
+public class AudioDataSourceYtdl implements PlayerDataSource, Serializable {
     private static final long serialVersionUID = 1;
 
     private final String url;

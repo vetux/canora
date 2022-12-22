@@ -2,8 +2,8 @@ package com.phaseshifter.canora.model.editor;
 
 import android.app.RecoverableSecurityException;
 import android.net.Uri;
-import com.phaseshifter.canora.data.media.audio.AudioData;
-import com.phaseshifter.canora.data.media.audio.metadata.AudioMetadata;
+import com.phaseshifter.canora.data.media.player.PlayerData;
+import com.phaseshifter.canora.data.media.player.metadata.PlayerMetadata;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,7 +30,7 @@ public interface AudioMetadataEditor {
      * @throws IOException                  If the function is unable to write the file.
      * @throws RecoverableSecurityException Only thrown in android Q, indicates an recoverable permissions issue as described above.
      */
-    void writeMetadata(Uri target, AudioMetadata metadata) throws IOException, RecoverableSecurityException;
+    void writeMetadata(Uri target, PlayerMetadata metadata) throws IOException, RecoverableSecurityException;
 
     /**
      * Write the supplied metadata directly to the file.
@@ -39,7 +39,7 @@ public interface AudioMetadataEditor {
      * @param metadata The updated metadata to be written.
      * @throws IOException If the function is unable to write the file.
      */
-    void writeMetadata(File target, AudioMetadata metadata) throws IOException;
+    void writeMetadata(File target, PlayerMetadata metadata) throws IOException;
 
     /**
      * Generates a mask which describes which fields are supported for editing.
@@ -47,5 +47,5 @@ public interface AudioMetadataEditor {
      * @param data The AudioData object to create a mask of
      * @return The generated mask for the supplied AudioData object. Non null
      */
-    AudioMetadataMask getMask(AudioData data);
+    AudioMetadataMask getMask(PlayerData data);
 }

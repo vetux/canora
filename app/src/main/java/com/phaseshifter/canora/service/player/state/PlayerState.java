@@ -1,6 +1,6 @@
 package com.phaseshifter.canora.service.player.state;
 
-import com.phaseshifter.canora.data.media.audio.AudioData;
+import com.phaseshifter.canora.data.media.player.PlayerData;
 import com.phaseshifter.canora.service.player.playback.PlaybackController;
 import com.google.android.exoplayer2.ExoPlayer;
 
@@ -8,7 +8,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 public class PlayerState implements Serializable {
-    private AudioData currentTrack;
+    private PlayerData currentTrack;
     private PlaybackState playbackState;
     private boolean playing;
     private boolean repeating;
@@ -17,7 +17,7 @@ public class PlayerState implements Serializable {
     private float volume;
     private int equalizerPreset;
 
-    public PlayerState(AudioData currentTrack, PlaybackState playbackState, boolean isPlaying, boolean isRepeating, boolean isShuffling, long playerPosition, float volume, int equalizerPreset) {
+    public PlayerState(PlayerData currentTrack, PlaybackState playbackState, boolean isPlaying, boolean isRepeating, boolean isShuffling, long playerPosition, float volume, int equalizerPreset) {
         this.currentTrack = currentTrack;
         this.playbackState = playbackState;
         this.playing = isPlaying;
@@ -49,11 +49,11 @@ public class PlayerState implements Serializable {
         this(null, null, false, false, false, 0, 0, 0);
     }
 
-    public AudioData getCurrentTrack() {
+    public PlayerData getCurrentTrack() {
         return currentTrack;
     }
 
-    public void setCurrentTrack(AudioData currentTrack) {
+    public void setCurrentTrack(PlayerData currentTrack) {
         this.currentTrack = currentTrack;
     }
 

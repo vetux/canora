@@ -1,7 +1,7 @@
 package com.phaseshifter.canora.model.formatting;
 
 import android.util.Log;
-import com.phaseshifter.canora.data.media.audio.AudioData;
+import com.phaseshifter.canora.data.media.player.PlayerData;
 import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
 import com.phaseshifter.canora.ui.data.formatting.SortingOptions;
 
@@ -15,11 +15,11 @@ import static com.phaseshifter.canora.ui.data.formatting.SortingOptions.*;
 public class ListSorter {
     private static final String LOG_TAG = "ListSorter";
 
-    public static List<AudioData> sortAudioData(List<AudioData> input, SortingOptions def) {
+    public static List<PlayerData> sortAudioData(List<PlayerData> input, SortingOptions def) {
         if (input == null)
             return null;
         Log.v(LOG_TAG, "sortAudioData");
-        List<AudioData> ret = new ArrayList<>(input);
+        List<PlayerData> ret = new ArrayList<>(input);
         switch (def.sorttech) {
             case SORT_TECH_ALPHA:
                 switch (def.sortby) {
@@ -138,36 +138,36 @@ public class ListSorter {
         }
     }
 
-    private static class TitleComparatorABC implements Comparator<AudioData> {
+    private static class TitleComparatorABC implements Comparator<PlayerData> {
         @Override
-        public int compare(AudioData o1, AudioData o2) {
+        public int compare(PlayerData o1, PlayerData o2) {
             String v1 = o1.getMetadata().getTitle() == null ? "" : o1.getMetadata().getTitle();
             String v2 = o2.getMetadata().getTitle() == null ? "" : o2.getMetadata().getTitle();
             return v1.toLowerCase().compareTo(v2.toLowerCase());
         }
     }
 
-    private static class TitleComparator012 implements Comparator<AudioData> {
+    private static class TitleComparator012 implements Comparator<PlayerData> {
         @Override
-        public int compare(AudioData o1, AudioData o2) {
+        public int compare(PlayerData o1, PlayerData o2) {
             String v1 = o1.getMetadata().getTitle() == null ? "" : o1.getMetadata().getTitle();
             String v2 = o2.getMetadata().getTitle() == null ? "" : o2.getMetadata().getTitle();
             return extractIntegerFromString(v1) - extractIntegerFromString(v2);
         }
     }
 
-    private static class ArtistComparatorABC implements Comparator<AudioData> {
+    private static class ArtistComparatorABC implements Comparator<PlayerData> {
         @Override
-        public int compare(AudioData o1, AudioData o2) {
+        public int compare(PlayerData o1, PlayerData o2) {
             String v1 = o1.getMetadata().getTitle() == null ? "" : o1.getMetadata().getTitle();
             String v2 = o2.getMetadata().getTitle() == null ? "" : o2.getMetadata().getTitle();
             return v1.toLowerCase().compareTo(v2.toLowerCase());
         }
     }
 
-    private static class ArtistComparator012 implements Comparator<AudioData> {
+    private static class ArtistComparator012 implements Comparator<PlayerData> {
         @Override
-        public int compare(AudioData o1, AudioData o2) {
+        public int compare(PlayerData o1, PlayerData o2) {
             String v1 = o1.getMetadata().getTitle() == null ? "" : o1.getMetadata().getTitle();
             String v2 = o2.getMetadata().getTitle() == null ? "" : o2.getMetadata().getTitle();
             return extractIntegerFromString(v1) - extractIntegerFromString(v2);

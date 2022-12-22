@@ -2,7 +2,7 @@ package com.phaseshifter.canora.ui.contracts;
 
 import android.net.Uri;
 
-import com.phaseshifter.canora.data.media.audio.AudioData;
+import com.phaseshifter.canora.data.media.player.PlayerData;
 import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
 import com.phaseshifter.canora.data.theme.AppTheme;
 import com.phaseshifter.canora.model.editor.AudioMetadataMask;
@@ -55,7 +55,7 @@ public interface MainContract {
         void showDialog_SortOptions(SortingOptions curDef,
                                     RunnableArg<SortingOptions> onAccept);
 
-        void showDialog_CreatePlaylist(List<AudioData> tracks,
+        void showDialog_CreatePlaylist(List<PlayerData> tracks,
                                        RunnableArg<String> onCreate,
                                        Runnable onCancel);
 
@@ -64,11 +64,11 @@ public interface MainContract {
                                         Runnable onCancel);
 
         void showDialog_DeleteTracksFromPlaylist(AudioPlaylist playlist,
-                                                 List<AudioData> tracks,
+                                                 List<PlayerData> tracks,
                                                  Runnable onAccept,
                                                  Runnable onCancel);
 
-        void startEditor(AudioData data, AudioMetadataMask mask, AppTheme theme);
+        void startEditor(PlayerData data, AudioMetadataMask mask, AppTheme theme);
 
         void startEditor(AudioPlaylist data, AppTheme theme);
 
@@ -156,7 +156,7 @@ public interface MainContract {
 
         void onMediaStoreDataChange();
 
-        void onEditorResult(AudioData data, boolean error, boolean canceled, boolean deleted);
+        void onEditorResult(PlayerData data, boolean error, boolean canceled, boolean deleted);
 
         void onEditorResult(AudioPlaylist data, boolean error, boolean canceled, boolean deleted);
 

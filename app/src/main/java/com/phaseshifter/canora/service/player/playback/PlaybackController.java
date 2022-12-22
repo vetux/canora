@@ -1,6 +1,6 @@
 package com.phaseshifter.canora.service.player.playback;
 
-import com.phaseshifter.canora.data.media.audio.AudioData;
+import com.phaseshifter.canora.data.media.player.PlayerData;
 
 import java.util.List;
 import java.util.UUID;
@@ -13,19 +13,19 @@ public interface PlaybackController {
      * @param c The updated data to act upon
      * @return True if the currently playing track was found in the new data set.
      */
-    boolean setContent(List<AudioData> c);
+    boolean setContent(List<PlayerData> c);
 
-    List<AudioData> getContent();
+    List<PlayerData> getContent();
 
-    AudioData setNext(UUID id);
+    PlayerData setNext(UUID id);
 
-    AudioData getNext();
+    PlayerData getNext();
 
-    AudioData peekNext();
+    PlayerData peekNext();
 
-    AudioData getPrev();
+    PlayerData getPrev();
 
-    AudioData getCurrentTrack();
+    PlayerData getCurrentTrack();
 
     void setRepeat(Boolean repeat);
 

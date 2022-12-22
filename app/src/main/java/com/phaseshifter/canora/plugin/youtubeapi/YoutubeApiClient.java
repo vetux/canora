@@ -2,8 +2,8 @@ package com.phaseshifter.canora.plugin.youtubeapi;
 
 import android.net.Uri;
 
-import com.phaseshifter.canora.data.media.audio.AudioData;
-import com.phaseshifter.canora.data.media.audio.metadata.AudioMetadataMemory;
+import com.phaseshifter.canora.data.media.player.PlayerData;
+import com.phaseshifter.canora.data.media.player.metadata.PlayerMetadataMemory;
 import com.phaseshifter.canora.data.media.image.ImageData;
 import com.phaseshifter.canora.data.media.image.metadata.ImageMetadataMemory;
 import com.phaseshifter.canora.data.media.image.source.ImageDataSourceUri;
@@ -46,13 +46,13 @@ public class YoutubeApiClient {
         return createSearchResponse(client.doRequest(createSearchRequest(query)));
     }
 
-    public AudioData getAudioData(String key, YoutubeVideo video) throws IOException, JSONException {
+    public PlayerData getAudioData(String key, YoutubeVideo video) throws IOException, JSONException {
         List<YoutubeVideo> videos = new ArrayList<>();
         videos.add(video);
         return createVideoResponse(client.doRequest(createVideoRequest(key, videos))).get(0);
     }
 
-    public List<AudioData> getAudioData(String key, List<YoutubeVideo> videos) throws IOException, JSONException {
+    public List<PlayerData> getAudioData(String key, List<YoutubeVideo> videos) throws IOException, JSONException {
         return createVideoResponse(client.doRequest(createVideoRequest(key, videos)));
     }
 
@@ -80,25 +80,25 @@ public class YoutubeApiClient {
         return new HttpRequest(HttpMethod.GET, ENDPOINT_YOUTUBE_API_VIDEOS, parameters);
     }
 
-    private List<AudioData> createVideoResponse(HttpResponse response) throws IOException, JSONException {
+    private List<PlayerData> createVideoResponse(HttpResponse response) throws IOException, JSONException {
         JSONObject json = new JSONObject(response.getBodyString());
         JSONArray items = json.getJSONArray("items");
 
-        List<AudioData> ret = new ArrayList<>();
+        List<PlayerData> ret = new ArrayList<>();
         for (int i = 0; i < items.length(); i++) {
             JSONObject video = items.getJSONObject(i);
             JSONObject snippet = video.getJSONObject("snippet");
             JSONObject contentDetails = video.getJSONObject("contentDetails");
             JSONObject thumbnail = snippet.getJSONObject("thumbnails").getJSONObject("default");
             String uri = ENDPOINT_YOUTUBE + "?v=" + video.get("id");
-            AudioMetadataMemory metadata = new AudioMetadataMemory();
+            PlayerMetadataMemory metadata = new PlayerMetadataMemory();
             metadata.setId(UUID.randomUUID());
             metadata.setTitle(snippet.getString("title"));
             metadata.setArtist(snippet.getString("channelTitle"));
             Duration duration = Duration.parse(contentDetails.getString("duration"));
             metadata.setLength(duration.getSeconds() * 1000);
             metadata.setArtwork(new ImageData(new ImageMetadataMemory(UUID.randomUUID()), new ImageDataSourceUri(Uri.parse(thumbnail.getString("url")))));
-            ret.add(new AudioData(metadata, new AudioDataSourceYtdl(uri)));
+            ret.add(new PlayerData(metadata, new AudioDataSourceYtdl(uri)));
         }
         return ret;
     }

@@ -2,7 +2,6 @@ package com.phaseshifter.canora.ui.activities.editors;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.text.InputType;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -12,10 +11,10 @@ import android.widget.TextView;
 
 import com.phaseshifter.canora.R;
 import com.phaseshifter.canora.application.MainApplication;
-import com.phaseshifter.canora.data.media.audio.AudioData;
-import com.phaseshifter.canora.data.media.audio.metadata.AudioMetadataMemory;
-import com.phaseshifter.canora.data.media.audio.source.AudioDataSourceFile;
-import com.phaseshifter.canora.data.media.audio.source.AudioDataSourceUri;
+import com.phaseshifter.canora.data.media.player.PlayerData;
+import com.phaseshifter.canora.data.media.player.metadata.PlayerMetadataMemory;
+import com.phaseshifter.canora.data.media.player.source.PlayerDataSourceFile;
+import com.phaseshifter.canora.data.media.player.source.PlayerDataSourceUri;
 import com.phaseshifter.canora.data.theme.AppTheme;
 import com.phaseshifter.canora.model.editor.AudioMetadataMask;
 import com.phaseshifter.canora.plugin.soundcloud.AudioDataSourceSC;
@@ -25,10 +24,10 @@ import com.phaseshifter.canora.utils.android.Miscellaneous;
 public class AudioDataEditorActivity extends Activity {
     public static class ActivityBundle {
         public final AppTheme theme;
-        public final AudioData data;
+        public final PlayerData data;
         public final AudioMetadataMask mask;
 
-        public ActivityBundle(AppTheme theme, AudioData data, AudioMetadataMask mask) {
+        public ActivityBundle(AppTheme theme, PlayerData data, AudioMetadataMask mask) {
             if (theme == null
                     || data == null
                     || mask == null)
@@ -50,7 +49,7 @@ public class AudioDataEditorActivity extends Activity {
 
     private final String LOG_TAG = "AudioEditor";
 
-    private AudioData data;
+    private PlayerData data;
     private AudioMetadataMask mask;
 
     @Override
@@ -99,16 +98,16 @@ public class AudioDataEditorActivity extends Activity {
         finish();
     }
 
-    private AudioData getUpdatedData(AudioData data) {
+    private PlayerData getUpdatedData(PlayerData data) {
         if (data != null) {
             EditText titleText = findViewById(R.id.title);
             EditText artistText = findViewById(R.id.artist);
             EditText albumText = findViewById(R.id.album);
-            AudioMetadataMemory ret = new AudioMetadataMemory(data.getMetadata());
+            PlayerMetadataMemory ret = new PlayerMetadataMemory(data.getMetadata());
             ret.setTitle(titleText.getText().toString());
             ret.setArtist(artistText.getText().toString());
             ret.setAlbum(albumText.getText().toString());
-            return new AudioData(ret, data.getDataSource());
+            return new PlayerData(ret, data.getDataSource());
         } else {
             return null;
         }
@@ -137,10 +136,10 @@ public class AudioDataEditorActivity extends Activity {
         genreText.setText(sb.toString());
 
         boolean gotUri = true;
-        if (data.getDataSource() instanceof AudioDataSourceUri) {
-            fileText.setText(((AudioDataSourceUri) data.getDataSource()).getUri().toString());
-        } else if (data.getDataSource() instanceof AudioDataSourceFile) {
-            fileText.setText(((AudioDataSourceFile) data.getDataSource()).getFile().getAbsolutePath());
+        if (data.getDataSource() instanceof PlayerDataSourceUri) {
+            fileText.setText(((PlayerDataSourceUri) data.getDataSource()).getUri().toString());
+        } else if (data.getDataSource() instanceof PlayerDataSourceFile) {
+            fileText.setText(((PlayerDataSourceFile) data.getDataSource()).getFile().getAbsolutePath());
         } else if (data.getDataSource() instanceof AudioDataSourceSC) {
             fileText.setText(((AudioDataSourceSC) data.getDataSource()).getUrls());
         } else if (data.getDataSource() instanceof AudioDataSourceYtdl) {

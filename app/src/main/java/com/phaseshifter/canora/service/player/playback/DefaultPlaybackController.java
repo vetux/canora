@@ -2,7 +2,7 @@ package com.phaseshifter.canora.service.player.playback;
 
 import android.util.Log;
 
-import com.phaseshifter.canora.data.media.audio.AudioData;
+import com.phaseshifter.canora.data.media.player.PlayerData;
 import com.phaseshifter.canora.model.comparison.AudioDataComparsion;
 
 import java.util.*;
@@ -14,15 +14,15 @@ public class DefaultPlaybackController implements PlaybackController {
     private final int historySize = 999;
     private final int forwardHistorySize = 999;
 
-    private final Stack<AudioData> history;
-    private final Stack<AudioData> forwardHistory;
-    private final List<AudioData> shuffleCache;
-    private AudioData currentTrack;
+    private final Stack<PlayerData> history;
+    private final Stack<PlayerData> forwardHistory;
+    private final List<PlayerData> shuffleCache;
+    private PlayerData currentTrack;
     private int currentIndex;
 
     private boolean shuffle;
     private boolean repeat;
-    private List<AudioData> content;
+    private List<PlayerData> content;
 
     private final Random rand = new Random();
     private int nextRandom = -1;
@@ -36,7 +36,7 @@ public class DefaultPlaybackController implements PlaybackController {
         currentIndex = 0;
     }
 
-    public AudioData setNext(UUID id) {
+    public PlayerData setNext(UUID id) {
         Log.v(LOG_TAG, "setNext " + id);
         if (content == null || content.size() == 0) {
             Log.e(LOG_TAG, "ERROR: CONTENT EMPTY / INVALID");
@@ -52,7 +52,7 @@ public class DefaultPlaybackController implements PlaybackController {
         return currentTrack;
     }
 
-    public AudioData getNext() {
+    public PlayerData getNext() {
         Log.v(LOG_TAG, "getNext");
         if (content == null || content.size() == 0) {
             Log.e(LOG_TAG, "ERROR: CONTENT EMPTY / INVALID");
@@ -98,7 +98,7 @@ public class DefaultPlaybackController implements PlaybackController {
         return currentTrack;
     }
 
-    public AudioData peekNext() {
+    public PlayerData peekNext() {
         Log.v(LOG_TAG, "getNext");
         if (content == null || content.size() == 0) {
             Log.e(LOG_TAG, "ERROR: CONTENT EMPTY / INVALID");
@@ -125,7 +125,7 @@ public class DefaultPlaybackController implements PlaybackController {
         }
     }
 
-    public AudioData getPrev() {
+    public PlayerData getPrev() {
         Log.v(LOG_TAG, "getPrev");
         if (content == null || content.size() == 0)
             return null;
@@ -134,7 +134,7 @@ public class DefaultPlaybackController implements PlaybackController {
         }
         if (history.size() > 0) {
             Log.v(LOG_TAG, "HISTORY");
-            AudioData p = history.pop();
+            PlayerData p = history.pop();
             for (int i = 0; i < content.size(); i++) {
                 if (content.get(i).equals(p)) {
                     currentIndex = i;
@@ -156,16 +156,16 @@ public class DefaultPlaybackController implements PlaybackController {
         }
     }
 
-    public AudioData getCurrentTrack() {
+    public PlayerData getCurrentTrack() {
         return currentTrack;
     }
 
-    public boolean setContent(List<AudioData> c) {
+    public boolean setContent(List<PlayerData> c) {
         currentIndex = -1;
         boolean found = false;
         if (currentTrack != null) {
             for (int i = 0; i < c.size(); i++) {
-                AudioData track = c.get(i);
+                PlayerData track = c.get(i);
                 if (AudioDataComparsion.isEqual_exclude_UUID(currentTrack, track)) {
                     currentIndex = i;
                     currentTrack = track;
@@ -184,7 +184,7 @@ public class DefaultPlaybackController implements PlaybackController {
         return found;
     }
 
-    public List<AudioData> getContent() {
+    public List<PlayerData> getContent() {
         return content;
     }
 
@@ -221,14 +221,14 @@ public class DefaultPlaybackController implements PlaybackController {
         return 0;
     }
 
-    private void pushHistory(final AudioData item) {
+    private void pushHistory(final PlayerData item) {
         history.push(item);
         if (history.size() > historySize) {
             history.setSize(historySize);
         }
     }
 
-    private void pushForwardHistory(final AudioData item) {
+    private void pushForwardHistory(final PlayerData item) {
         forwardHistory.push(item);
         if (forwardHistory.size() > forwardHistorySize) {
             forwardHistory.setSize(forwardHistorySize);

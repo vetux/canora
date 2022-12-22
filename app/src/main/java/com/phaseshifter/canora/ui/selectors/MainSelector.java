@@ -1,6 +1,6 @@
 package com.phaseshifter.canora.ui.selectors;
 
-import com.phaseshifter.canora.data.media.audio.AudioData;
+import com.phaseshifter.canora.data.media.player.PlayerData;
 import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
 import com.phaseshifter.canora.model.formatting.ListSorter;
 import com.phaseshifter.canora.model.repo.DeviceAudioRepository;
@@ -38,11 +38,11 @@ public abstract class MainSelector {
             return null;
     }
 
-    public static List<AudioData> getTracksForSelector(ContentSelector indicator,
-                                                       SortingOptions sortOpt,
-                                                       DeviceAudioRepository audioDataRepository,
-                                                       UserPlaylistRepository audioPlaylistRepository,
-                                                       SoundCloudAudioRepository scAudioDataRepo) {
+    public static List<PlayerData> getTracksForSelector(ContentSelector indicator,
+                                                        SortingOptions sortOpt,
+                                                        DeviceAudioRepository audioDataRepository,
+                                                        UserPlaylistRepository audioPlaylistRepository,
+                                                        SoundCloudAudioRepository scAudioDataRepo) {
         switch (indicator.getPage()) {
             case TRACKS:
                 return ListSorter.sortAudioData(audioDataRepository.getTracks(), sortOpt);

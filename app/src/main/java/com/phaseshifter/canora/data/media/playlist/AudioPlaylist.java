@@ -1,6 +1,6 @@
 package com.phaseshifter.canora.data.media.playlist;
 
-import com.phaseshifter.canora.data.media.audio.AudioData;
+import com.phaseshifter.canora.data.media.player.PlayerData;
 import com.phaseshifter.canora.data.media.playlist.metadata.PlaylistMetadata;
 
 import java.util.List;
@@ -8,7 +8,7 @@ import java.util.List;
 public final class AudioPlaylist extends MediaPlaylist {
     private static final long serialVersionUID = 1;
 
-    public AudioPlaylist(PlaylistMetadata metadata, List<AudioData> data) {
+    public AudioPlaylist(PlaylistMetadata metadata, List<PlayerData> data) {
         super(metadata, data);
     }
 
@@ -17,7 +17,7 @@ public final class AudioPlaylist extends MediaPlaylist {
     }
 
     @Override
-    public List<AudioData> getData() {
-        return (List<AudioData>) data;
+    public List<PlayerData> getData() {
+        return (List<PlayerData>) data;
     }
 }

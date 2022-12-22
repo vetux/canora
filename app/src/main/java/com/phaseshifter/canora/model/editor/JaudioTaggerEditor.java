@@ -6,9 +6,9 @@ import android.content.Context;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.util.Log;
-import com.phaseshifter.canora.data.media.audio.AudioData;
-import com.phaseshifter.canora.data.media.audio.metadata.AudioMetadata;
-import com.phaseshifter.canora.data.media.audio.source.AudioDataSourceUri;
+import com.phaseshifter.canora.data.media.player.PlayerData;
+import com.phaseshifter.canora.data.media.player.metadata.PlayerMetadata;
+import com.phaseshifter.canora.data.media.player.source.PlayerDataSourceUri;
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.audio.SupportedFileFormat;
@@ -34,7 +34,7 @@ public class JaudioTaggerEditor implements AudioMetadataEditor {
     }
 
     @Override
-    public void writeMetadata(Uri target, AudioMetadata metadata) throws IOException {
+    public void writeMetadata(Uri target, PlayerMetadata metadata) throws IOException {
         Log.v(LOG_TAG, "writeMetadata " + target + " " + metadata);
         final byte[] originalBytes = getBytesFromUri(target);
 
@@ -67,7 +67,7 @@ public class JaudioTaggerEditor implements AudioMetadataEditor {
     }
 
     @Override
-    public void writeMetadata(File target, AudioMetadata metadata) throws IOException {
+    public void writeMetadata(File target, PlayerMetadata metadata) throws IOException {
         Log.v(LOG_TAG, "writeMetadata " + target + " " + metadata);
         try {
             AudioFile jaudioFile = AudioFileIO.read(target);
@@ -86,10 +86,10 @@ public class JaudioTaggerEditor implements AudioMetadataEditor {
     }
 
     @Override
-    public AudioMetadataMask getMask(AudioData data) {
+    public AudioMetadataMask getMask(PlayerData data) {
         //Even though jaudiotagger uses various java.nio classes (Which supposedly should only work with API 26+) the writing / reading of the tag seems to work fine on API 21 in the emulator.
-        if (data.getDataSource() instanceof AudioDataSourceUri) {
-            String mime = contentResolver.getType(((AudioDataSourceUri) data.getDataSource()).getUri());
+        if (data.getDataSource() instanceof PlayerDataSourceUri) {
+            String mime = contentResolver.getType(((PlayerDataSourceUri) data.getDataSource()).getUri());
             if (mime == null)
                 return new AudioMetadataMask();
             String extension = getFileExtensionForMimeType(mime);
@@ -152,7 +152,7 @@ public class JaudioTaggerEditor implements AudioMetadataEditor {
         }
     }
 
-    private void notifyMediaStore(Uri uri, AudioMetadata metadata) {
+    private void notifyMediaStore(Uri uri, PlayerMetadata metadata) {
         ContentValues values = new ContentValues();
         values.put(MediaStore.Audio.Media.TITLE, metadata.getTitle());
         values.put(MediaStore.Audio.Media.ARTIST, metadata.getArtist());

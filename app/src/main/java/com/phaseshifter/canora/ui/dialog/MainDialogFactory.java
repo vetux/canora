@@ -10,7 +10,7 @@ import android.view.Window;
 import android.widget.*;
 
 import com.phaseshifter.canora.R;
-import com.phaseshifter.canora.data.media.audio.AudioData;
+import com.phaseshifter.canora.data.media.player.PlayerData;
 import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
 import com.phaseshifter.canora.ui.data.formatting.FilterOptions;
 import com.phaseshifter.canora.ui.data.formatting.SortingOptions;
@@ -21,7 +21,7 @@ import java.util.List;
 
 public class MainDialogFactory {
     public static Dialog getPlaylistCreate(Activity host,
-                                           List<AudioData> data,
+                                           List<PlayerData> data,
                                            RunnableArg<String> onCreate,
                                            Runnable onCancel) {
         Dialog ret = new Dialog(host);
@@ -77,7 +77,7 @@ public class MainDialogFactory {
 
     public static Dialog getTracksDeleteFromPlaylist(Activity host,
                                                      AudioPlaylist playlist,
-                                                     List<AudioData> tracks,
+                                                     List<PlayerData> tracks,
                                                      Runnable onAccept,
                                                      Runnable onCancel) {
         Dialog ret = new Dialog(host);

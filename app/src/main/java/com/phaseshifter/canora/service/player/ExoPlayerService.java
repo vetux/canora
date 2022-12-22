@@ -22,7 +22,7 @@ import androidx.annotation.NonNull;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.PlaybackException;
 import com.phaseshifter.canora.R;
-import com.phaseshifter.canora.data.media.audio.AudioData;
+import com.phaseshifter.canora.data.media.player.PlayerData;
 import com.phaseshifter.canora.service.player.mediasession.MediaSessionCallback;
 import com.phaseshifter.canora.service.player.playback.PlaybackController;
 import com.phaseshifter.canora.service.player.playback.DefaultPlaybackController;
@@ -94,9 +94,9 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
     private int trackSourceIndex;
 
     private AtomicInteger preparingTracks = new AtomicInteger(0);
-    private AudioData playingTrack = null;
+    private PlayerData playingTrack = null;
 
-    private AtomicReference<AudioData> requestedTrack = new AtomicReference<>(null);
+    private AtomicReference<PlayerData> requestedTrack = new AtomicReference<>(null);
 
     private ThreadPoolExecutor pool = new ThreadPoolExecutor(1, 1, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
 
@@ -251,7 +251,7 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
     }
 
     @Override
-    public void setContent(List<AudioData> pl) {
+    public void setContent(List<PlayerData> pl) {
         Log.v(LOG_TAG, "setContent " + pl);
         if (playbackController.getContent() != null && playbackController.getContent().equals(pl)) {
             Log.v(LOG_TAG, "Content Identical, returning...");
@@ -268,7 +268,7 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
     @Override
     public void play(UUID id) {
         Log.v(LOG_TAG, "play " + id);
-        AudioData n = playbackController.setNext(id);
+        PlayerData n = playbackController.setNext(id);
         if (n != null) {
             Log.v(LOG_TAG, "Setting up Track: " + n.getMetadata().getTitle());
             createPlayer(n);
@@ -280,7 +280,7 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
     @Override
     public void next() {
         Log.v(LOG_TAG, "next");
-        AudioData n = playbackController.getNext();
+        PlayerData n = playbackController.getNext();
         if (n != null) {
             Log.v(LOG_TAG, "Setting up Track: " + n.getMetadata().getTitle());
             createPlayer(n);
@@ -292,7 +292,7 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
     @Override
     public void previous() {
         Log.v(LOG_TAG, "previous");
-        AudioData n = playbackController.getPrev();
+        PlayerData n = playbackController.getPrev();
         if (n != null) {
             Log.v(LOG_TAG, "Setting up Track: " + n.getMetadata().getTitle());
             createPlayer(n);
@@ -326,7 +326,7 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
     @Override
     public void seek(float percentage) {
         if (playbackController.getCurrentTrack() != null) {
-            long ms = (long) (playbackController.getCurrentTrack().getMetadata().getLength() * percentage);
+            long ms = (long) (playbackController.getCurrentTrack().getMetadata().getDuration() * percentage);
             seek(ms);
         }
     }
@@ -458,7 +458,7 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
 
     private void updateNotification(PlayerState state) {
         pool.submit(() -> {
-            AudioData track = state.getCurrentTrack();
+            PlayerData track = state.getCurrentTrack();
             if (track != null && track.getMetadata().getArtwork() != null) {
                 track.getMetadata().getArtwork().getDataSource().getBitmap(this, (bitmap) -> {
                             if (bitmap != null) {
@@ -476,7 +476,7 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
         });
     }
 
-    private void showNotification(boolean playing, AudioData track, Bitmap artwork) {
+    private void showNotification(boolean playing, PlayerData track, Bitmap artwork) {
         runOnMainThread(() -> {
             final Notification.Builder notificationBuilder;
             notificationBuilder = new Notification.Builder(this, NOTIFICATION_CHANNEL_ID)
@@ -554,7 +554,7 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
     }
 
     private void updateMediaSession(PlayerState state) {
-        AudioData track = state.getCurrentTrack();
+        PlayerData track = state.getCurrentTrack();
 
         if (track != null) {
             final String title = track.getMetadata().getTitle();
@@ -665,7 +665,7 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
         registerReceiver(brcv, flt);
     }
 
-    private void createPlayer(AudioData next) {
+    private void createPlayer(PlayerData next) {
         preparingTracks.incrementAndGet();
 
         exoPlayer.stop(true);
@@ -676,7 +676,7 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
         requestedTrack.set(next);
 
         pool.submit(() -> {
-            AudioData track = requestedTrack.getAndSet(null);
+            PlayerData track = requestedTrack.getAndSet(null);
             if (track != null) {
                 if (playingTrack != null) {
                     playingTrack.getDataSource().finish();

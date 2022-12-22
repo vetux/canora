@@ -2,9 +2,9 @@ package com.phaseshifter.canora.model.repo;
 
 import android.util.Log;
 
-import com.phaseshifter.canora.data.media.audio.AudioData;
-import com.phaseshifter.canora.data.media.audio.metadata.AudioMetadata;
-import com.phaseshifter.canora.data.media.audio.metadata.AudioMetadataMemory;
+import com.phaseshifter.canora.data.media.player.PlayerData;
+import com.phaseshifter.canora.data.media.player.metadata.PlayerMetadata;
+import com.phaseshifter.canora.data.media.player.metadata.PlayerMetadataMemory;
 import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
 import com.phaseshifter.canora.data.media.playlist.metadata.PlaylistMetadataMemory;
 import com.phaseshifter.canora.model.compression.Gzip;
@@ -49,7 +49,7 @@ public class UserPlaylistRepository {
         if (playlist == null)
             throw new IllegalArgumentException();
 
-        List<AudioData> modifiedTracks = prepareData(playlist.getData());
+        List<PlayerData> modifiedTracks = prepareData(playlist.getData());
 
         PlaylistMetadataMemory metadata = new PlaylistMetadataMemory(key,
                 playlist.getMetadata().getTitle(),
@@ -71,7 +71,7 @@ public class UserPlaylistRepository {
         if (playlist == null)
             throw new IllegalArgumentException();
 
-        List<AudioData> modifiedTracks = prepareData(playlist.getData());
+        List<PlayerData> modifiedTracks = prepareData(playlist.getData());
 
         UUID uuid = UUID.randomUUID();
 
@@ -98,7 +98,7 @@ public class UserPlaylistRepository {
         if (value == null)
             throw new IllegalArgumentException();
 
-        List<AudioData> modifiedData = prepareData(value.getData());
+        List<PlayerData> modifiedData = prepareData(value.getData());
 
         PlaylistMetadataMemory metadata = new PlaylistMetadataMemory(key,
                 value.getMetadata().getTitle(),
@@ -134,25 +134,25 @@ public class UserPlaylistRepository {
         return playlists.values().size();
     }
 
-    private List<AudioData> prepareData(List<AudioData> orig) {
-        List<AudioData> modifiedTracks = new ArrayList<>();
+    private List<PlayerData> prepareData(List<PlayerData> orig) {
+        List<PlayerData> modifiedTracks = new ArrayList<>();
         List<UUID> usedUUIDS = new ArrayList<>();
-        for (AudioData track : orig) {
+        for (PlayerData track : orig) {
             UUID genUUID = UUID.randomUUID();
             if (usedUUIDS.contains(genUUID))
                 throw new RuntimeException("UUID Collision !!!");
             usedUUIDS.add(genUUID);
-            AudioMetadata existingMetadata = track.getMetadata();
-            AudioMetadataMemory modifiedMetadata = new AudioMetadataMemory(
+            PlayerMetadata existingMetadata = track.getMetadata();
+            PlayerMetadataMemory modifiedMetadata = new PlayerMetadataMemory(
                     genUUID,
                     existingMetadata.getTitle(),
                     existingMetadata.getArtist(),
                     existingMetadata.getAlbum(),
                     existingMetadata.getGenres(),
-                    existingMetadata.getLength(),
+                    existingMetadata.getDuration(),
                     existingMetadata.getArtwork()
             );
-            modifiedTracks.add(new AudioData(modifiedMetadata, track.getDataSource()));
+            modifiedTracks.add(new PlayerData(modifiedMetadata, track.getDataSource()));
         }
         return modifiedTracks;
     }

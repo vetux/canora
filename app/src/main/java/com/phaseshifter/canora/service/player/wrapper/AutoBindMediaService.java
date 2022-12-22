@@ -7,7 +7,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 
-import com.phaseshifter.canora.data.media.audio.AudioData;
+import com.phaseshifter.canora.data.media.player.PlayerData;
 import com.phaseshifter.canora.service.player.ExoPlayerService;
 import com.phaseshifter.canora.service.player.MediaPlayerService;
 import com.phaseshifter.canora.service.player.state.PlayerState;
@@ -112,7 +112,7 @@ public class AutoBindMediaService implements ServiceConnection, MediaPlayerServi
     }
 
     @Override
-    public void setContent(List<AudioData> pl) {
+    public void setContent(List<PlayerData> pl) {
         verifyMainThread();
         if (serviceRef.get() != null) {
             serviceRef.get().setContent(pl);

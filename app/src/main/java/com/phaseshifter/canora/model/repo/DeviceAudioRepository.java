@@ -2,8 +2,8 @@ package com.phaseshifter.canora.model.repo;
 
 import android.util.Log;
 
-import com.phaseshifter.canora.data.media.audio.AudioData;
-import com.phaseshifter.canora.data.media.audio.metadata.AudioMetadataMemory;
+import com.phaseshifter.canora.data.media.player.PlayerData;
+import com.phaseshifter.canora.data.media.player.metadata.PlayerMetadataMemory;
 import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
 import com.phaseshifter.canora.data.media.playlist.metadata.PlaylistMetadataMemory;
 import com.phaseshifter.canora.model.comparison.AudioDataComparsion;
@@ -21,13 +21,13 @@ public class DeviceAudioRepository {
     private final String LOG_TAG = "AudioDataRepository";
     private final IContentProvider contentProvider;
 
-    private List<AudioData> tracks;
+    private List<PlayerData> tracks;
     private List<AudioPlaylist> artists;
     private List<AudioPlaylist> albums;
     private List<AudioPlaylist> genres;
 
     public DeviceAudioRepository(IContentProvider contentProvider,
-                                 List<AudioData> tracks,
+                                 List<PlayerData> tracks,
                                  List<AudioPlaylist> artists,
                                  List<AudioPlaylist> albums,
                                  List<AudioPlaylist> genres) {
@@ -49,7 +49,7 @@ public class DeviceAudioRepository {
 
     public void refresh() {
         Log.v(LOG_TAG, "refresh");
-        List<AudioData> tracks = contentProvider.getTracks();
+        List<PlayerData> tracks = contentProvider.getTracks();
         List<AudioPlaylist> artists = contentProvider.getArtists(tracks);
         List<AudioPlaylist> albums = contentProvider.getAlbums(tracks);
         List<AudioPlaylist> genres = contentProvider.getGenres();
@@ -60,7 +60,7 @@ public class DeviceAudioRepository {
         Log.v(LOG_TAG, "refresh complete");
     }
 
-    public List<AudioData> getTracks() {
+    public List<PlayerData> getTracks() {
         Log.v(LOG_TAG, "getTracks");
         return tracks;
     }
@@ -118,15 +118,15 @@ public class DeviceAudioRepository {
      * @param newData The updated data
      * @return The patched data, non null
      */
-    private List<AudioData> updateAudioData(List<AudioData> oldData, List<AudioData> newData) {
-        List<AudioData> ret = new ArrayList<>();
-        for (AudioData track : newData) {
+    private List<PlayerData> updateAudioData(List<PlayerData> oldData, List<PlayerData> newData) {
+        List<PlayerData> ret = new ArrayList<>();
+        for (PlayerData track : newData) {
             boolean foundOld = false;
-            for (AudioData oldTrack : oldData) {
+            for (PlayerData oldTrack : oldData) {
                 if (AudioDataComparsion.isEqual_exclude_UUID(track, oldTrack)) {
-                    AudioMetadataMemory patchedMetadata = new AudioMetadataMemory(track.getMetadata());
+                    PlayerMetadataMemory patchedMetadata = new PlayerMetadataMemory(track.getMetadata());
                     patchedMetadata.setId(oldTrack.getMetadata().getId());
-                    ret.add(new AudioData(patchedMetadata, track.getDataSource()));
+                    ret.add(new PlayerData(patchedMetadata, track.getDataSource()));
                     foundOld = true;
                     break;
                 }

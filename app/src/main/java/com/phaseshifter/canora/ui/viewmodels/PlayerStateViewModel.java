@@ -46,7 +46,7 @@ public class PlayerStateViewModel {
             } else {
                 trackArtwork.setIfNotEqual(state.getCurrentTrack().getMetadata().getArtwork());
             }
-            trackLength.setIfNotEqual(state.getCurrentTrack().getMetadata().getLength());
+            trackLength.setIfNotEqual(state.getCurrentTrack().getMetadata().getDuration());
         }
 
         trackPosition.setIfNotEqual(state.getPlayerPosition());

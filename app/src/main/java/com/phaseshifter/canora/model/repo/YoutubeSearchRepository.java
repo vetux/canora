@@ -1,13 +1,12 @@
 package com.phaseshifter.canora.model.repo;
 
 import com.google.common.primitives.UnsignedInteger;
-import com.phaseshifter.canora.data.media.audio.AudioData;
+import com.phaseshifter.canora.data.media.player.PlayerData;
 import com.phaseshifter.canora.plugin.youtubeapi.YoutubeApiClient;
 import com.phaseshifter.canora.plugin.youtubeapi.YoutubeOrder;
 import com.phaseshifter.canora.plugin.youtubeapi.YoutubeRequest;
 import com.phaseshifter.canora.plugin.youtubeapi.YoutubeResource;
 import com.phaseshifter.canora.plugin.youtubeapi.YoutubeResponse;
-import com.phaseshifter.canora.plugin.youtubeapi.YoutubeVideo;
 import com.phaseshifter.canora.utils.Observable;
 import com.phaseshifter.canora.utils.RunnableArg;
 
@@ -19,7 +18,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 
 public class YoutubeSearchRepository {
-    public Observable<List<AudioData>> results = new Observable<>(new ArrayList<>());
+    public Observable<List<PlayerData>> results = new Observable<>(new ArrayList<>());
 
     public YoutubeSearchRepository(YoutubeApiClient client) {
         this.client = client;
