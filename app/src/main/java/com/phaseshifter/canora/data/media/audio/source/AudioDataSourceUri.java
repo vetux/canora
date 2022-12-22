@@ -8,6 +8,7 @@ import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.upstream.ContentDataSource;
 import com.google.android.exoplayer2.upstream.DataSource;
+import com.phaseshifter.canora.utils.RunnableArg;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -38,7 +39,7 @@ public class AudioDataSourceUri implements AudioDataSource, Serializable {
     }
 
     @Override
-    public List<MediaSource> getExoPlayerSources(Context context) {
+    public void getExoPlayerSources(Context context, RunnableArg<List<MediaSource>> onReady, RunnableArg<Exception> onException) {
         DataSource.Factory factory = new DataSource.Factory() {
             @Override
             public DataSource createDataSource() {
@@ -48,7 +49,7 @@ public class AudioDataSourceUri implements AudioDataSource, Serializable {
         Uri uri = getUri();
         List<MediaSource> ret = new ArrayList<>();
         ret.add(new ProgressiveMediaSource.Factory(factory).createMediaSource(MediaItem.fromUri(uri)));
-        return ret;
+        onReady.run(ret);
     }
 
     @Override

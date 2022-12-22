@@ -13,6 +13,7 @@ import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DataSpec;
 import com.google.android.exoplayer2.upstream.TransferListener;
+import com.phaseshifter.canora.utils.RunnableArg;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -35,7 +36,7 @@ public class AudioDataSourceMediaDataSource implements AudioDataSource, Serializ
     }
 
     @Override
-    public List<MediaSource> getExoPlayerSources(Context context) throws Exception {
+    public void getExoPlayerSources(Context context, RunnableArg<List<MediaSource>> onReady, RunnableArg<Exception> onException) {
         DataSource.Factory factory = new DataSource.Factory() {
             @Override
             public DataSource createDataSource() {
@@ -70,7 +71,7 @@ public class AudioDataSourceMediaDataSource implements AudioDataSource, Serializ
         };
         List<MediaSource> ret = new ArrayList<>();
         ret.add(new ProgressiveMediaSource.Factory(factory).createMediaSource(null));
-        return ret;
+        onReady.run( ret);
     }
 
     @Override

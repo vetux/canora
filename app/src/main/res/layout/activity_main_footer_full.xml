@@ -22,8 +22,7 @@
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/control_imageview_cover_full">
+        app:layout_constraintTop_toTopOf="parent">
 
         <ImageButton
             android:id="@+id/control_button_menu_full"
@@ -46,6 +45,7 @@
             android:indeterminate="true"
             android:indeterminateTint="?colorSecondary"
             android:indeterminateTintMode="src_atop"
+            android:padding="15dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@id/control_button_menu_full"
             app:layout_constraintTop_toTopOf="parent"

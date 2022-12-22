@@ -17,6 +17,7 @@ import com.phaseshifter.canora.plugin.soundcloud.api_v2.data.SCV2StreamProtocol;
 import com.phaseshifter.canora.plugin.soundcloud.api_v2.data.SCV2Track;
 import com.phaseshifter.canora.plugin.soundcloud.api_v2.data.SCV2TrackStreamData;
 import com.phaseshifter.canora.utils.Pair;
+import com.phaseshifter.canora.utils.RunnableArg;
 
 import org.json.JSONException;
 
@@ -80,7 +81,7 @@ public class AudioDataSourceSC implements AudioDataSource, Serializable {
     }
 
     @Override
-    public void prepare() throws Exception {
+    public void prepare(Runnable onReady, RunnableArg<Exception> onError) {
         if (getStreams().isEmpty()) {
             try {
                 loadStreams();
@@ -92,7 +93,7 @@ public class AudioDataSourceSC implements AudioDataSource, Serializable {
                 } catch (Exception ex) {
                     getStreams().clear();
                     ex.printStackTrace();
-                    throw ex;
+                    onError.run(ex);
                 }
             }
         }
@@ -104,7 +105,7 @@ public class AudioDataSourceSC implements AudioDataSource, Serializable {
     }
 
     @Override
-    public List<MediaSource> getExoPlayerSources(Context context) {
+    public void getExoPlayerSources(Context context, RunnableArg<List<MediaSource>> onReady, RunnableArg<Exception> onException) {
         if (getStreams().isEmpty()) {
             throw new RuntimeException("Failed to retrieve stream data for track " + codings);
         }
@@ -120,7 +121,7 @@ public class AudioDataSourceSC implements AudioDataSource, Serializable {
                     break;
             }
         }
-        return ret;
+        onReady.run(ret);
     }
 
     @Override

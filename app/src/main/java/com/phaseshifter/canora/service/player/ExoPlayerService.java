@@ -29,7 +29,6 @@ import com.phaseshifter.canora.service.player.playback.DefaultPlaybackController
 import com.phaseshifter.canora.service.player.state.PlayerState;
 import com.phaseshifter.canora.ui.activities.MainActivity;
 import com.phaseshifter.canora.utils.Observable;
-import com.phaseshifter.canora.utils.RunnableArg;
 import com.phaseshifter.canora.utils.android.bitmap.BitmapUtils;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.Player;
@@ -683,32 +682,31 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
                     playingTrack.getDataSource().finish();
                 }
                 playingTrack = track;
-                try {
-                    track.getDataSource().prepare();
+                track.getDataSource().prepare(null,null);
+                track.getDataSource().getExoPlayerSources(this, (sources) -> {
                     trackSources.clear();
-                    trackSources.addAll(track.getDataSource().getExoPlayerSources(this));
-                } catch (Exception e) {
-                    trackSources.clear();
-                    e.printStackTrace();
+                    trackSources.addAll(sources);
+
+                    trackSourceIndex = 0;
+
                     runOnMainThread(() -> {
+                        Log.v(LOG_TAG, "Prepared MediaSources for track " + track.getMetadata().getTitle());
+                        preparingTracks.decrementAndGet();
+                        if (requestedTrack.get() == null) {
+                            updateTrackSource();
+                            onStateModified();
+                        }
+                    });
+                }, (exception) -> {
+                    runOnMainThread(() -> {
+                        trackSources.clear();
+
                         Log.e(LOG_TAG, "Failed to retrieve MediaSources");
                         preparingTracks.decrementAndGet();
                         if (requestedTrack.get() == null) {
                             next();
                         }
                     });
-                    return;
-                }
-
-                trackSourceIndex = 0;
-
-                runOnMainThread(() -> {
-                    Log.v(LOG_TAG, "Prepared MediaSources for track " + track.getMetadata().getTitle());
-                    preparingTracks.decrementAndGet();
-                    if (requestedTrack.get() == null) {
-                        updateTrackSource();
-                        onStateModified();
-                    }
                 });
             } else {
                 preparingTracks.decrementAndGet();

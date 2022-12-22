@@ -8,6 +8,7 @@ import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.FileDataSource;
+import com.phaseshifter.canora.utils.RunnableArg;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -15,6 +16,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class AudioDataSourceFile implements AudioDataSource, Serializable {
     private static final long serialVersionUID = 1;
@@ -30,11 +33,11 @@ public class AudioDataSourceFile implements AudioDataSource, Serializable {
     }
 
     @Override
-    public List<MediaSource> getExoPlayerSources(Context context) throws Exception {
+    public void getExoPlayerSources(Context context, RunnableArg<List<MediaSource>> onReady, RunnableArg<Exception> onException) {
         String targetFilePath = file.getAbsolutePath();
         File targetFile = new File(targetFilePath);
         if (!targetFile.exists()) {
-            throw new FileNotFoundException("File not found: " + targetFile.getAbsolutePath());
+            onException.run( new FileNotFoundException("File not found: " + targetFile.getAbsolutePath()));;
         } else {
             DataSource.Factory factory = new DataSource.Factory() {
                 @Override
@@ -44,7 +47,7 @@ public class AudioDataSourceFile implements AudioDataSource, Serializable {
             };
             List<MediaSource> ret = new ArrayList<>();
             ret.add(new ProgressiveMediaSource.Factory(factory).createMediaSource(MediaItem.fromUri(Uri.fromFile(targetFile))));
-            return ret;
+            onReady.run(ret);
         }
     }
 
