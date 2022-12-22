@@ -141,28 +141,36 @@ public class ListSorter {
     private static class TitleComparatorABC implements Comparator<AudioData> {
         @Override
         public int compare(AudioData o1, AudioData o2) {
-            return o1.getMetadata().getTitle().toLowerCase().compareTo(o2.getMetadata().getTitle().toLowerCase());
+            String v1 = o1.getMetadata().getTitle() == null ? "" : o1.getMetadata().getTitle();
+            String v2 = o2.getMetadata().getTitle() == null ? "" : o2.getMetadata().getTitle();
+            return v1.toLowerCase().compareTo(v2.toLowerCase());
         }
     }
 
     private static class TitleComparator012 implements Comparator<AudioData> {
         @Override
         public int compare(AudioData o1, AudioData o2) {
-            return extractIntegerFromString(o1.getMetadata().getTitle()) - extractIntegerFromString(o2.getMetadata().getTitle());
+            String v1 = o1.getMetadata().getTitle() == null ? "" : o1.getMetadata().getTitle();
+            String v2 = o2.getMetadata().getTitle() == null ? "" : o2.getMetadata().getTitle();
+            return extractIntegerFromString(v1) - extractIntegerFromString(v2);
         }
     }
 
     private static class ArtistComparatorABC implements Comparator<AudioData> {
         @Override
         public int compare(AudioData o1, AudioData o2) {
-            return o1.getMetadata().getArtist().toLowerCase().compareTo(o2.getMetadata().getArtist().toLowerCase());
+            String v1 = o1.getMetadata().getTitle() == null ? "" : o1.getMetadata().getTitle();
+            String v2 = o2.getMetadata().getTitle() == null ? "" : o2.getMetadata().getTitle();
+            return v1.toLowerCase().compareTo(v2.toLowerCase());
         }
     }
 
     private static class ArtistComparator012 implements Comparator<AudioData> {
         @Override
         public int compare(AudioData o1, AudioData o2) {
-            return extractIntegerFromString(o1.getMetadata().getArtist()) - extractIntegerFromString(o2.getMetadata().getArtist());
+            String v1 = o1.getMetadata().getTitle() == null ? "" : o1.getMetadata().getTitle();
+            String v2 = o2.getMetadata().getTitle() == null ? "" : o2.getMetadata().getTitle();
+            return extractIntegerFromString(v1) - extractIntegerFromString(v2);
         }
     }
 }

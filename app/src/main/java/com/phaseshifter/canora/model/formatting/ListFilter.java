@@ -1,6 +1,7 @@
 package com.phaseshifter.canora.model.formatting;
 
 import android.util.Log;
+
 import com.phaseshifter.canora.data.media.audio.AudioData;
 import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
 import com.phaseshifter.canora.ui.data.formatting.FilterOptions;
@@ -23,21 +24,21 @@ public class ListFilter {
             switch (def.filterBy) {
                 case FILTER_TITLE:
                     for (AudioData f : content) {
-                        if (f.getMetadata().getTitle().toLowerCase().contains(def.filterFor.toLowerCase())) {
+                        if (f.getMetadata().getTitle() != null && f.getMetadata().getTitle().toLowerCase().contains(def.filterFor.toLowerCase())) {
                             ret.add(f);
                         }
                     }
                     break;
                 case FILTER_ALBUM:
                     for (AudioData f : content) {
-                        if (f.getMetadata().getAlbum().toLowerCase().contains(def.filterFor.toLowerCase())) {
+                        if (f.getMetadata().getAlbum() != null && f.getMetadata().getAlbum().toLowerCase().contains(def.filterFor.toLowerCase())) {
                             ret.add(f);
                         }
                     }
                     break;
                 case FILTER_ARTIST:
                     for (AudioData f : content) {
-                        if (f.getMetadata().getArtist().toLowerCase().contains(def.filterFor.toLowerCase())) {
+                        if (f.getMetadata().getArtist() != null && f.getMetadata().getArtist().toLowerCase().contains(def.filterFor.toLowerCase())) {
                             ret.add(f);
                         }
                     }
@@ -50,12 +51,11 @@ public class ListFilter {
                         }
                     }
                     break;
-                case FILTER_FILENAME:
-                    throw new RuntimeException("Not supported");
                 case FILTER_TITLE_ARTIST:
                     for (AudioData f : content) {
-                        if (f.getMetadata().getTitle().toLowerCase().contains(def.filterFor.toLowerCase())
-                                || f.getMetadata().getArtist().toLowerCase().contains(def.filterFor.toLowerCase())) {
+                        if (f.getMetadata().getTitle() != null
+                                && (f.getMetadata().getTitle().toLowerCase().contains(def.filterFor.toLowerCase())
+                                || f.getMetadata().getArtist().toLowerCase().contains(def.filterFor.toLowerCase()))) {
                             ret.add(f);
                         }
                     }
@@ -63,16 +63,17 @@ public class ListFilter {
                 case FILTER_ANY:
                     for (AudioData f : content) {
                         String genreString = concatStringArray(f.getMetadata().getGenres());
-                        if (f.getMetadata().getTitle().toLowerCase().contains(def.filterFor.toLowerCase()) ||
-                                f.getMetadata().getAlbum().toLowerCase().contains(def.filterFor.toLowerCase()) ||
-                                f.getMetadata().getArtist().toLowerCase().contains(def.filterFor.toLowerCase()) ||
+                        if ((f.getMetadata().getTitle() != null && f.getMetadata().getTitle().toLowerCase().contains(def.filterFor.toLowerCase())) ||
+                                (f.getMetadata().getAlbum() != null && f.getMetadata().getAlbum().toLowerCase().contains(def.filterFor.toLowerCase())) ||
+                                (f.getMetadata().getArtist() != null && f.getMetadata().getArtist().toLowerCase().contains(def.filterFor.toLowerCase())) ||
                                 genreString.toLowerCase().contains(def.filterFor.toLowerCase())) {
                             ret.add(f);
                         }
                     }
                     break;
                 default:
-                    throw new RuntimeException("FILTER NOT RECOGNIZED: " + def.filterBy);
+                    ret = content;
+                    break;
             }
             Log.v(LOG_TAG, "CONTENT SIZE AFTER FILTER " + ret.size());
             return ret;
@@ -89,15 +90,10 @@ public class ListFilter {
         List<AudioPlaylist> ret = new ArrayList<>();
         if (def.filterFor.length() > 0) {
             Log.v(LOG_TAG, "CONTENT SIZE BEFORE FILTER " + content.size());
-            switch (def.filterBy) {
-                case FILTER_TITLE:
-                default:
-                    for (AudioPlaylist f : content) {
-                        if (f.getMetadata().getTitle().toLowerCase().contains(def.filterFor.toLowerCase())) {
-                            ret.add(f);
-                        }
-                    }
-                    break;
+            for (AudioPlaylist f : content) {
+                if (f.getMetadata().getTitle() != null && f.getMetadata().getTitle().toLowerCase().contains(def.filterFor.toLowerCase())) {
+                    ret.add(f);
+                }
             }
             Log.v(LOG_TAG, "CONTENT SIZE AFTER FILTER: " + ret.size());
             return ret;
