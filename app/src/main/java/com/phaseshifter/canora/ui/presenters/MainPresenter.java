@@ -531,8 +531,6 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
         ytRepo.setApiKey(settingsRepository.getString(StringSetting.YOUTUBE_API_KEY));
         scAudioDataRepo.setClientID(settingsRepository.getString(StringSetting.SC_CLIENTID));
 
-        theme = themeRepository.get(settingsRepository.getInt(IntegerSetting.THEME));
-
         sortingOptions.sortby = settingsRepository.getInt(IntegerSetting.SORT_BY);
         sortingOptions.sortdir = settingsRepository.getInt(IntegerSetting.SORT_DIR);
         sortingOptions.sorttech = settingsRepository.getInt(IntegerSetting.SORT_TECH);
@@ -540,8 +538,6 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
         filterBy = settingsRepository.getInt(IntegerSetting.FILTER_BY);
 
         appViewModel.devMode.set(settingsRepository.getBoolean(BooleanSetting.DEVELOPERMODE));
-
-        setViewModelContentSelector(uiContentSelector);
 
         mediaService.setVolume(settingsRepository.getFloat(FloatSetting.VOLUME));
         mediaService.setShuffle(settingsRepository.getBoolean(BooleanSetting.SHUFFLE));
@@ -553,12 +549,16 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
         if (playerState != null)
             playerStateViewModel.applyPlayerState(mediaService.getState().get(), getPlaylistForSelector(playingContentSelector, deviceAudioRepository, userPlaylistRepository));
 
-        view.setTheme(theme);
-        appViewModel.notifyObservers();
-        contentViewModel.notifyObservers();
-        playerStateViewModel.notifyObservers();
-        ytdlViewModel.notifyObservers();
-        updateVisibleContent();
+        AppTheme theme1 = themeRepository.get(settingsRepository.getInt(IntegerSetting.THEME));
+        if (theme != theme1) {
+            theme = theme1;
+            view.setTheme(theme);
+            appViewModel.notifyObservers();
+            contentViewModel.notifyObservers();
+            playerStateViewModel.notifyObservers();
+            ytdlViewModel.notifyObservers();
+            updateVisibleContent();
+        }
     }
 
     @Override
@@ -785,7 +785,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
         if (uiContentSelector.getPage() == MainPage.PLAYLISTS) {
             actions.add(ContextMenu.Action.DELETE);
         }
-        if (uiContentSelector.getPage() == MainPage.YOUTUBE_SEARCH_VIDEOS){
+        if (uiContentSelector.getPage() == MainPage.YOUTUBE_SEARCH_VIDEOS) {
             actions.add(ContextMenu.Action.DOWNLOAD_AUDIO);
             actions.add(ContextMenu.Action.DOWNLOAD_VIDEO);
         }
@@ -1270,7 +1270,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                 AudioData clickedTrack = contentViewModel.visibleTracks.get().get(index);
                 downloadingAudio = true;
                 downloadingVideo = false;
-                ytdlViewModel.url.set(((AudioDataSourceYtdl)clickedTrack.getDataSource()).getUrl());
+                ytdlViewModel.url.set(((AudioDataSourceYtdl) clickedTrack.getDataSource()).getUrl());
                 view.createDocument("*/*", clickedTrack.getMetadata().getTitle() + "_" + clickedTrack.getMetadata().getArtist() + ".mp3");
             }
             break;
@@ -1278,7 +1278,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                 AudioData clickedTrack = contentViewModel.visibleTracks.get().get(index);
                 downloadingAudio = false;
                 downloadingVideo = true;
-                ytdlViewModel.url.set(((AudioDataSourceYtdl)clickedTrack.getDataSource()).getUrl());
+                ytdlViewModel.url.set(((AudioDataSourceYtdl) clickedTrack.getDataSource()).getUrl());
                 view.createDocument("*/*", clickedTrack.getMetadata().getTitle() + "_" + clickedTrack.getMetadata().getArtist() + ".mp4");
             }
             break;
