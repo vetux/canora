@@ -22,20 +22,21 @@
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/control_imageview_cover_full">
 
         <ImageButton
-            android:id="@+id/control_button_close"
+            android:id="@+id/control_button_menu_full"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_margin="10dp"
             android:background="@drawable/ripple_imagebutton_square"
             android:padding="5dp"
-            android:scaleType="fitXY"
-            android:src="@drawable/arrow_down"
+            android:scaleType="centerCrop"
+            android:src="@drawable/baseline_menu_black_48dp"
             android:tint="?onTexControlFull"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/control_anchor_top_spacer"
+            app:layout_constraintEnd_toStartOf="@id/control_progressbar_playbackload_full"
             app:layout_constraintTop_toTopOf="parent" />
 
         <ProgressBar
@@ -46,8 +47,9 @@
             android:indeterminateTint="?colorSecondary"
             android:indeterminateTintMode="src_atop"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@id/control_button_close"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintStart_toEndOf="@id/control_button_menu_full"
+            app:layout_constraintTop_toTopOf="parent"
+            android:visibility="invisible"/>
 
         <View
             android:id="@+id/control_anchor_top_spacer"
@@ -55,7 +57,7 @@
             android:layout_height="1dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/control_button_volume"
-            app:layout_constraintStart_toEndOf="@id/control_button_close"
+            app:layout_constraintStart_toEndOf="@id/control_progressbar_playbackload_full"
             app:layout_constraintTop_toTopOf="parent" />
 
         <ImageButton
@@ -68,8 +70,23 @@
             android:scaleType="fitXY"
             android:src="@drawable/ic_equalizer_fill0_wght400_grad0_opsz48"
             android:tint="?onTexControlFull"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/control_button_options"
             app:layout_constraintStart_toEndOf="@id/control_anchor_top_spacer"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+        <ImageButton
+            android:id="@+id/control_button_options"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
+            android:background="@drawable/ripple_imagebutton_square"
+            android:padding="5dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_menu_moreoverflow_normal_holo_dark"
+            android:tint="?onTexControlFull"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/control_button_volume"
             app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -93,8 +110,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:padding="10dp"
-        android:layout_marginBottom="30dp">
+        android:padding="10dp">
 
         <TextView
             android:id="@+id/control_text_songtext"
@@ -178,7 +194,6 @@
             android:id="@+id/control_buttons"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@id/control_seekbaranddigits">
 
             <ImageButton
@@ -271,5 +286,18 @@
                 app:layout_constraintStart_toEndOf="@id/control_button_next_full"
                 app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
+        <ImageButton
+            android:id="@+id/control_button_close"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:background="@drawable/ripple_imagebutton_square"
+            android:padding="5dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/arrow_down"
+            android:tint="?onTexControl"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/control_buttons"
+            app:layout_constraintBottom_toBottomOf="parent"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
