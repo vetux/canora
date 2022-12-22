@@ -100,7 +100,6 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
     private final List<MediaSource> trackSources = new ArrayList<>();
     private int trackSourceIndex;
 
-    private AtomicInteger preparingTracks = new AtomicInteger(0);
     private PlayerData playingTrack = null;
 
     private ThreadPoolExecutor pool = new ThreadPoolExecutor(1, 1, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
@@ -704,12 +703,8 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
     private LoadTask currentTask = null;
 
     private void createPlayer(PlayerData next) {
-        preparingTracks.incrementAndGet();
-
         exoPlayer.stop(true);
         exoPlayer.setPlayWhenReady(true);
-
-        onStateModified();
 
         LoadTask task = new LoadTask();
 
@@ -718,6 +713,8 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
         LoadTask prevTask = currentTask;
 
         currentTask = task;
+
+        onStateModified();
 
         pool.submit(() -> {
             // Cancel previous task
@@ -737,54 +734,48 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
             }
 
             PlayerData track = task.track;
-            if (track != null) {
-                if (playingTrack != null) {
-                    playingTrack.getDataSource().finish();
-                }
-                playingTrack = track;
-                track.getDataSource().prepare(null, null);
-                track.getDataSource().getExoPlayerSources(this, (sources) -> {
-                    boolean acquiredLock = false;
-                    while (!acquiredLock) {
-                        try {
-                            task.mutex.acquire();
-                            acquiredLock = true;
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-
-                    // Check if the task was cancelled
-                    if (task.cancel) {
-                        return;
-                    }
-
-                    trackSources.clear();
-                    trackSources.addAll(sources);
-
-                    trackSourceIndex = 0;
-
-                    runOnMainThread(() -> {
-                        Log.v(LOG_TAG, "Prepared MediaSources for track " + track.getMetadata().getTitle());
-                        preparingTracks.decrementAndGet();
-                        task.completed = true;
-                        updateTrackSource();
-                        onStateModified();
-                        task.mutex.release();
-                    });
-                }, (exception) -> {
-                    runOnMainThread(() -> {
-                        Log.e(LOG_TAG, "Failed to retrieve MediaSources");
-                        preparingTracks.decrementAndGet();
-                        next();
-                        task.completed = true;
-                        trackSources.clear();
-                        task.mutex.release();
-                    });
-                });
-            } else {
-                preparingTracks.decrementAndGet();
+            if (playingTrack != null) {
+                playingTrack.getDataSource().finish();
             }
+            playingTrack = track;
+            track.getDataSource().prepare(null, null);
+            track.getDataSource().getExoPlayerSources(this, (sources) -> {
+                boolean acquiredLock = false;
+                while (!acquiredLock) {
+                    try {
+                        task.mutex.acquire();
+                        acquiredLock = true;
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                // Check if the task was cancelled
+                if (task.cancel) {
+                    return;
+                }
+
+                trackSources.clear();
+                trackSources.addAll(sources);
+
+                trackSourceIndex = 0;
+
+                runOnMainThread(() -> {
+                    Log.v(LOG_TAG, "Prepared MediaSources for track " + track.getMetadata().getTitle());
+                    task.completed = true;
+                    updateTrackSource();
+                    onStateModified();
+                    task.mutex.release();
+                });
+            }, (exception) -> {
+                runOnMainThread(() -> {
+                    Log.e(LOG_TAG, "Failed to retrieve MediaSources");
+                    next();
+                    task.completed = true;
+                    trackSources.clear();
+                    task.mutex.release();
+                });
+            });
         });
     }
 

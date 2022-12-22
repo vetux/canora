@@ -1,159 +1,175 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/main_footer"
     android:layout_width="match_parent"
-    android:layout_height="75dp">
+    android:layout_height="wrap_content">
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/main_footer"
+        android:layout_width="match_parent"
+        android:layout_height="75dp">
 
-    <com.phaseshifter.canora.ui.widgets.CustomImageView
-        android:id="@+id/control_imageview_background"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:scaleType="centerCrop"
-        android:src="?texControl"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        android:tint="?colorPrimary_60"/>
+        <com.phaseshifter.canora.ui.widgets.CustomImageView
+            android:id="@+id/control_imageview_background"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:scaleType="centerCrop"
+            android:src="?texControl"
+            android:tint="?colorPrimary_60"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    <com.phaseshifter.canora.ui.widgets.CustomImageView
-        android:id="@+id/control_imageview_cover"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:scaleType="centerCrop"
-        android:src="@drawable/artwork_unset"
-        android:layout_margin="5dp"
-        app:layout_constraintDimensionRatio="1:1"
-        app:layout_constraintTop_toBottomOf="@id/control_seekbar_progressstatic"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-    <SurfaceView
-        android:id="@+id/control_video_viewport"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_margin="5dp"
-        app:layout_constraintDimensionRatio="1:1"
-        app:layout_constraintTop_toBottomOf="@id/control_seekbar_progressstatic"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        <com.phaseshifter.canora.ui.widgets.CustomImageView
+            android:id="@+id/control_imageview_cover"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_margin="5dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/artwork_unset"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/control_seekbar_progressstatic" />
 
-    <ImageButton
-        android:id="@+id/control_button_open"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="@android:color/transparent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/control_button_prev" />
+        <View
+            android:id="@+id/control_video_viewport_background"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@android:color/black"
+            app:layout_constraintBottom_toBottomOf="@id/control_imageview_cover"
+            app:layout_constraintEnd_toEndOf="@id/control_imageview_cover"
+            app:layout_constraintStart_toStartOf="@id/control_imageview_cover"
+            app:layout_constraintTop_toTopOf="@id/control_imageview_cover" />
 
-    <SeekBar
-        android:id="@+id/control_seekbar_progressstatic"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:max="1000"
-        android:maxHeight="5dp"
-        android:minHeight="5dp"
-        android:paddingStart="0dp"
-        android:paddingEnd="0dp"
-        android:progress="1000"
-        android:progressDrawable="@drawable/seekbar_progress_playercontrols"
-        android:thumb="@null"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        <SurfaceView
+            android:id="@+id/control_video_viewport"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:elevation="1dp"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintBottom_toBottomOf="@id/control_imageview_cover"
+            app:layout_constraintEnd_toEndOf="@id/control_imageview_cover"
+            app:layout_constraintStart_toStartOf="@id/control_imageview_cover"
+            app:layout_constraintTop_toTopOf="@id/control_imageview_cover" />
 
-    <TextView
-        android:id="@+id/control_text_title"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:background="@null"
-        android:ellipsize="marquee"
-        android:gravity="center_vertical"
-        android:includeFontPadding="false"
-        android:singleLine="true"
-        android:paddingLeft="5dp"
-        android:text="TITLE_TITLE_TITLE"
-        android:textColor="?onTexControl"
-        android:textSize="18sp"
-        app:layout_constraintTop_toBottomOf="@id/control_seekbar_progressstatic"
-        app:layout_constraintBottom_toTopOf="@id/control_text_artist"
-        app:layout_constraintStart_toEndOf="@id/control_video_viewport"
-        app:layout_constraintEnd_toStartOf="@id/control_progressbar_playbackload"
-        app:layout_constraintVertical_chainStyle="packed" />
+        <ImageButton
+            android:id="@+id/control_button_open"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@android:color/transparent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/control_button_prev"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/control_text_artist"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:background="@null"
-        android:ellipsize="marquee"
-        android:gravity="center_vertical"
-        android:includeFontPadding="false"
-        android:singleLine="true"
-        android:paddingLeft="5dp"
-        android:text="ARTIST_ARTIST_ARTIST"
-        android:textColor="?onTexControl"
-        android:textSize="18sp"
-        app:layout_constraintTop_toBottomOf="@id/control_text_title"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@id/control_video_viewport"
-        app:layout_constraintEnd_toStartOf="@id/control_progressbar_playbackload"/>
+        <SeekBar
+            android:id="@+id/control_seekbar_progressstatic"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:max="1000"
+            android:maxHeight="5dp"
+            android:minHeight="5dp"
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp"
+            android:progress="1000"
+            android:progressDrawable="@drawable/seekbar_progress_playercontrols"
+            android:thumb="@null"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    <ProgressBar
-        android:id="@+id/control_progressbar_playbackload"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:indeterminate="true"
-        android:indeterminateTint="?colorSecondary"
-        android:indeterminateTintMode="src_atop"
-        android:padding="10dp"
-        app:layout_constraintTop_toBottomOf="@id/control_seekbar_progressstatic"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@id/control_text_title"
-        app:layout_constraintEnd_toStartOf="@id/control_button_prev"/>
+        <TextView
+            android:id="@+id/control_text_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:ellipsize="marquee"
+            android:gravity="center_vertical"
+            android:includeFontPadding="false"
+            android:paddingLeft="5dp"
+            android:singleLine="true"
+            android:text="TITLE_TITLE_TITLE"
+            android:textColor="?onTexControl"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toTopOf="@id/control_text_artist"
+            app:layout_constraintEnd_toStartOf="@id/control_progressbar_playbackload"
+            app:layout_constraintStart_toEndOf="@id/control_imageview_cover"
+            app:layout_constraintTop_toBottomOf="@id/control_seekbar_progressstatic"
+            app:layout_constraintVertical_chainStyle="packed" />
 
-    <ImageButton
-        android:id="@+id/control_button_prev"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:background="@drawable/ripple_imagebutton_square"
-        android:src="@drawable/skip_previous"
-        android:scaleType="fitXY"
-        android:padding="5dp"
-        android:tint="?onTexControl"
-        app:layout_constraintTop_toBottomOf="@id/control_seekbar_progressstatic"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@id/control_progressbar_playbackload"
-        app:layout_constraintEnd_toStartOf="@id/control_button_play"/>
+        <TextView
+            android:id="@+id/control_text_artist"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:ellipsize="marquee"
+            android:gravity="center_vertical"
+            android:includeFontPadding="false"
+            android:paddingLeft="5dp"
+            android:singleLine="true"
+            android:text="ARTIST_ARTIST_ARTIST"
+            android:textColor="?onTexControl"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/control_progressbar_playbackload"
+            app:layout_constraintStart_toEndOf="@id/control_imageview_cover"
+            app:layout_constraintTop_toBottomOf="@id/control_text_title" />
 
-    <ImageButton
-        android:id="@+id/control_button_play"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:background="@drawable/ripple_imagebutton_square"
-        android:src="@drawable/play_arrow"
-        android:scaleType="fitXY"
-        android:padding="2dp"
-        android:tint="?onTexControl"
-        app:layout_constraintTop_toBottomOf="@id/control_seekbar_progressstatic"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@id/control_button_prev"
-        app:layout_constraintEnd_toStartOf="@id/control_button_next"/>
+        <ProgressBar
+            android:id="@+id/control_progressbar_playbackload"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:indeterminate="true"
+            android:indeterminateTint="?colorSecondary"
+            android:indeterminateTintMode="src_atop"
+            android:padding="10dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/control_button_prev"
+            app:layout_constraintStart_toEndOf="@id/control_text_title"
+            app:layout_constraintTop_toBottomOf="@id/control_seekbar_progressstatic" />
 
-    <ImageButton
-        android:id="@+id/control_button_next"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:background="@drawable/ripple_imagebutton_square"
-        android:src="@drawable/skip_next"
-        android:scaleType="fitXY"
-        android:padding="5dp"
-        android:tint="?onTexControl"
-        app:layout_constraintTop_toBottomOf="@id/control_seekbar_progressstatic"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@id/control_button_play"
-        app:layout_constraintEnd_toEndOf="parent"/>
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <ImageButton
+            android:id="@+id/control_button_prev"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@drawable/ripple_imagebutton_square"
+            android:padding="5dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/skip_previous"
+            android:tint="?onTexControl"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/control_button_play"
+            app:layout_constraintStart_toEndOf="@id/control_progressbar_playbackload"
+            app:layout_constraintTop_toBottomOf="@id/control_seekbar_progressstatic" />
+
+        <ImageButton
+            android:id="@+id/control_button_play"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@drawable/ripple_imagebutton_square"
+            android:padding="2dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/play_arrow"
+            android:tint="?onTexControl"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/control_button_next"
+            app:layout_constraintStart_toEndOf="@id/control_button_prev"
+            app:layout_constraintTop_toBottomOf="@id/control_seekbar_progressstatic" />
+
+        <ImageButton
+            android:id="@+id/control_button_next"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@drawable/ripple_imagebutton_square"
+            android:padding="5dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/skip_next"
+            android:tint="?onTexControl"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/control_button_play"
+            app:layout_constraintTop_toBottomOf="@id/control_seekbar_progressstatic" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</FrameLayout>
