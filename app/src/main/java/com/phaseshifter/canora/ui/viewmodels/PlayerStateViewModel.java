@@ -25,12 +25,7 @@ public class PlayerStateViewModel {
     public final Observable<Integer> equalizerPreset = new Observable<>(-1);
 
     public void applyPlayerState(PlayerState state, AudioPlaylist playingPlaylist) {
-        if (state.isPlaying()
-                && state.getPlaybackState() != PlaybackState.STATE_READY) {
-            buffering.setIfNotEqual(true);
-        } else {
-            buffering.setIfNotEqual(state.getPlaybackState() == PlaybackState.STATE_BUFFERING);
-        }
+        buffering.setIfNotEqual(state.getPlaybackState() == PlaybackState.STATE_BUFFERING);
 
         if (state.getCurrentTrack() == null) {
             trackTitle.setIfNotEqual("");

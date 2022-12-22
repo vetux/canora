@@ -23,7 +23,16 @@
         android:layout_height="0dp"
         android:scaleType="centerCrop"
         android:src="@drawable/artwork_unset"
-        android:padding="5dp"
+        android:layout_margin="5dp"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintTop_toBottomOf="@id/control_seekbar_progressstatic"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+    <SurfaceView
+        android:id="@+id/control_video_viewport"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="5dp"
         app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintTop_toBottomOf="@id/control_seekbar_progressstatic"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -65,12 +74,13 @@
         android:gravity="center_vertical"
         android:includeFontPadding="false"
         android:singleLine="true"
+        android:paddingLeft="5dp"
         android:text="TITLE_TITLE_TITLE"
         android:textColor="?onTexControl"
         android:textSize="18sp"
         app:layout_constraintTop_toBottomOf="@id/control_seekbar_progressstatic"
         app:layout_constraintBottom_toTopOf="@id/control_text_artist"
-        app:layout_constraintStart_toEndOf="@id/control_imageview_cover"
+        app:layout_constraintStart_toEndOf="@id/control_video_viewport"
         app:layout_constraintEnd_toStartOf="@id/control_progressbar_playbackload"
         app:layout_constraintVertical_chainStyle="packed" />
 
@@ -83,12 +93,13 @@
         android:gravity="center_vertical"
         android:includeFontPadding="false"
         android:singleLine="true"
+        android:paddingLeft="5dp"
         android:text="ARTIST_ARTIST_ARTIST"
         android:textColor="?onTexControl"
         android:textSize="18sp"
         app:layout_constraintTop_toBottomOf="@id/control_text_title"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@id/control_imageview_cover"
+        app:layout_constraintStart_toEndOf="@id/control_video_viewport"
         app:layout_constraintEnd_toStartOf="@id/control_progressbar_playbackload"/>
 
     <ProgressBar

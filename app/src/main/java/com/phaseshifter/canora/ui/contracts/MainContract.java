@@ -1,6 +1,7 @@
 package com.phaseshifter.canora.ui.contracts;
 
 import android.net.Uri;
+import android.view.SurfaceView;
 
 import com.phaseshifter.canora.data.media.player.PlayerData;
 import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
@@ -97,6 +98,14 @@ public interface MainContract {
         OutputStream openDocument(Uri uri) throws FileNotFoundException;
 
         void scanDocument(Uri uri, Runnable onScanComplete);
+
+        SurfaceView getLargeVideoSurface();
+
+        SurfaceView getSmallVideoSurface();
+
+        void setShowingVideo(boolean showingVideo);
+
+        void setVideoSize(int width, int height);
     }
 
     interface Presenter {

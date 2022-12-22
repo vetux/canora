@@ -6,6 +6,7 @@ import android.content.ServiceConnection;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.view.SurfaceView;
 
 import com.phaseshifter.canora.data.media.player.PlayerData;
 import com.phaseshifter.canora.service.player.ExoPlayerService;
@@ -363,6 +364,22 @@ public class AutoBindMediaService implements ServiceConnection, MediaPlayerServi
                     mainHandler.post(() -> {
                         if (serviceRef.get() != null)
                             serviceRef.get().setEqualizerPreset(preset);
+                    });
+            });
+        }
+    }
+
+    @Override
+    public void setVideoSurfaceView(SurfaceView view) {
+        verifyMainThread();
+        if (serviceRef.get() != null){
+            serviceRef.get().setVideoSurfaceView(view);
+        } else {
+            exec.execute(() -> {
+                if (requireService())
+                    mainHandler.post(() -> {
+                        if (serviceRef.get() != null)
+                            serviceRef.get().setVideoSurfaceView(view);
                     });
             });
         }

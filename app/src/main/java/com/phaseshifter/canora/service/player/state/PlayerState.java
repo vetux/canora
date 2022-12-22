@@ -16,8 +16,11 @@ public class PlayerState implements Serializable {
     private long playerPosition; //Position of Player in milliseconds
     private float volume;
     private int equalizerPreset;
+    private boolean video;
+    private int width;
+    private int height;
 
-    public PlayerState(PlayerData currentTrack, PlaybackState playbackState, boolean isPlaying, boolean isRepeating, boolean isShuffling, long playerPosition, float volume, int equalizerPreset) {
+    public PlayerState(PlayerData currentTrack, PlaybackState playbackState, boolean isPlaying, boolean isRepeating, boolean isShuffling, long playerPosition, float volume, int equalizerPreset, boolean isVideo, int width, int height) {
         this.currentTrack = currentTrack;
         this.playbackState = playbackState;
         this.playing = isPlaying;
@@ -26,9 +29,12 @@ public class PlayerState implements Serializable {
         this.playerPosition = playerPosition;
         this.volume = volume;
         this.equalizerPreset = equalizerPreset;
+        this.video = isVideo;
+        this.width = width;
+        this.height = height;
     }
 
-    public PlayerState(PlaybackController playbackController, ExoPlayer player, float volume, boolean loadingTrack, int equalizerPreset) {
+    public PlayerState(PlaybackController playbackController, ExoPlayer player, float volume, boolean loadingTrack, int equalizerPreset, boolean isVideo, int width, int height) {
         this(
                 playbackController.getCurrentTrack(),
                 loadingTrack ? PlaybackState.STATE_BUFFERING : PlaybackState.fromInt(player.getPlaybackState()),
@@ -37,16 +43,19 @@ public class PlayerState implements Serializable {
                 playbackController.getShuffle(),
                 player.getCurrentPosition(),
                 volume,
-                equalizerPreset
+                equalizerPreset,
+                isVideo,
+                width,
+                height
         );
     }
 
     public PlayerState(PlayerState copy) {
-        this(copy.currentTrack, copy.playbackState, copy.playing, copy.repeating, copy.shuffling, copy.playerPosition, copy.volume, copy.equalizerPreset);
+        this(copy.currentTrack, copy.playbackState, copy.playing, copy.repeating, copy.shuffling, copy.playerPosition, copy.volume, copy.equalizerPreset, copy.video, copy.width, copy.height);
     }
 
     public PlayerState() {
-        this(null, null, false, false, false, 0, 0, 0);
+        this(null, null, false, false, false, 0, 0, 0, false, 0, 0);
     }
 
     public PlayerData getCurrentTrack() {
@@ -111,6 +120,30 @@ public class PlayerState implements Serializable {
 
     public void setEqualizerPreset(int value) {
         equalizerPreset = value;
+    }
+
+    public boolean isVideo() {
+        return video;
+    }
+
+    public void setVideo(boolean video) {
+        this.video = video;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public void setWidth(int value) {
+        width = value;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public void setHeight(int value) {
+        height = value;
     }
 
     @Override

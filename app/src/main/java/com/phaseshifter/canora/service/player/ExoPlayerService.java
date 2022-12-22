@@ -16,11 +16,14 @@ import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.os.*;
 import android.util.Log;
+import android.view.SurfaceView;
 
 import androidx.annotation.NonNull;
 
 import com.google.android.exoplayer2.C;
+import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.PlaybackException;
+import com.google.android.exoplayer2.Tracks;
 import com.phaseshifter.canora.R;
 import com.phaseshifter.canora.data.media.player.PlayerData;
 import com.phaseshifter.canora.service.player.mediasession.MediaSessionCallback;
@@ -38,11 +41,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 //TODO:Testing: Create Unit Tests for Service.
 //TODO: Implement volume fade
@@ -95,8 +102,6 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
 
     private AtomicInteger preparingTracks = new AtomicInteger(0);
     private PlayerData playingTrack = null;
-
-    private AtomicReference<PlayerData> requestedTrack = new AtomicReference<>(null);
 
     private ThreadPoolExecutor pool = new ThreadPoolExecutor(1, 1, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
 
@@ -402,6 +407,13 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
     }
 
     @Override
+    public void setVideoSurfaceView(SurfaceView view) {
+        runOnMainThread(() -> {
+            exoPlayer.setVideoSurfaceView(view);
+        });
+    }
+
+    @Override
     public Observable<PlayerState> getState() {
         return state;
     }
@@ -443,8 +455,25 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
         });
     }
 
+    private boolean isPlayingVideo() {
+        for (Tracks.Group group : exoPlayer.getCurrentTracks().getGroups()) {
+            if (group.getType() == C.TRACK_TYPE_VIDEO) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void onStateModified() {
-        PlayerState newState = new PlayerState(playbackController, exoPlayer, volume, preparingTracks.get() > 0, equalizerPreset);
+        Format format = exoPlayer.getVideoFormat();
+        PlayerState newState = new PlayerState(playbackController,
+                exoPlayer,
+                volume,
+                currentTask != null && !currentTask.completed,
+                equalizerPreset,
+                isPlayingVideo(),
+                format == null ? 0 : format.width, format == null ? 0 : format.height);
+
         runOnMainThread(() -> {
             boolean changed = !Objects.equals(this.state.get(), newState);
             this.state.set(newState);
@@ -665,6 +694,15 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
         registerReceiver(brcv, flt);
     }
 
+    private class LoadTask {
+        public boolean cancel = false;
+        public boolean completed = false;
+        public Semaphore mutex = new Semaphore(1);
+        public PlayerData track = null;
+    }
+
+    private LoadTask currentTask = null;
+
     private void createPlayer(PlayerData next) {
         preparingTracks.incrementAndGet();
 
@@ -673,17 +711,54 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
 
         onStateModified();
 
-        requestedTrack.set(next);
+        LoadTask task = new LoadTask();
+
+        task.track = next;
+
+        LoadTask prevTask = currentTask;
+
+        currentTask = task;
 
         pool.submit(() -> {
-            PlayerData track = requestedTrack.getAndSet(null);
+            // Cancel previous task
+            if (prevTask != null) {
+                boolean acquiredLock = false;
+                while (!acquiredLock) {
+                    try {
+                        prevTask.mutex.acquire();
+                        acquiredLock = true;
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                prevTask.cancel = true;
+                prevTask.mutex.release();
+            }
+
+            PlayerData track = task.track;
             if (track != null) {
                 if (playingTrack != null) {
                     playingTrack.getDataSource().finish();
                 }
                 playingTrack = track;
-                track.getDataSource().prepare(null,null);
+                track.getDataSource().prepare(null, null);
                 track.getDataSource().getExoPlayerSources(this, (sources) -> {
+                    boolean acquiredLock = false;
+                    while (!acquiredLock) {
+                        try {
+                            task.mutex.acquire();
+                            acquiredLock = true;
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    // Check if the task was cancelled
+                    if (task.cancel) {
+                        return;
+                    }
+
                     trackSources.clear();
                     trackSources.addAll(sources);
 
@@ -692,20 +767,19 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
                     runOnMainThread(() -> {
                         Log.v(LOG_TAG, "Prepared MediaSources for track " + track.getMetadata().getTitle());
                         preparingTracks.decrementAndGet();
-                        if (requestedTrack.get() == null) {
-                            updateTrackSource();
-                            onStateModified();
-                        }
+                        task.completed = true;
+                        updateTrackSource();
+                        onStateModified();
+                        task.mutex.release();
                     });
                 }, (exception) -> {
                     runOnMainThread(() -> {
-                        trackSources.clear();
-
                         Log.e(LOG_TAG, "Failed to retrieve MediaSources");
                         preparingTracks.decrementAndGet();
-                        if (requestedTrack.get() == null) {
-                            next();
-                        }
+                        next();
+                        task.completed = true;
+                        trackSources.clear();
+                        task.mutex.release();
                     });
                 });
             } else {

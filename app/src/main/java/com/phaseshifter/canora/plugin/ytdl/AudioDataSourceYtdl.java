@@ -50,7 +50,7 @@ public class AudioDataSourceYtdl implements PlayerDataSource, Serializable {
                 try {
                     YoutubeDL ytdl = MainApplication.instance.getYoutubeDlInstance();
                     YoutubeDLRequest request = new YoutubeDLRequest(url);
-                    request.addOption("-f", "bestaudio");
+                    request.addOption("-f", "best");
                     VideoInfo streamInfo = ytdl.getInfo(request);
                     streamUrl = streamInfo.getUrl();
                     if (onReady != null)
@@ -61,6 +61,8 @@ public class AudioDataSourceYtdl implements PlayerDataSource, Serializable {
                         onError.run(e);
                 }
             });
+        } else {
+            onReady.run();
         }
     }
 

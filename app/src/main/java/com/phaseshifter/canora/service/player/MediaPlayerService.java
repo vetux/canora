@@ -1,5 +1,7 @@
 package com.phaseshifter.canora.service.player;
 
+import android.view.SurfaceView;
+
 import com.phaseshifter.canora.data.media.player.PlayerData;
 import com.phaseshifter.canora.service.player.state.PlayerState;
 import com.phaseshifter.canora.utils.Observable;
@@ -48,6 +50,8 @@ public interface MediaPlayerService {
      * @param preset If negative equalizer is disabled otherwise the index of the equalizer preset in android.media.audiofx.Equalizer
      */
     void setEqualizerPreset(int preset);
+
+    void setVideoSurfaceView(SurfaceView view);
 
     Observable<PlayerState> getState();
 }

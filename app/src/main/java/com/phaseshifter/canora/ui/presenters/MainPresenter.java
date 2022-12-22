@@ -413,6 +413,8 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
     @Override
     public void update(Observable<PlayerState> observable, PlayerState value) {
         playerStateViewModel.applyPlayerState(value, getPlaylistForSelector(playingContentSelector, deviceAudioRepository, userPlaylistRepository));
+        view.setShowingVideo(value.isVideo());
+        view.setVideoSize(value.getWidth(), value.getHeight());
         updateHighlightedIndex();
     }
 
@@ -483,6 +485,8 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
         mediaService.setShuffle(settingsRepository.getBoolean(BooleanSetting.SHUFFLE));
         mediaService.setRepeat(settingsRepository.getBoolean(BooleanSetting.REPEAT));
         mediaService.setEqualizerPreset(settingsRepository.getInt(IntegerSetting.EQUALIZER_PRESET_INDEX));
+
+        mediaService.setVideoSurfaceView(view.getSmallVideoSurface());
 
         PlayerState playerState = mediaService.getState().get();
 
@@ -937,6 +941,11 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
 
     @Override
     public void onTransportControlChange(boolean controlMax) {
+        if (controlMax){
+            mediaService.setVideoSurfaceView(view.getLargeVideoSurface());
+        } else {
+            mediaService.setVideoSurfaceView(view.getSmallVideoSurface());
+        }
     }
 
     @Override
