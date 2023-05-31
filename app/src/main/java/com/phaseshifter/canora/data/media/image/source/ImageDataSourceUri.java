@@ -43,28 +43,32 @@ public class ImageDataSourceUri implements ImageDataSource, Serializable {
         if (context == null)
             throw new IllegalArgumentException();
         Uri uri = getUri();
-        if (uri.getScheme().equals("https")
-                || uri.getScheme().equals("http")) {
-            pool.submit(() -> {
-                Bitmap bitmap = null;
-                try {
-                    URL url = new URL(uri.toString());
-                    bitmap = BitmapFactory.decodeStream(url.openConnection().getInputStream());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    onError.run(e);
-                }
-                onReady.run(bitmap);
-            });
+        if (uri == null) {
+            onError.run(new NullPointerException("Null URI for url " + uriStr));
         } else {
-            pool.submit(() ->  {
-                if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                    ImageDecoder.Source src = ImageDecoder.createSource(context.getContentResolver(), uri);
-                    return ImageDecoder.decodeBitmap(src);
-                } else {
-                    return MediaStore.Images.Media.getBitmap(context.getContentResolver(), uri);
-                }
-            });
+            if (uri.getScheme().equals("https")
+                    || uri.getScheme().equals("http")) {
+                pool.submit(() -> {
+                    Bitmap bitmap = null;
+                    try {
+                        URL url = new URL(uri.toString());
+                        bitmap = BitmapFactory.decodeStream(url.openConnection().getInputStream());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        onError.run(e);
+                    }
+                    onReady.run(bitmap);
+                });
+            } else {
+                pool.submit(() -> {
+                    if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                        ImageDecoder.Source src = ImageDecoder.createSource(context.getContentResolver(), uri);
+                        return ImageDecoder.decodeBitmap(src);
+                    } else {
+                        return MediaStore.Images.Media.getBitmap(context.getContentResolver(), uri);
+                    }
+                });
+            }
         }
     }
 
