@@ -79,12 +79,13 @@ public class AudioDataSourceYtdl implements PlayerDataSource, Serializable {
     public void getExoPlayerSources(Context context, RunnableArg<List<MediaSource>> onReady, RunnableArg<Exception> onException) {
         pool.execute(() -> {
             if (streamUrl == null) {
-                throw new RuntimeException("Failed to retrieve stream data for track " + url);
+                onException.run(new RuntimeException("Failed to retrieve stream data for track " + url));
+            } else {
+                List<MediaSource> ret = new ArrayList<>();
+                DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(context, "clank");
+                ret.add(new ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(MediaItem.fromUri(Uri.parse(streamUrl))));
+                onReady.run(ret);
             }
-            List<MediaSource> ret = new ArrayList<>();
-            DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(context, "clank");
-            ret.add(new ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(MediaItem.fromUri(Uri.parse(streamUrl))));
-            onReady.run(ret);
         });
     }
 
