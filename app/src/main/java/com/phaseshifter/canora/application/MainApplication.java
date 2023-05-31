@@ -23,6 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
 public class MainApplication extends Application {
+    private static final String LOG_TAG = "MainApplication";
     public static MainApplication instance;
     private DeviceAudioRepository audioDataRepo;
     private UserPlaylistRepository audioPlaylistRepository;
@@ -36,6 +37,8 @@ public class MainApplication extends Application {
 
     private final String DOUBLE_LINE_SEP = "  ";
     private final String SINGLE_LINE_SEP = " ";
+
+    private Thread ytDlLoaderThread;
 
     public void uncaughtException(Thread t, final Throwable e) {
         //https://stackoverflow.com/a/13417090
@@ -128,6 +131,18 @@ public class MainApplication extends Application {
         scAudioDataRepo = new SoundCloudAudioRepository();
         ytRepo = new YoutubeSearchRepository(new YoutubeApiClient());
 
+        ytDlLoaderThread = new Thread(() -> {
+            try {
+                YoutubeDL.getInstance().init(this);
+                FFmpeg.getInstance().init(this);
+                YoutubeDL.getInstance().updateYoutubeDL(this);
+                Log.v(LOG_TAG, "YoutubeDL Version:" + YoutubeDL.getInstance().version(this));
+            } catch (Exception e) {
+                Log.e(LOG_TAG, e.getMessage());
+            }
+        });
+        ytDlLoaderThread.start();
+
         try {
             File crashDir = new File(getCrashLogsPath());
             File[] files = crashDir.listFiles();
@@ -183,15 +198,12 @@ public class MainApplication extends Application {
     }
 
     public YoutubeDL getYoutubeDlInstance() {
-        try {
-            if (!instanceInit) {
-                YoutubeDL.getInstance().init(this);
-                FFmpeg.getInstance().init(this);
-                YoutubeDL.getInstance().updateYoutubeDL(this);
-                instanceInit = true;
+        while (ytDlLoaderThread.isAlive()) {
+            try {
+                ytDlLoaderThread.join();
+            } catch (Exception e) {
+                Log.e(LOG_TAG, e.getMessage());
             }
-        } catch (Exception e) {
-            Log.e("MainApplication", "" + e.getMessage());
         }
         return YoutubeDL.getInstance();
     }
