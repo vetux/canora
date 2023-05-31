@@ -26,6 +26,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class AudioDataSourceSC implements PlayerDataSource, Serializable {
     private static final long serialVersionUID = 1;
@@ -34,6 +36,9 @@ public class AudioDataSourceSC implements PlayerDataSource, Serializable {
 
     private final List<SCV2Track.MediaTranscoding> codings = new ArrayList<>();
     private transient List<Pair<SCV2StreamProtocol, String>> streams = null;
+
+    private static final ExecutorService pool = Executors.newCachedThreadPool();
+    private static final Object mutex = new Object();
 
     public String getUrls() {
         StringBuilder ret = new StringBuilder();
@@ -45,11 +50,13 @@ public class AudioDataSourceSC implements PlayerDataSource, Serializable {
     }
 
     private SCV2Client getClient() {
-        if (client == null) {
-            client = new SCV2Client();
-            updateClientId();
+        synchronized (mutex){
+            if (client == null) {
+                client = new SCV2Client();
+                updateClientId();
+            }
+            return client;
         }
-        return client;
     }
 
     private void updateClientId() {
@@ -81,47 +88,41 @@ public class AudioDataSourceSC implements PlayerDataSource, Serializable {
     }
 
     @Override
-    public void prepare(Runnable onReady, RunnableArg<Exception> onError) {
-        if (getStreams().isEmpty()) {
-            try {
-                loadStreams();
-            } catch (Exception e) {
-                e.printStackTrace();
-                updateClientId();
+    public void getExoPlayerSources(Context context, RunnableArg<List<MediaSource>> onReady, RunnableArg<Exception> onException) {
+        pool.execute(() -> {
+            if (getStreams().isEmpty()) {
                 try {
                     loadStreams();
-                } catch (Exception ex) {
-                    getStreams().clear();
-                    ex.printStackTrace();
-                    onError.run(ex);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    updateClientId();
+                    try {
+                        loadStreams();
+                    } catch (Exception ex) {
+                        getStreams().clear();
+                        ex.printStackTrace();
+                        onException.run(ex);
+                    }
                 }
             }
-        }
-    }
-
-    @Override
-    public void finish() {
-        streams.clear();
-    }
-
-    @Override
-    public void getExoPlayerSources(Context context, RunnableArg<List<MediaSource>> onReady, RunnableArg<Exception> onException) {
-        if (getStreams().isEmpty()) {
-            throw new RuntimeException("Failed to retrieve stream data for track " + codings);
-        }
-        List<MediaSource> ret = new ArrayList<>();
-        DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(context, "clank");
-        for (Pair<SCV2StreamProtocol, String> stream : getStreams()) {
-            switch (stream.first) {
-                case HLS:
-                    ret.add(new HlsMediaSource.Factory(dataSourceFactory).createMediaSource(MediaItem.fromUri(Uri.parse(stream.second))));
-                    break;
-                case PROGRESSIVE:
-                    ret.add(new ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(MediaItem.fromUri(Uri.parse(stream.second))));
-                    break;
+            if (getStreams().isEmpty()) {
+                onException.run(new RuntimeException("Failed to retrieve stream data for track " + codings));
+            } else {
+                List<MediaSource> ret = new ArrayList<>();
+                DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(context, "clank");
+                for (Pair<SCV2StreamProtocol, String> stream : getStreams()) {
+                    switch (stream.first) {
+                        case HLS:
+                            ret.add(new HlsMediaSource.Factory(dataSourceFactory).createMediaSource(MediaItem.fromUri(Uri.parse(stream.second))));
+                            break;
+                        case PROGRESSIVE:
+                            ret.add(new ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(MediaItem.fromUri(Uri.parse(stream.second))));
+                            break;
+                    }
+                }
+                onReady.run(ret);
             }
-        }
-        onReady.run(ret);
+        });
     }
 
     @Override

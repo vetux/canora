@@ -734,11 +734,7 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
             }
 
             PlayerData track = task.track;
-            if (playingTrack != null) {
-                playingTrack.getDataSource().finish();
-            }
             playingTrack = track;
-            track.getDataSource().prepare(null, null);
             track.getDataSource().getExoPlayerSources(this, (sources) -> {
                 boolean acquiredLock = false;
                 while (!acquiredLock) {

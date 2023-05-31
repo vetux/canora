@@ -9,19 +9,6 @@ import java.util.List;
 
 public interface PlayerDataSource {
     /**
-     * Prepare the data source for playback.
-     * <p>
-     * Called some time before getExoPlayerSource is called.
-     * @param onReady
-     * @param onError
-     */
-    default void prepare(Runnable onReady, RunnableArg<Exception> onError) {
-    }
-
-    default void finish() {
-    }
-
-    /**
      * Called when the player fails to stream from the returned media sources.
      * Network based sources can then for example refresh the url.
      */

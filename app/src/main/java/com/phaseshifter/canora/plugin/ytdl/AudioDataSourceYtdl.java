@@ -29,7 +29,7 @@ public class AudioDataSourceYtdl implements PlayerDataSource, Serializable {
     private final String url;
     private transient String streamUrl = null;
 
-    private static ExecutorService pool = Executors.newSingleThreadExecutor();
+    private static final ExecutorService pool = Executors.newCachedThreadPool();
 
     public String getUrl() {
         return url;
@@ -44,33 +44,6 @@ public class AudioDataSourceYtdl implements PlayerDataSource, Serializable {
     }
 
     @Override
-    public void prepare(Runnable onReady, RunnableArg<Exception> onError) {
-        if (streamUrl == null) {
-            pool.execute(() -> {
-                try {
-                    YoutubeDL ytdl = MainApplication.instance.getYoutubeDlInstance();
-                    YoutubeDLRequest request = new YoutubeDLRequest(url);
-                    request.addOption("-f", "best");
-                    VideoInfo streamInfo = ytdl.getInfo(request);
-                    streamUrl = streamInfo.getUrl();
-                    if (onReady != null)
-                        onReady.run();
-                } catch (Exception e) {
-                    Log.e("StreamDownloader", e.getMessage());
-                    if (onError != null)
-                        onError.run(e);
-                }
-            });
-        } else {
-            onReady.run();
-        }
-    }
-
-    @Override
-    public void finish() {
-    }
-
-    @Override
     public void failed() {
         streamUrl = null;
     }
@@ -79,7 +52,20 @@ public class AudioDataSourceYtdl implements PlayerDataSource, Serializable {
     public void getExoPlayerSources(Context context, RunnableArg<List<MediaSource>> onReady, RunnableArg<Exception> onException) {
         pool.execute(() -> {
             if (streamUrl == null) {
-                onException.run(new RuntimeException("Failed to retrieve stream data for track " + url));
+                try {
+                    YoutubeDL ytdl = MainApplication.instance.getYoutubeDlInstance();
+                    YoutubeDLRequest request = new YoutubeDLRequest(url);
+                    request.addOption("-f", "best");
+                    VideoInfo streamInfo = ytdl.getInfo(request);
+                    streamUrl = streamInfo.getUrl();
+                } catch (Exception e) {
+                    if (onException != null)
+                        onException.run(e);
+                }
+            }
+            if (streamUrl == null) {
+                if (onException != null)
+                    onException.run(new RuntimeException("Failed to retrieve stream data for track " + url));
             } else {
                 List<MediaSource> ret = new ArrayList<>();
                 DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(context, "clank");
