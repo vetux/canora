@@ -486,8 +486,6 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
         mediaService.setRepeat(settingsRepository.getBoolean(BooleanSetting.REPEAT));
         mediaService.setEqualizerPreset(settingsRepository.getInt(IntegerSetting.EQUALIZER_PRESET_INDEX));
 
-        mediaService.setVideoSurfaceView(view.getSmallVideoSurface());
-
         PlayerState playerState = mediaService.getState().get();
 
         if (playerState != null)
@@ -499,6 +497,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
             deviceAudioRepository.refresh();
             mainThread.execute(() -> {
                 view.setTheme(theme);
+                mediaService.setVideoSurfaceView(view.getSmallVideoSurface());
                 appViewModel.notifyObservers();
                 contentViewModel.notifyObservers();
                 playerStateViewModel.notifyObservers();
@@ -941,7 +940,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
 
     @Override
     public void onTransportControlChange(boolean controlMax) {
-        if (controlMax){
+        if (controlMax) {
             mediaService.setVideoSurfaceView(view.getLargeVideoSurface());
         } else {
             mediaService.setVideoSurfaceView(view.getSmallVideoSurface());
