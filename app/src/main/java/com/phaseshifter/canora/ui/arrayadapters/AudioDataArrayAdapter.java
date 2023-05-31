@@ -6,8 +6,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
 import com.phaseshifter.canora.R;
 import com.phaseshifter.canora.data.media.player.PlayerData;
 import com.phaseshifter.canora.data.media.image.ImageData;
@@ -114,10 +116,8 @@ public class AudioDataArrayAdapter extends ArrayAdapter<PlayerData> implements S
                     .setDefaultRequestOptions(RequestOptions
                             .diskCacheStrategyOf(DiskCacheStrategy.NONE))
                     .load(imageData)
-                    .override(Target.SIZE_ORIGINAL)
-                   // .placeholder(defaultArt) Using placeholder here causes the images to not be centerCrop'ed
-                    .transition(DrawableTransitionOptions.withCrossFade())
                     .centerCrop()
+                    .transition(DrawableTransitionOptions.withCrossFade())
                     .fallback(R.drawable.artwork_unset)
                     .error(R.drawable.artwork_unset)
                     .placeholder(R.drawable.artwork_unset)
