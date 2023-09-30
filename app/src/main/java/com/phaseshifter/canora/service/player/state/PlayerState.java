@@ -34,11 +34,11 @@ public class PlayerState implements Serializable {
         this.height = height;
     }
 
-    public PlayerState(PlaybackController playbackController, ExoPlayer player, float volume, boolean loadingTrack, int equalizerPreset, boolean isVideo, int width, int height) {
+    public PlayerState(PlaybackController playbackController, ExoPlayer player, boolean isPlaying, float volume, boolean loadingTrack, int equalizerPreset, boolean isVideo, int width, int height) {
         this(
                 playbackController.getCurrentTrack(),
                 loadingTrack ? PlaybackState.STATE_BUFFERING : PlaybackState.fromInt(player.getPlaybackState()),
-                player.isPlaying(),
+                isPlaying,
                 playbackController.getRepeat(),
                 playbackController.getShuffle(),
                 player.getCurrentPosition(),

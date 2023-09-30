@@ -123,22 +123,18 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
         playbackController = new DefaultPlaybackController();
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         if (audioManager != null) {
-            if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                focusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
-                        .setOnAudioFocusChangeListener(this)
-                        .build();
-                audioManager.requestAudioFocus(focusRequest);
-            } else {
-                audioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
-            }
+            focusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+                    .setOnAudioFocusChangeListener(this)
+                    .build();
+            audioManager.requestAudioFocus(focusRequest);
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, NOTIFICATION_CHANNEL_NAME, NotificationManager.IMPORTANCE_LOW);
-            channel.setDescription(NOTIFICATION_CHANNEL_DESCRIPTION);
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            if (notificationManager != null)
-                notificationManager.createNotificationChannel(channel);
-        }
+
+        NotificationChannel channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, NOTIFICATION_CHANNEL_NAME, NotificationManager.IMPORTANCE_LOW);
+        channel.setDescription(NOTIFICATION_CHANNEL_DESCRIPTION);
+        NotificationManager notificationManager = getSystemService(NotificationManager.class);
+        if (notificationManager != null)
+            notificationManager.createNotificationChannel(channel);
+
         mediaSession = new MediaSession(this, "CanoraMS");
         mediaSession.setCallback(new MediaSessionCallback(this));
         mediaSession.setActive(true);
@@ -157,13 +153,13 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
                         next();
                     }
                 }
-                onStateModified();
+                onStateModified(state.get().isPlaying());
             }
 
             @Override
             public void onIsPlayingChanged(boolean isPlaying) {
                 Log.v(LOG_TAG, "onIsPlayingChanged " + isPlaying);
-                onStateModified();
+                onStateModified(state.get().isPlaying());
             }
 
             @Override
@@ -174,14 +170,27 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
                 }
                 error.printStackTrace();
                 broadcastError();
-                onStateModified();
-                if (!trackSources.isEmpty()) {
-                    trackSourceIndex++;
-                    if (trackSourceIndex >= 0 && trackSourceIndex < trackSources.size()) {
-                        updateTrackSource();
-                    } else {
-                        next();
+                onStateModified(state.get().isPlaying());
+
+                LoadTask task = currentTask;
+
+                // Wait for current loading task to finish
+                if (task != null) {
+                    while (task.latch.getCount() > 0) {
+                        try {
+                            task.latch.await();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
+                }
+
+                // Attempt to use a different source for the given track
+                trackSourceIndex++;
+                if (trackSourceIndex >= trackSources.size()) {
+                    next();
+                } else {
+                    updateTrackSource();
                 }
             }
 
@@ -194,7 +203,7 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
             }
         });
         exoPlayer.setVolume(volume);
-        onStateModified();
+        onStateModified(false);
         registerBroadcastReceiver();
     }
 
@@ -207,11 +216,9 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
         } catch (Exception e) {
             e.printStackTrace();
         }
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            audioManager.abandonAudioFocusRequest(focusRequest);
-        } else {
-            audioManager.abandonAudioFocus(this);
-        }
+
+        audioManager.abandonAudioFocusRequest(focusRequest);
+
         mediaSession.setActive(false);
         mediaSession.release();
         try {
@@ -265,7 +272,7 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
                 Log.v(LOG_TAG, "Current Track not found in new dataset. Stopping player...");
                 exoPlayer.stop(true);
             }
-            onStateModified();
+            onStateModified(state.get().isPlaying());
         }
     }
 
@@ -276,6 +283,7 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
         if (n != null) {
             Log.v(LOG_TAG, "Setting up Track: " + n.getMetadata().getTitle());
             createPlayer(n);
+            resume();
         } else {
             Log.e(LOG_TAG, "Null track");
         }
@@ -319,12 +327,14 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
     public void pause() {
         Log.v(LOG_TAG, "pause");
         exoPlayer.setPlayWhenReady(false);
+        onStateModified(false);
     }
 
     @Override
     public void resume() {
         Log.v(LOG_TAG, "resume");
         exoPlayer.setPlayWhenReady(true);
+        onStateModified(true);
     }
 
     @Override
@@ -359,7 +369,7 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
     public void setShuffle(boolean shuffle) {
         Log.v(LOG_TAG, "setShuffle " + shuffle);
         playbackController.setShuffle(shuffle);
-        onStateModified();
+        onStateModified(state.get().isPlaying());
     }
 
     @Override
@@ -371,7 +381,7 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
     public void setRepeat(boolean repeat) {
         Log.v(LOG_TAG, "setRepeat " + repeat);
         playbackController.setRepeat(repeat);
-        onStateModified();
+        onStateModified(state.get().isPlaying());
     }
 
     @Override
@@ -380,7 +390,7 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
             Log.v(LOG_TAG, "setVolume " + vol);
             volume = vol;
             exoPlayer.setVolume(vol);
-            onStateModified();
+            onStateModified(state.get().isPlaying());
         } else {
             throw new IllegalArgumentException("Invalid volume: " + vol);
         }
@@ -401,7 +411,7 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
                     e.printStackTrace();
                 }
             }
-            onStateModified();
+            onStateModified(state.get().isPlaying());
         }
     }
 
@@ -463,10 +473,11 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
         return false;
     }
 
-    private void onStateModified() {
+    private void onStateModified(boolean playing) {
         Format format = exoPlayer.getVideoFormat();
         PlayerState newState = new PlayerState(playbackController,
                 exoPlayer,
+                playing,
                 volume,
                 currentTask != null && !currentTask.completed,
                 equalizerPreset,
@@ -556,7 +567,6 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
 
             Notification notification = notificationBuilder.build();
 
-
             NotificationManager nfm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
             if (nfm != null) {
                 nfm.notify(NOTIFICATION_ID, notification);
@@ -587,28 +597,24 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
         if (track != null) {
             final String title = track.getMetadata().getTitle();
             final String artist = track.getMetadata().getArtist();
+            final long duration = track.getMetadata().getDuration();
             if (track.getMetadata().getArtwork() != null) {
                 track.getMetadata().getArtwork().getDataSource().getBitmap(this, (bitmap) -> {
                             runOnMainThread(() -> {
+                                MediaMetadata.Builder b = new MediaMetadata.Builder()
+                                        .putString(MediaMetadata.METADATA_KEY_TITLE, title)
+                                        .putString(MediaMetadata.METADATA_KEY_ARTIST, artist)
+                                        .putLong(MediaMetadata.METADATA_KEY_DURATION, duration);
                                 if (bitmap != null) {
-                                    MediaMetadata.Builder b = new MediaMetadata.Builder()
-                                            .putString(MediaMetadata.METADATA_KEY_TITLE, title)
-                                            .putString(MediaMetadata.METADATA_KEY_ARTIST, artist);
                                     b.putBitmap(MediaMetadata.METADATA_KEY_ART, bitmap)
                                             .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, bitmap);
-
-                                    mediaSession.setMetadata(b.build());
                                 } else {
                                     Bitmap defBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.artwork_unset);
 
-                                    MediaMetadata.Builder b = new MediaMetadata.Builder()
-                                            .putString(MediaMetadata.METADATA_KEY_TITLE, title)
-                                            .putString(MediaMetadata.METADATA_KEY_ARTIST, artist);
                                     b.putBitmap(MediaMetadata.METADATA_KEY_ART, defBitmap)
                                             .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, defBitmap);
-
-                                    mediaSession.setMetadata(b.build());
                                 }
+                                mediaSession.setMetadata(b.build());
                                 mediaSession.setPlaybackState(getMediaSessionState(state.isPlaying(), state.getPlayerPosition()));
                             });
                         },
@@ -632,12 +638,13 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
 
     private PlaybackState getMediaSessionState(boolean playing, long pos) {
         return new PlaybackState.Builder()
-                .setState(playing ? PlaybackState.STATE_PLAYING : PlaybackState.STATE_PAUSED, pos, 1f, System.currentTimeMillis())
+                .setState(playing ? PlaybackState.STATE_PLAYING : PlaybackState.STATE_PAUSED, pos, 1f, SystemClock.elapsedRealtime())
                 .setActions(PlaybackState.ACTION_PLAY
                         | PlaybackState.ACTION_PAUSE
                         | PlaybackState.ACTION_SKIP_TO_NEXT
                         | PlaybackState.ACTION_SKIP_TO_PREVIOUS
-                        | PlaybackState.ACTION_PLAY_PAUSE)
+                        | PlaybackState.ACTION_PLAY_PAUSE
+                        | PlaybackState.ACTION_SEEK_TO)
                 .build();
     }
 
@@ -698,13 +705,14 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
         public boolean completed = false;
         public Semaphore mutex = new Semaphore(1);
         public PlayerData track = null;
+        public CountDownLatch latch = new CountDownLatch(1);
     }
 
     private LoadTask currentTask = null;
 
     private void createPlayer(PlayerData next) {
         exoPlayer.stop(true);
-        exoPlayer.setPlayWhenReady(true);
+        exoPlayer.setPlayWhenReady(state.get().isPlaying());
 
         LoadTask task = new LoadTask();
 
@@ -714,7 +722,7 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
 
         currentTask = task;
 
-        onStateModified();
+        onStateModified(state.get().isPlaying());
 
         pool.submit(() -> {
             // Cancel previous task
@@ -735,6 +743,7 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
 
             PlayerData track = task.track;
             playingTrack = track;
+
             track.getDataSource().getExoPlayerSources(this, (sources) -> {
                 boolean acquiredLock = false;
                 while (!acquiredLock) {
@@ -746,30 +755,45 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
                     }
                 }
 
-                // Check if the task was cancelled
-                if (task.cancel) {
-                    return;
-                }
-
-                trackSources.clear();
-                trackSources.addAll(sources);
-
-                trackSourceIndex = 0;
-
                 runOnMainThread(() -> {
                     Log.v(LOG_TAG, "Prepared MediaSources for track " + track.getMetadata().getTitle());
+
+                    if (!task.cancel) {
+                        trackSources.clear();
+                        trackSources.addAll(sources);
+                        trackSourceIndex = 0;
+
+                        updateTrackSource();
+                        onStateModified(state.get().isPlaying());
+                    }
+
                     task.completed = true;
-                    updateTrackSource();
-                    onStateModified();
                     task.mutex.release();
+                    task.latch.countDown();
                 });
             }, (exception) -> {
+                boolean acquiredLock = false;
+                while (!acquiredLock) {
+                    try {
+                        task.mutex.acquire();
+                        acquiredLock = true;
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
                 runOnMainThread(() -> {
                     Log.e(LOG_TAG, "Failed to retrieve MediaSources");
-                    next();
+
+                    if (!task.cancel) {
+                        trackSources.clear();
+                        trackSourceIndex = 0;
+                        next();
+                    }
+
                     task.completed = true;
-                    trackSources.clear();
                     task.mutex.release();
+                    task.latch.countDown();
                 });
             });
         });
@@ -778,7 +802,6 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
     private void updateTrackSource() {
         Log.v(LOG_TAG, "Updating MediaSource Current: " + trackSourceIndex + " Sources: " + trackSources);
         exoPlayer.stop(true);
-        exoPlayer.setPlayWhenReady(true);
         exoPlayer.prepare(trackSources.get(trackSourceIndex));
     }
 }

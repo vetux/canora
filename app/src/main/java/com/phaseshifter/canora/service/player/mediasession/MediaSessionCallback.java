@@ -5,8 +5,10 @@ import android.media.session.MediaSession;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.ResultReceiver;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
 import com.phaseshifter.canora.service.player.ExoPlayerService;
 
 public class MediaSessionCallback extends MediaSession.Callback {
@@ -104,7 +106,12 @@ public class MediaSessionCallback extends MediaSession.Callback {
 
     @Override
     public void onSeekTo(long pos) {
+        boolean resume = service.getState().get().isPlaying();
+        service.pause();
         service.seek(pos);
+        if (resume) {
+            service.resume();
+        }
     }
 
     @Override

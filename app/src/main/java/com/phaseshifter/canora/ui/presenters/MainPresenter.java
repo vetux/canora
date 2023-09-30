@@ -119,6 +119,8 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
     private String scSearch = "";
     private String ytSearch = "";
 
+    private boolean resumeSeek = false;
+
     public MainPresenter(MainContract.View view,
                          AutoBindMediaService service,
                          AutoBindDownloadService downloadService,
@@ -570,6 +572,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
 
     @Override
     public void onTrackSeekStart() {
+        resumeSeek = mediaService.getState().get().isPlaying();
         mediaService.pause();
     }
 
@@ -580,7 +583,8 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
 
     @Override
     public void onTrackSeekStop() {
-        mediaService.resume();
+        if (resumeSeek)
+            mediaService.resume();
     }
 
     @Override
