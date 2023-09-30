@@ -6,6 +6,7 @@ import android.icu.util.Calendar;
 import android.os.Build;
 import android.util.Log;
 
+import com.phaseshifter.canora.BuildConfig;
 import com.phaseshifter.canora.model.provider.MediaStoreContentProvider;
 import com.phaseshifter.canora.model.repo.DeviceAudioRepository;
 import com.phaseshifter.canora.model.repo.UserPlaylistRepository;
@@ -35,67 +36,74 @@ public class MainApplication extends Application {
 
     private boolean instanceInit = false;
 
-    private final String DOUBLE_LINE_SEP = "  ";
-    private final String SINGLE_LINE_SEP = " ";
-
     private Thread ytDlLoaderThread;
 
     public void uncaughtException(Thread t, final Throwable e) {
         //https://stackoverflow.com/a/13417090
         StackTraceElement[] arr = e.getStackTrace();
-        final StringBuffer report = new StringBuffer(e.toString());
-        final String lineSeperator = "-------------------------------\n\n";
-        report.append(DOUBLE_LINE_SEP);
-        report.append("--------- Stack trace ---------\n\n");
+        final StringBuffer report = new StringBuffer();
+
+        report.append(e.toString());
+        report.append("\n");
+        report.append("--------- Stack trace ---------\n");
         for (int i = 0; i < arr.length; i++) {
             report.append("    ");
             report.append(arr[i].toString());
-            report.append(SINGLE_LINE_SEP);
+            report.append("\n");
         }
-        report.append(lineSeperator);
 
-        report.append("--------- Cause ---------\n\n");
+        report.append("--------- Cause ---------\n");
         Throwable cause = e.getCause();
         if (cause != null) {
             report.append(cause);
-            report.append(DOUBLE_LINE_SEP);
+            report.append("\n");
             arr = cause.getStackTrace();
             for (int i = 0; i < arr.length; i++) {
                 report.append("    ");
                 report.append(arr[i].toString());
-                report.append(SINGLE_LINE_SEP);
+                report.append("\n");
             }
         }
 
-        report.append(lineSeperator);
-        report.append("--------- Device ---------\n\n");
+        report.append("--------- Device ---------\n");
         report.append("Brand: ");
         report.append(Build.BRAND);
-        report.append(SINGLE_LINE_SEP);
+        report.append("\n");
         report.append("Device: ");
         report.append(Build.DEVICE);
-        report.append(SINGLE_LINE_SEP);
+        report.append("\n");
         report.append("Model: ");
         report.append(Build.MODEL);
-        report.append(SINGLE_LINE_SEP);
+        report.append("\n");
         report.append("Id: ");
         report.append(Build.ID);
-        report.append(SINGLE_LINE_SEP);
+        report.append("\n");
         report.append("Product: ");
         report.append(Build.PRODUCT);
-        report.append(SINGLE_LINE_SEP);
-        report.append(lineSeperator);
-        report.append("--------- Firmware ---------\n\n");
+        report.append("\n");
+        report.append("--------- Firmware ---------\n");
         report.append("SDK: ");
         report.append(Build.VERSION.SDK);
-        report.append(SINGLE_LINE_SEP);
+        report.append("\n");
         report.append("Release: ");
         report.append(Build.VERSION.RELEASE);
-        report.append(SINGLE_LINE_SEP);
+        report.append("\n");
         report.append("Incremental: ");
         report.append(Build.VERSION.INCREMENTAL);
-        report.append(SINGLE_LINE_SEP);
-        report.append(lineSeperator);
+        report.append("\n");
+        report.append("--------- App ---------\n");
+        report.append("Application ID: ");
+        report.append(BuildConfig.APPLICATION_ID);
+        report.append("\n");
+        report.append("Build Type: ");
+        report.append(BuildConfig.BUILD_TYPE);
+        report.append("\n");
+        report.append("Version Name: ");
+        report.append(BuildConfig.VERSION_NAME);
+        report.append("\n");
+        report.append("Version Code: ");
+        report.append(BuildConfig.VERSION_CODE);
+        report.append("\n");
 
         Log.e("Report ::", report.toString());
 
@@ -176,8 +184,12 @@ public class MainApplication extends Application {
         return getFilesDir().getAbsolutePath() + "/playlists/";
     }
 
+    public String getCrashLogsDir()  {
+        return getFilesDir().getAbsolutePath() + "/crashlogs/";
+    }
+
     public String getCrashLogsPath() throws IOException {
-        String ret = getFilesDir().getAbsolutePath() + "/crashlogs/";
+        String ret = getCrashLogsDir();
         File file = new File(ret);
         if (!file.isDirectory()) {
             file.mkdirs();

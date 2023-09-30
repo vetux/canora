@@ -1,27 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/settings_tab_system_log"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="?colorPrimary">
+    android:background="?colorPrimary"
+    android:orientation="vertical">
 
     <View
         android:layout_width="match_parent"
         android:layout_height="2dp"
         android:background="?onColorPrimary_20" />
 
-    <ScrollView
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
         <TextView
-            android:id="@+id/logText"
+            android:id="@+id/logText_crashlogs"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center"
             android:padding="10dp"
-            android:textSize="20sp"
+            android:text="@string/settings_crashlog_count"
             android:textColor="?onColorPrimary"
-            android:gravity="center" />
-    </ScrollView>
+            android:textSize="20sp"
+            app:layout_constraintBottom_toTopOf="@id/logExportBtn"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <Button
+            android:id="@+id/logExportBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/settings_crashlog_export"
+            app:layout_constraintTop_toBottomOf="@id/logText_crashlogs"/>
+
+        <ScrollView
+            android:id="@+id/logScroll"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/logExportBtn">
+            <TextView
+                android:id="@+id/logText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:padding="10dp"
+                android:text="Logs..."
+                android:textColor="?onColorPrimary"
+                android:textSize="20sp"
+                android:layout_gravity="bottom"/>
+        </ScrollView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </LinearLayout>

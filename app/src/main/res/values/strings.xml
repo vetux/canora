@@ -196,7 +196,7 @@
     <string name="settings_list_item_title0displaySettings">Display Settings</string>
     <string name="settings_list_item_subTitle0displaySettings">Themes, Brightness, Animations, etc.</string>
     <string name="settings_list_item_title0systemSettings">System Settings</string>
-    <string name="settings_list_item_subTitle0systemSettings">Developer Mode, etc.</string>
+    <string name="settings_list_item_subTitle0systemSettings">Web Authentication, Developer Mode, etc.</string>
 
     <string name="settings_toolbar_title0settings">Settings</string>
     <string name="settings_toolbar_title0audioSettings">Audio Settings</string>
@@ -222,16 +222,22 @@
     <string name="settings_button0resetSettings">Reset Settings</string>
 
     <string name="settings_dialog_settingsreset_title0warning">Warning</string>
-    <string name="settings_dialog_settingsreset_text0confirmReset">Do you really want to reset all app settings?
-    </string>
+    <string name="settings_dialog_settingsreset_text0confirmReset">Do you really want to reset all app settings? (Playlists will not be removed)</string>
 
     <string name="settings_dialog_warning_devmode0title">Warning</string>
     <string name="settings_dialog_warning_devmode0text">The developer mode adds overlays and other functionality
         intended for debugging.\n\nDo you really want to enable developer mode?
     </string>
 
-    <string name="settings_soundcloud_id">SoundCloud client id...</string>
+    <string name="settings_soundcloud_id_title">SoundCloud Client ID</string>
+    <string name="settings_soundcloud_id">SoundCloud Client ID...</string>
+    <string name="settings_youtube_id_title">YouTube API Key</string>
     <string name="settings_youtube_id">YouTube API key...</string>
+
+    <string name="settings_crashlog_count">%1$d Crash Logs found.</string>
+    <string name="settings_crashlog_export">Export Crash Logs</string>
+    <string name="settings_crashlog_export_success">Successfully exported crash logs</string>
+    <string name="settings_crashlog_export_fail">Failed to export crash logs</string>
 
     <string name="equalizerDefault">Disabled</string>
 

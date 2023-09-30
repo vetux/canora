@@ -2,7 +2,9 @@ package com.phaseshifter.canora.ui.activities;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.media.AudioManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -37,6 +39,8 @@ import com.phaseshifter.canora.utils.Observable;
 import com.phaseshifter.canora.utils.Observer;
 import com.phaseshifter.canora.utils.Pair;
 
+import java.io.FileNotFoundException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,6 +53,8 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
 
     private final String BUNDLE_PRESENTERSTATE = "BUNDLE_PRESENTERSTATE";
 
+    public static final int REQUESTCODE_CREATE_DOCUMENT = 0;
+
     private final Observable<AppTheme> activeTheme = new Observable<>();
     private final Observable<List<AppTheme>> availableThemes = new Observable<>();
     private final Observable<Float> volume = new Observable<>();
@@ -60,6 +66,7 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
     private final Observable<List<Pair<String, Object>>> modifiedSettings = new Observable<>();
     private final Observable<Integer> equalizerPreset = new Observable<>(-1);
     private final Observable<String[]> equalizerPresets = new Observable<>(new String[0]);
+    private final Observable<Integer> crashLogCount = new Observable<>(0);
 
     private SettingsContract.Presenter presenter;
 
@@ -68,8 +75,6 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
     private SettingsPagerAdapter pagerAdapter;
 
     private AutoBindMediaService service;
-
-    private Context context;
 
     //START Activity Interface
 
@@ -85,6 +90,7 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
                 ((MainApplication) getApplication()).getAudioPlaylistRepository(),
                 service,
                 audioManager,
+                this,
                 savedInstanceState == null ? null : savedInstanceState.getSerializable(BUNDLE_PRESENTERSTATE));
         pagerAdapter = new SettingsPagerAdapter(this);
     }
@@ -141,6 +147,9 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
             case R.id.buttonSettingsReset:
                 presenter.resetSettings();
                 break;
+            case R.id.logExportBtn:
+                presenter.onExportCrashLogs();
+                break;
         }
     }
 
@@ -187,6 +196,26 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         outState.putSerializable(BUNDLE_PRESENTERSTATE, presenter.saveState());
         super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        switch(requestCode){
+            case REQUESTCODE_CREATE_DOCUMENT:
+                if (data != null) {
+                    Uri resultUri = data.getData();
+                    if (resultUri != null) {
+                        getContentResolver().takePersistableUriPermission(resultUri, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                        try {
+                            presenter.onDocumentCreated(resultUri);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                break;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     //STOP Listeners
@@ -339,8 +368,8 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
 
     @Override
     public void showDialog_confirmation_settingsreset(Runnable onReset) {
-        Log.v(LOG_TAG, "showDialog_confiramtion_settingsreset " + onReset);
-        new AlertDialog.Builder(this)
+        Log.v(LOG_TAG, "showDialog_confirmation_settingsreset " + onReset);
+        new AlertDialog.Builder(this, androidx.appcompat.R.style.Base_Theme_AppCompat_Dialog)
                 .setTitle(R.string.settings_dialog_settingsreset_title0warning)
                 .setMessage(R.string.settings_dialog_settingsreset_text0confirmReset)
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
@@ -356,8 +385,8 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
 
     @Override
     public void showDialog_warning_devmode(Runnable onEnable, Runnable onCancel) {
-        Log.v(LOG_TAG, "showDialog_wanring_devmode " + onEnable + " " + onCancel);
-        new AlertDialog.Builder(this)
+        Log.v(LOG_TAG, "showDialog_warning_devmode " + onEnable + " " + onCancel);
+        new AlertDialog.Builder(this, androidx.appcompat.R.style.Base_Theme_AppCompat_Dialog)
                 .setTitle(R.string.settings_dialog_warning_devmode0title)
                 .setMessage(R.string.settings_dialog_warning_devmode0text)
                 .setPositiveButton(android.R.string.yes, (dialog, which) -> onEnable.run())
@@ -368,10 +397,39 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
                         onCancel.run();
                     }
                 })
+
                 .create()
                 .show();
     }
 
+    @Override
+    public void setCrashLogCount(int count) {
+        crashLogCount.set(count);
+    }
+
+    @Override
+    public void createDocument(String mime, String fileName) {
+        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType(mime);
+        intent.putExtra(Intent.EXTRA_TITLE, fileName);
+        intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+        startActivityForResult(intent, REQUESTCODE_CREATE_DOCUMENT);
+    }
+
+    @Override
+    public OutputStream openDocument(Uri uri) throws FileNotFoundException {
+        return getContentResolver().openOutputStream(uri);
+    }
+
+    @Override
+    public void showMessage(String message) {
+        runOnUiThread(() -> {
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+        });
+    }
 
     //STOP View Interface
 
@@ -508,6 +566,20 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
                 };
                 playlistData.addObserver(playlistObserver);
                 modifiedSettings.addObserver(settingsObserver);
+
+                TextView logCrashText = findViewById(R.id.logText_crashlogs);
+
+                logCrashText.setText(getString(R.string.settings_crashlog_count, crashLogCount.get()));
+
+                crashLogCount.addObserver(new Observer<Integer>() {
+                    @Override
+                    public void update(Observable<Integer> observable, Integer value) {
+                        logCrashText.setText(getString(R.string.settings_crashlog_count, value));
+                    }
+                });
+
+                Button logExportBtn = findViewById(R.id.logExportBtn);
+                logExportBtn.setOnClickListener(this);
                 break;
             case R.id.settings_tab_system_soundcloud:
                 EditText scText = findViewById(R.id.edittext_soundcloudid);

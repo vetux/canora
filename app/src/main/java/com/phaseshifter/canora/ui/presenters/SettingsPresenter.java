@@ -1,10 +1,13 @@
 package com.phaseshifter.canora.ui.presenters;
 
+import android.content.Context;
 import android.media.AudioManager;
 import android.media.audiofx.Equalizer;
+import android.net.Uri;
 import android.util.Log;
 
 import com.phaseshifter.canora.R;
+import com.phaseshifter.canora.application.MainApplication;
 import com.phaseshifter.canora.data.settings.BooleanSetting;
 import com.phaseshifter.canora.data.settings.FloatSetting;
 import com.phaseshifter.canora.data.settings.IntegerSetting;
@@ -18,11 +21,20 @@ import com.phaseshifter.canora.ui.contracts.SettingsContract;
 import com.phaseshifter.canora.ui.data.constants.SettingsPage;
 import com.phaseshifter.canora.utils.Pair;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.Serializable;
+import java.nio.Buffer;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 public class SettingsPresenter implements SettingsContract.Presenter {
     private final String LOG_TAG = "SettingsPresenter";
@@ -41,6 +53,7 @@ public class SettingsPresenter implements SettingsContract.Presenter {
         public List<Pair<String, Object>> modifiedSettings;
         public int equalizerPreset;
         public String[] equalizerPresets;
+        public int crashLogCount;
 
         public void copy(State state) {
             page = state.page;
@@ -55,6 +68,7 @@ public class SettingsPresenter implements SettingsContract.Presenter {
             this.ytApiKey = state.ytApiKey;
             equalizerPreset = state.equalizerPreset;
             equalizerPresets = state.equalizerPresets;
+            crashLogCount = state.crashLogCount;
         }
     }
 
@@ -65,6 +79,7 @@ public class SettingsPresenter implements SettingsContract.Presenter {
     private final UserPlaylistRepository audioPlaylistRepository;
     private final MediaPlayerService service;
     private final AudioManager audioManager;
+    private final Context context;
 
     private final State state = new State();
 
@@ -74,6 +89,7 @@ public class SettingsPresenter implements SettingsContract.Presenter {
                              UserPlaylistRepository audioPlaylistRepository,
                              MediaPlayerService service,
                              AudioManager audioManager,
+                             Context context,
                              State state) {
         this.view = view;
         this.settingsRepository = settingsRepository;
@@ -81,6 +97,7 @@ public class SettingsPresenter implements SettingsContract.Presenter {
         this.audioPlaylistRepository = audioPlaylistRepository;
         this.service = service;
         this.audioManager = audioManager;
+        this.context = context;
         if (state != null)
             this.state.copy(state);
     }
@@ -91,8 +108,9 @@ public class SettingsPresenter implements SettingsContract.Presenter {
                              UserPlaylistRepository audioPlaylistRepository,
                              MediaPlayerService service,
                              AudioManager audioManager,
+                             Context context,
                              Serializable state) {
-        this(view, settingsRepository, themeRepository, audioPlaylistRepository, service, audioManager, (State) state);
+        this(view, settingsRepository, themeRepository, audioPlaylistRepository, service, audioManager, context, (State) state);
     }
 
     //START Presenter Interface
@@ -203,6 +221,61 @@ public class SettingsPresenter implements SettingsContract.Presenter {
         service.setEqualizerPreset(preset - 1);
     }
 
+    @Override
+    public void onExportCrashLogs() {
+        String fileName = android.icu.util.Calendar.getInstance().getTime().toString();
+        fileName = fileName.replace(' ', '_');
+        fileName = fileName.replace(':', '_');
+        fileName = fileName.replace('+', '_');
+        view.createDocument("application/zip", "Canora_Crash_Logs_" + fileName + ".zip");
+    }
+
+    @Override
+    public void onDocumentCreated(Uri uri) {
+        File[] files = null;
+
+        MainApplication app = (MainApplication) context.getApplicationContext();
+        File logDir = new File(app.getCrashLogsDir());
+        if (logDir.exists()) {
+            files = logDir.listFiles();
+        }
+
+        if (files != null) {
+            try {
+                ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(view.openDocument(uri)));
+
+                BufferedInputStream in;
+
+                final int BUFFER_SIZE = 4096;
+
+                byte[] buffer = new byte[BUFFER_SIZE];
+                for (File file : files) {
+                    FileInputStream fis = new FileInputStream(file);
+                    in = new BufferedInputStream(fis, BUFFER_SIZE);
+                    try {
+                        ZipEntry entry = new ZipEntry(file.getName());
+                        out.putNextEntry(entry);
+                        int count;
+                        while ((count = in.read(buffer, 0, BUFFER_SIZE)) != -1) {
+                            out.write(buffer, 0, count);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    } finally {
+                        in.close();
+                    }
+                }
+
+                out.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+                view.showMessage(view.getString(R.string.settings_crashlog_export_fail));
+            } finally {
+                view.showMessage(view.getString(R.string.settings_crashlog_export_success));
+            }
+        }
+    }
+
     //STOP Presenter Interface
 
     private void loadApply() {
@@ -247,14 +320,19 @@ public class SettingsPresenter implements SettingsContract.Presenter {
         for (short i = 0; i < equalizer.getNumberOfPresets(); i++) {
             state.equalizerPresets[i + 1] = equalizer.getPresetName(i);
         }
+
+        state.crashLogCount = 0;
+        MainApplication app = (MainApplication) context.getApplicationContext();
+        File logDir = new File(app.getCrashLogsDir());
+        if (logDir.exists()) {
+            File[] files = logDir.listFiles();
+            if (files != null)
+                state.crashLogCount = files.length;
+        }
     }
 
     private void applyState(SettingsContract.View view, State state) {
         view.setTheme(state.activeTheme);
-        if (state.page != null)
-            view.showPage(state.page);
-        else
-            view.showMain();
         view.setActiveTheme(state.activeTheme);
         view.setAvailableThemes(state.availableThemes);
         view.setVolume(state.volume);
@@ -266,5 +344,10 @@ public class SettingsPresenter implements SettingsContract.Presenter {
         view.setYoutubeApiKey(state.ytApiKey);
         view.setEqualizerPresets(state.equalizerPresets);
         view.setEqualizerPreset(state.equalizerPreset + 1);
+        view.setCrashLogCount(state.crashLogCount);
+        if (state.page != null)
+            view.showPage(state.page);
+        else
+            view.showMain();
     }
 }

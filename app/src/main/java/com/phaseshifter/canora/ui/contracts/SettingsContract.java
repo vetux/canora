@@ -1,9 +1,13 @@
 package com.phaseshifter.canora.ui.contracts;
 
+import android.net.Uri;
+
 import com.phaseshifter.canora.data.theme.AppTheme;
 import com.phaseshifter.canora.ui.data.constants.SettingsPage;
 import com.phaseshifter.canora.utils.Pair;
 
+import java.io.FileNotFoundException;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.List;
 
@@ -37,11 +41,19 @@ public interface SettingsContract {
 
         void setLog_modifiedSettings(List<Pair<String, Object>> settings);
 
+        void setCrashLogCount(int count);
+
         void showDialog_confirmation_settingsreset(Runnable onReset);
 
         void showDialog_warning_devmode(Runnable onEnable, Runnable onCancel);
 
         String getString(int res);
+
+        void createDocument(String mime, String fileName);
+
+        OutputStream openDocument(Uri uri) throws FileNotFoundException;
+
+        void showMessage(String message);
 
         void finish();
     }
@@ -72,5 +84,9 @@ public interface SettingsContract {
         void onYoutubeApiKeyChange(String apiKey);
 
         void onEqualizerPresetChange(int preset);
+
+        void onExportCrashLogs();
+
+        void onDocumentCreated(Uri uri);
     }
 }
