@@ -32,10 +32,12 @@ public class ImageDataFetcher implements DataFetcher<InputStream> {
         }
         try {
             stream = imageData.getDataSource().getStream(context);
-            callback.onDataReady(stream);
-
+            if (stream == null){
+                callback.onLoadFailed(new RuntimeException("No image data found"));
+            } else {
+                callback.onDataReady(stream);
+            }
         } catch (Exception e) {
-            e.printStackTrace();
             callback.onLoadFailed(e);
         }
     }

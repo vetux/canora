@@ -42,6 +42,24 @@ public class AudioDataArrayAdapter extends ArrayAdapter<PlayerData> implements S
 
     private boolean isEnabled = true;
 
+    public static class ViewHolder {
+        public final TextView title;
+        public final TextView artist;
+        public final TextView length;
+        public final CheckBox box;
+        public final ImageView highlight;
+        public final ImageView cover;
+
+        public ViewHolder(View view) {
+            title = view.findViewById(R.id.title);
+            artist = view.findViewById(R.id.artist);
+            length = view.findViewById(R.id.length);
+            box = view.findViewById(R.id.checkbox);
+            highlight = view.findViewById(R.id.highlight);
+            cover = view.findViewById(R.id.cover);
+        }
+    }
+
     public AudioDataArrayAdapter(Context context, List<PlayerData> list) {
         super(context, 0, list);
         contentRef = list;
@@ -90,27 +108,24 @@ public class AudioDataArrayAdapter extends ArrayAdapter<PlayerData> implements S
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-        View listItem = convertView;
-        if ((listItem == null || listItem.findViewById(R.id.title) == null)) {
-            listItem = LayoutInflater.from(context).inflate(R.layout.list_item_track, parent, false);
+        ViewHolder viewHolder;
+        if (convertView == null) {
+            convertView = LayoutInflater.from(context).inflate(R.layout.list_item_track, parent, false);
+            viewHolder = new ViewHolder(convertView);
+            convertView.setTag(viewHolder);
+        } else  {
+            viewHolder = (ViewHolder) convertView.getTag();
         }
-        //Get relevant views
-        TextView title = listItem.findViewById(R.id.title);
-        TextView artist = listItem.findViewById(R.id.artist);
-        TextView length = listItem.findViewById(R.id.length);
-        CheckBox box = listItem.findViewById(R.id.checkbox);
-        ImageView highlight = listItem.findViewById(R.id.highlight);
-        ImageView cover = listItem.findViewById(R.id.cover);
 
         PlayerData track = contentRef.get(position);
 
         //Set values
-        title.setText(track.getMetadata().getTitle());
-        artist.setText(track.getMetadata().getArtist());
-        length.setText(Miscellaneous.digitize(track.getMetadata().getDuration()));
+        viewHolder.title.setText(track.getMetadata().getTitle());
+        viewHolder.artist.setText(track.getMetadata().getArtist());
+        viewHolder.length.setText(Miscellaneous.digitize(track.getMetadata().getDuration()));
 
         ImageData imageData = track.getMetadata().getArtwork();
-        GlideApp.with(context).clear(cover);
+        GlideApp.with(context).clear(viewHolder.cover);
         if (imageData != null) {
             GlideApp.with(context)
                     .setDefaultRequestOptions(RequestOptions
@@ -121,26 +136,27 @@ public class AudioDataArrayAdapter extends ArrayAdapter<PlayerData> implements S
                     .fallback(R.drawable.artwork_unset)
                     .error(R.drawable.artwork_unset)
                     .placeholder(R.drawable.artwork_unset)
-                    .into(cover);
+                    .into(viewHolder.cover);
         } else {
-            cover.setImageResource(R.drawable.artwork_unset);
+            viewHolder.cover.setImageResource(R.drawable.artwork_unset);
         }
 
         if (isSelecting) {
-            box.setVisibility(View.VISIBLE);
-            box.setChecked(selection.contains(position));
+            viewHolder.box.setVisibility(View.VISIBLE);
+            viewHolder.box.setChecked(selection.contains(position));
         } else {
-            box.setVisibility(View.GONE);
+            viewHolder.box.setVisibility(View.GONE);
         }
 
         if (playingIndex != null && playingIndex.equals(position)) {
             //Highlight
-            highlight.setVisibility(View.VISIBLE);
-            highlight.setColorFilter(AttributeConversion.getColorForAtt(R.attr.colorSecondary, context)); //API 21 COMPAT
+            viewHolder.highlight.setVisibility(View.VISIBLE);
+            viewHolder.highlight.setColorFilter(AttributeConversion.getColorForAtt(R.attr.colorSecondary, context)); //API 21 COMPAT
         } else {
-            highlight.setVisibility(View.INVISIBLE);
+            viewHolder.highlight.setVisibility(View.INVISIBLE);
         }
-        return listItem;
+
+        return convertView;
     }
 
     @Override

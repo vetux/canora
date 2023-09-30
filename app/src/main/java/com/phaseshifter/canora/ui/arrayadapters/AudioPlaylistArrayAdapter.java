@@ -45,6 +45,22 @@ public class AudioPlaylistArrayAdapter extends ArrayAdapter<AudioPlaylist> imple
 
     private boolean isEnabled = true;
 
+    public static class ViewHolder {
+        public final TextView subTitle;
+        public final TextView subCount;
+        public final CustomImageView plImg;
+        public final CheckBox box;
+        public final ConstraintLayout bg;
+
+        public ViewHolder(View view) {
+            subTitle = view.findViewById(R.id.subMenuTitle);
+            subCount = view.findViewById(R.id.subMenuTracks);
+            plImg = view.findViewById(R.id.playlistImage);
+            box = view.findViewById(R.id.checkbox);
+            bg = view.findViewById(R.id.textBackground);
+        }
+    }
+
     public AudioPlaylistArrayAdapter(Context c, List<AudioPlaylist> cont) {
         super(c, 0, cont);
         contentRef = cont;
@@ -93,30 +109,27 @@ public class AudioPlaylistArrayAdapter extends ArrayAdapter<AudioPlaylist> imple
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-        View listItem = convertView;
-        //Checks
-        if (listItem == null || listItem.findViewById(R.id.subMenuTitle) == null)
-            listItem = LayoutInflater.from(C).inflate(R.layout.grid_item_playlist, parent, false);
-        //Get Relevant Views
-        TextView subTitle = listItem.findViewById(R.id.subMenuTitle);
-        TextView subCount = listItem.findViewById(R.id.subMenuTracks);
-        CustomImageView plImg = listItem.findViewById(R.id.playlistImage);
-        CheckBox box = listItem.findViewById(R.id.checkbox);
-        ConstraintLayout bg = listItem.findViewById(R.id.textBackground);
+        ViewHolder viewHolder;
+        if (convertView == null){
+            convertView = LayoutInflater.from(C).inflate(R.layout.grid_item_playlist, parent, false);
+            viewHolder = new ViewHolder(convertView);
+            convertView.setTag(viewHolder);
+        } else {
+            viewHolder = (ViewHolder) convertView.getTag();
+        }
 
         AudioPlaylist playlist = contentRef.get(position);
-        //SetValues
-        subTitle.setText(playlist.getMetadata().getTitle());
-        subCount.setText(C.getString(R.string.arrayadapter_audioplaylist_header0numberOfTracks, playlist.getData().size()));
+        viewHolder.subTitle.setText(playlist.getMetadata().getTitle());
+        viewHolder.subCount.setText(C.getString(R.string.arrayadapter_audioplaylist_header0numberOfTracks, playlist.getData().size()));
         if (isSelecting) {
-            box.setVisibility(View.VISIBLE);
-            box.setChecked(selection.contains(position));
+            viewHolder.box.setVisibility(View.VISIBLE);
+            viewHolder.box.setChecked(selection.contains(position));
         } else {
-            box.setVisibility(View.GONE);
+            viewHolder.box.setVisibility(View.GONE);
         }
 
         ImageData imageData = playlist.getMetadata().getArtwork();
-        GlideApp.with(C).clear(plImg);
+        GlideApp.with(C).clear(viewHolder.plImg);
         if (imageData != null) {
             GlideApp.with(C)
                     .setDefaultRequestOptions(RequestOptions
@@ -125,19 +138,20 @@ public class AudioPlaylistArrayAdapter extends ArrayAdapter<AudioPlaylist> imple
                     .override(Target.SIZE_ORIGINAL)
                     .placeholder(defaultArt)
                     .transition(DrawableTransitionOptions.withCrossFade())
-                    .into(plImg);
+                    .into(viewHolder.plImg);
         } else {
-            plImg.setImageResource(R.drawable.artwork_unset);
+            viewHolder.plImg.setImageResource(R.drawable.artwork_unset);
         }
 
         if (playingIndex != null && playingIndex.equals(position)) {
             //Highlight
-            plImg.setImageTintList(ColorStateList.valueOf(getColorForAtt(R.attr.colorSecondary_20, C)));
-            plImg.setImageTintMode(PorterDuff.Mode.ADD);
+            viewHolder.plImg.setImageTintList(ColorStateList.valueOf(getColorForAtt(R.attr.colorSecondary_20, C)));
+            viewHolder.plImg.setImageTintMode(PorterDuff.Mode.ADD);
         } else {
-            plImg.setImageTintList(null);
+            viewHolder.plImg.setImageTintList(null);
         }
-        return listItem;
+
+        return convertView;
     }
 
     @Override

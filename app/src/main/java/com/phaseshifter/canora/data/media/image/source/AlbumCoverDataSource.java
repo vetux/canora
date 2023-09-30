@@ -57,9 +57,12 @@ public class AlbumCoverDataSource implements ImageDataSource, Serializable {
 
     @Override
     public InputStream getStream(Context context) throws Exception {
-        MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-        mmr.setDataSource(context.getApplicationContext(), Uri.parse(trackUri));
-        imageData = mmr.getEmbeddedPicture();
+        if (!imageLoaded) {
+            imageLoaded = true;
+            MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+            mmr.setDataSource(context.getApplicationContext(), Uri.parse(trackUri));
+            imageData = mmr.getEmbeddedPicture();
+        }
         if (imageData != null){
             return new ByteArrayInputStream(imageData);
         } else {
