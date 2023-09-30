@@ -120,7 +120,11 @@ public class AudioDataSourceSC implements PlayerDataSource, Serializable {
                             break;
                     }
                 }
-                onReady.run(ret);
+                if (ret.isEmpty()){
+                    onException.run(new RuntimeException("Failed to retrieve stream data for track " + codings));
+                } else {
+                    onReady.run(ret);
+                }
             }
         });
     }
