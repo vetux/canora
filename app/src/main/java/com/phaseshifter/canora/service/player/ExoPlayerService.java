@@ -76,6 +76,8 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
     private static final String NOTIFICATION_CHANNEL_NAME = "Canora Notifications";
     private static final String NOTIFICATION_CHANNEL_DESCRIPTION = "Canora Notification Channel";
 
+    private static final long PREV_THRESHOLD = 3000; // When using previous() if current position is larger than threshold the track is sought to the start instead of playing the previous track.
+
     private final String LOG_TAG = "MediaPlayerService";
 
     private final Observable<PlayerState> state = new Observable<>();
@@ -304,12 +306,17 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
     @Override
     public void previous() {
         Log.v(LOG_TAG, "previous");
-        PlayerData n = playbackController.getPrev();
-        if (n != null) {
-            Log.v(LOG_TAG, "Setting up Track: " + n.getMetadata().getTitle());
-            createPlayer(n);
+        if (exoPlayer.getCurrentPosition() > PREV_THRESHOLD) {
+            exoPlayer.seekTo(0);
+            onStateModified(state.get().isPlaying());
         } else {
-            Log.e(LOG_TAG, "Null track");
+            PlayerData n = playbackController.getPrev();
+            if (n != null) {
+                Log.v(LOG_TAG, "Setting up Track: " + n.getMetadata().getTitle());
+                createPlayer(n);
+            } else {
+                Log.e(LOG_TAG, "Null track");
+            }
         }
     }
 

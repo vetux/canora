@@ -44,7 +44,7 @@ public class PlayerStateViewModel {
             trackLength.setIfNotEqual(state.getCurrentTrack().getMetadata().getDuration());
         }
 
-        trackPosition.setIfNotEqual(state.getPlayerPosition());
+        trackPosition.set(state.getPlayerPosition()); // The player position needs to be updated always because its the "start" position not the real current position and when using previous to seek to the beginning the position in the state does not change.
 
         isPlaying.setIfNotEqual(state.isPlaying());
         isShuffling.setIfNotEqual(state.isShuffling());
