@@ -33,12 +33,12 @@ public class AlbumCoverDataSource implements ImageDataSource, Serializable {
         pool.submit(() -> {
             if (!imageLoaded) {
                 imageLoaded = true;
-                try{
+                try {
                     MediaMetadataRetriever mmr = new MediaMetadataRetriever();
                     mmr.setDataSource(context.getApplicationContext(), Uri.parse(trackUri));
                     imageData = mmr.getEmbeddedPicture();
-                } catch(Exception e){
-                    e.printStackTrace();
+                } catch (Exception e) {
+                    onError.run(e);
                 }
             }
             if (imageData != null) {
@@ -50,7 +50,7 @@ public class AlbumCoverDataSource implements ImageDataSource, Serializable {
                 }
                 onReady.run(bitmap);
             } else {
-                onReady.run(null);
+                onError.run(new RuntimeException("No embedded image found"));
             }
         });
     }
@@ -63,10 +63,11 @@ public class AlbumCoverDataSource implements ImageDataSource, Serializable {
             mmr.setDataSource(context.getApplicationContext(), Uri.parse(trackUri));
             imageData = mmr.getEmbeddedPicture();
         }
-        if (imageData != null){
-            return new ByteArrayInputStream(imageData);
-        } else {
-            return null;
+
+        if (imageData == null) {
+            throw new RuntimeException(("No embedded image found"));
         }
+
+        return new ByteArrayInputStream(imageData);
     }
 }

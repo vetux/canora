@@ -1,7 +1,9 @@
 package com.phaseshifter.canora.ui.utils.glide.loader;
 
 import android.content.Context;
+
 import androidx.annotation.NonNull;
+
 import com.phaseshifter.canora.data.media.image.ImageData;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
@@ -32,11 +34,7 @@ public class ImageDataFetcher implements DataFetcher<InputStream> {
         }
         try {
             stream = imageData.getDataSource().getStream(context);
-            if (stream == null){
-                callback.onLoadFailed(new RuntimeException("No image data found"));
-            } else {
-                callback.onDataReady(stream);
-            }
+            callback.onDataReady(stream);
         } catch (Exception e) {
             callback.onLoadFailed(e);
         }
