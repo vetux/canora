@@ -273,6 +273,7 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
             if (!playbackController.setContent(pl)) {
                 Log.v(LOG_TAG, "Current Track not found in new dataset. Stopping player...");
                 exoPlayer.stop();
+                exoPlayer.seekTo(0);
             }
             onStateModified(state.get().isPlaying());
         }
@@ -365,6 +366,7 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
     public void stop() {
         Log.v(LOG_TAG, "stop");
         exoPlayer.stop();
+        exoPlayer.seekTo(0);
     }
 
     @Override
@@ -728,6 +730,7 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
 
     private void createPlayer(PlayerData next) {
         exoPlayer.stop();
+        exoPlayer.seekTo(0);
         exoPlayer.setPlayWhenReady(state.get().isPlaying());
 
         LoadTask task = new LoadTask();
@@ -818,6 +821,7 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
     private void updateTrackSource() {
         Log.v(LOG_TAG, "Updating MediaSource Current: " + trackSourceIndex + " Sources: " + trackSources);
         exoPlayer.stop();
+        exoPlayer.seekTo(0);
         exoPlayer.prepare(trackSources.get(trackSourceIndex));
     }
 }
