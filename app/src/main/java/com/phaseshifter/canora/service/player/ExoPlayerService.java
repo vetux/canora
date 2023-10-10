@@ -52,7 +52,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 //TODO: Implement volume fade
-//TODO: Replace ExoPlayer dependency because ExoPlayer segfaults randomly while playing from local device
+//TODO: Replace ExoPlayer dependency because ExoPlayer (v2.18.0) segfaults randomly while playing from local device (Update to v2.19.1 might have fixed this.)
 public class ExoPlayerService extends Service implements MediaPlayerService, AudioManager.OnAudioFocusChangeListener {
     private static final String packagenameBroadcasts = "com.phaseshifter.canora.mediaserv";
 
@@ -213,7 +213,7 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
     public void onDestroy() {
         Log.v(LOG_TAG, "onDestroy");
         try {
-            exoPlayer.stop(true);
+            exoPlayer.stop();
             exoPlayer.release();
         } catch (Exception e) {
             e.printStackTrace();
@@ -272,7 +272,7 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
             Log.v(LOG_TAG, "Setting Content: " + pl.hashCode() + " " + pl.size() + " tracks");
             if (!playbackController.setContent(pl)) {
                 Log.v(LOG_TAG, "Current Track not found in new dataset. Stopping player...");
-                exoPlayer.stop(true);
+                exoPlayer.stop();
             }
             onStateModified(state.get().isPlaying());
         }
@@ -727,7 +727,7 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
     private LoadTask currentTask = null;
 
     private void createPlayer(PlayerData next) {
-        exoPlayer.stop(true);
+        exoPlayer.stop();
         exoPlayer.setPlayWhenReady(state.get().isPlaying());
 
         LoadTask task = new LoadTask();
@@ -817,7 +817,7 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
 
     private void updateTrackSource() {
         Log.v(LOG_TAG, "Updating MediaSource Current: " + trackSourceIndex + " Sources: " + trackSources);
-        exoPlayer.stop(true);
+        exoPlayer.stop();
         exoPlayer.prepare(trackSources.get(trackSourceIndex));
     }
 }
