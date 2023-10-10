@@ -108,6 +108,8 @@
         android:textColor="?onTexToolbar"
         android:textColorHint="?onTexToolbar_60"
         android:textSize="20sp"
+        android:imeOptions="actionGo"
+        android:inputType="text"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@id/toolbar_imageview_background"
         app:layout_constraintStart_toStartOf="@id/toolbar_imageview_background"

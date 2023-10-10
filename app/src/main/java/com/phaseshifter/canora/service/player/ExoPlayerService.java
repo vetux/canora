@@ -137,7 +137,7 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
         if (notificationManager != null)
             notificationManager.createNotificationChannel(channel);
 
-        mediaSession = new MediaSession(this, "CanoraMS");
+        mediaSession = new MediaSession(this, "CanoraMediaSession");
         mediaSession.setCallback(new MediaSessionCallback(this));
         mediaSession.setActive(true);
         mainThread = new Handler(Looper.getMainLooper());
@@ -427,6 +427,15 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
         runOnMainThread(() -> {
             exoPlayer.setVideoSurfaceView(view);
         });
+    }
+
+    @Override
+    public void setEnableMediaSessionControls(boolean enable) {
+        if (enable){
+            mediaSession.setCallback(new MediaSessionCallback(this));
+        } else {
+            mediaSession.setCallback(null);
+        }
     }
 
     @Override

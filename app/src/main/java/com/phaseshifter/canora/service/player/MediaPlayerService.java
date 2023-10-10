@@ -53,5 +53,13 @@ public interface MediaPlayerService {
 
     void setVideoSurfaceView(SurfaceView view);
 
+    /**
+     * Configure wheter or not inputs such as previous, next coming from media sesssion (For example bluetooth headphones) will be respected.
+     * Useful for badly designed headphones which cause these controls to be triggered without user intention.
+     *
+     * @param enable When true the media session controls will be affecting the service.
+     */
+    void setEnableMediaSessionControls(boolean enable);
+
     Observable<PlayerState> getState();
 }

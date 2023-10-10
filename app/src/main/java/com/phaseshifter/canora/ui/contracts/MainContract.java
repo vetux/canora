@@ -141,6 +141,8 @@ public interface MainContract {
 
         void onSearchTextEditingFinished();
 
+        void onSearchReturn();
+
         void onOptionsButtonClick();
 
         void onSearchButtonClick();

@@ -1,54 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/settings_tab_system_general"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="?colorPrimary"
     android:visibility="visible">
+    <TextView
+        android:id="@+id/mediaSessionTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/settings_header0mediaSessionCallback"
+        android:textColor="?onColorPrimary"
+        android:padding="10dp"
+        android:maxLines="1"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/mediaSessionSwitch"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
-    <View
+    <Switch
+        android:id="@+id/mediaSessionSwitch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:thumb="@drawable/switch_thumb"
+        android:track="@drawable/switch_track"
+        android:background="@null"
+        app:layout_constraintTop_toBottomOf="@id/mediaSessionTitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <TextView
+        android:id="@+id/devModeTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/settings_header0developerMode"
+        android:textColor="?onColorPrimary"
+        android:padding="10dp"
+        android:maxLines="1"
+        app:layout_constraintTop_toBottomOf="@id/mediaSessionSwitch"
+        app:layout_constraintBottom_toTopOf="@id/devModeSwitch"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <Switch
+        android:id="@+id/devModeSwitch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:thumb="@drawable/switch_thumb"
+        android:track="@drawable/switch_track"
+        android:background="@null"
+        app:layout_constraintTop_toBottomOf="@id/devModeTitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <Button
+        android:id="@+id/buttonSettingsReset"
         android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:background="?onColorPrimary_20" />
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <Button
-            android:id="@+id/buttonSettingsReset"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:text="@string/settings_button0resetSettings"
-            android:textColor="?onColorSecondary"
-            android:background="@drawable/button_background"
-            android:layout_margin="10dp"
-            android:maxLines="1" />
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <TextView
-            android:id="@+id/devModeTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/settings_header0developerMode"
-            android:textColor="?onColorPrimary"
-            android:layout_centerHorizontal="true"
-            android:padding="10dp"
-            android:maxLines="1" />
-
-        <Switch
-            android:id="@+id/devModeSwitch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/devModeTitle"
-            android:layout_centerHorizontal="true"
-            android:thumb="@drawable/switch_thumb"
-            android:track="@drawable/switch_track"
-            android:background="@null" />
-    </RelativeLayout>
-</LinearLayout>
+        android:layout_height="50dp"
+        android:text="@string/settings_button0resetSettings"
+        android:textColor="?onColorSecondary"
+        android:background="@drawable/button_background"
+        android:layout_margin="10dp"
+        android:maxLines="1"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+</androidx.constraintlayout.widget.ConstraintLayout>

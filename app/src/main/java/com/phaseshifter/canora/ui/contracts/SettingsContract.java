@@ -29,6 +29,8 @@ public interface SettingsContract {
 
         void setDeveloperMode(boolean devMode);
 
+        void setEnableMediaSessionCallbacks(boolean enable);
+
         void setSoundCloudClientID(String clientID);
 
         void setYoutubeApiKey(String apiKey);
@@ -46,6 +48,8 @@ public interface SettingsContract {
         void showDialog_confirmation_settingsreset(Runnable onReset);
 
         void showDialog_warning_devmode(Runnable onEnable, Runnable onCancel);
+
+        void showDialog_warning_mediasession(Runnable onDisable, Runnable onCancel);
 
         String getString(int res);
 
@@ -78,6 +82,8 @@ public interface SettingsContract {
         void onUseAnimationsChange(boolean useAnimations);
 
         void onDeveloperModeChange(boolean devMode);
+
+        void onEnableMediaSessionCallbacksChange(boolean enable);
 
         void onSoundCloudClientIDChange(String clientID);
 

@@ -386,6 +386,22 @@ public class AutoBindMediaService implements ServiceConnection, MediaPlayerServi
     }
 
     @Override
+    public void setEnableMediaSessionControls(boolean enable) {
+        verifyMainThread();
+        if (serviceRef.get() != null){
+            serviceRef.get().setEnableMediaSessionControls(enable);
+        } else {
+            exec.execute(() -> {
+                if (requireService())
+                    mainHandler.post(() -> {
+                        if (serviceRef.get() != null)
+                            serviceRef.get().setEnableMediaSessionControls(enable);
+                    });
+            });
+        }
+    }
+
+    @Override
     public Observable<PlayerState> getState() {
         verifyMainThread();
         return stateProxy;

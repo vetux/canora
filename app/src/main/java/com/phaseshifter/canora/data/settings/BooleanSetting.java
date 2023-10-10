@@ -5,7 +5,7 @@ public enum BooleanSetting {
     REPEAT("BOOL_REPEAT", false),
     SHOWANIMATIONS("BOOL_SHOWANIM_CSTM", true),
     DEVELOPERMODE("BOOL_DEVMODE", false),
-    SHOWWARNING_PLAYLISTS("BOOL_WARNPL", true);
+    ENABLE_MEDIASESSION_CALLBACK("BOOL_ENABLE_MEDIASESSION_CALLBACK", true);
 
     public final String key;
     public final boolean defaultValue;

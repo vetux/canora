@@ -45,6 +45,7 @@ public class SettingsPresenter implements SettingsContract.Presenter {
         public List<AppTheme> availableThemes;
         public float volume;
         public boolean devMode;
+        public boolean enableMediaSessionCallbacks;
         public boolean useAnimations;
         public int playlistCount;
         public long playlistSize;
@@ -61,6 +62,7 @@ public class SettingsPresenter implements SettingsContract.Presenter {
             availableThemes = state.availableThemes;
             volume = state.volume;
             devMode = state.devMode;
+            enableMediaSessionCallbacks = state.enableMediaSessionCallbacks;
             useAnimations = state.useAnimations;
             this.playlistCount = state.playlistCount;
             this.modifiedSettings = state.modifiedSettings;
@@ -128,13 +130,11 @@ public class SettingsPresenter implements SettingsContract.Presenter {
 
     @Override
     public Serializable saveState() {
-        Log.v(LOG_TAG, "saveState");
         return state;
     }
 
     @Override
     public void resetSettings() {
-        Log.v(LOG_TAG, "resetSettings");
         view.showDialog_confirmation_settingsreset(() -> {
             settingsRepository.reset();
             loadApply();
@@ -143,14 +143,12 @@ public class SettingsPresenter implements SettingsContract.Presenter {
 
     @Override
     public void onThemeSelected(AppTheme theme) {
-        Log.v(LOG_TAG, "onThemeSelected " + theme);
         settingsRepository.putInt(IntegerSetting.THEME, theme.id);
         loadApply();
     }
 
     @Override
     public void onVolumeChange(float v) {
-        Log.v(LOG_TAG, "onVolumeChange " + v);
         settingsRepository.putFloat(FloatSetting.VOLUME, v);
         service.setVolume(v);
         loadState();
@@ -158,7 +156,6 @@ public class SettingsPresenter implements SettingsContract.Presenter {
 
     @Override
     public void onNavigateBack() {
-        Log.v(LOG_TAG, "onNavigateBack");
         if (state.page != null) {
             state.page = null;
             applyState(view, state);
@@ -169,21 +166,18 @@ public class SettingsPresenter implements SettingsContract.Presenter {
 
     @Override
     public void onPageSelected(SettingsPage page) {
-        Log.v(LOG_TAG, "onPageSelected " + page);
         state.page = page;
         view.showPage(page);
     }
 
     @Override
     public void onUseAnimationsChange(boolean useAnimations) {
-        Log.v(LOG_TAG, "onUseAnimationsChange " + useAnimations);
         settingsRepository.putBoolean(BooleanSetting.SHOWANIMATIONS, useAnimations);
         loadState();
     }
 
     @Override
     public void onDeveloperModeChange(boolean devMode) {
-        Log.v(LOG_TAG, "onDeveloperModeChange " + devMode);
         if (devMode && !state.devMode) {
             view.showDialog_warning_devmode(() -> {
                 settingsRepository.putBoolean(BooleanSetting.DEVELOPERMODE, true);
@@ -191,6 +185,19 @@ public class SettingsPresenter implements SettingsContract.Presenter {
             }, () -> applyState(view, state));
         } else {
             settingsRepository.putBoolean(BooleanSetting.DEVELOPERMODE, devMode);
+            loadApply();
+        }
+    }
+
+    @Override
+    public void onEnableMediaSessionCallbacksChange(boolean enable) {
+        if (!enable && state.enableMediaSessionCallbacks) {
+            view.showDialog_warning_mediasession(() -> {
+                settingsRepository.putBoolean(BooleanSetting.ENABLE_MEDIASESSION_CALLBACK, false);
+                loadApply();
+            }, () -> applyState(view, state));
+        } else {
+            settingsRepository.putBoolean(BooleanSetting.ENABLE_MEDIASESSION_CALLBACK, enable);
             loadApply();
         }
     }
@@ -294,6 +301,7 @@ public class SettingsPresenter implements SettingsContract.Presenter {
         }
         state.volume = settingsRepository.getFloat(FloatSetting.VOLUME);
         state.devMode = settingsRepository.getBoolean(BooleanSetting.DEVELOPERMODE);
+        state.enableMediaSessionCallbacks = settingsRepository.getBoolean(BooleanSetting.ENABLE_MEDIASESSION_CALLBACK);
         state.useAnimations = settingsRepository.getBoolean(BooleanSetting.SHOWANIMATIONS);
         state.playlistCount = audioPlaylistRepository.getAll().size();
         state.playlistSize = audioPlaylistRepository.getSize();
@@ -337,6 +345,7 @@ public class SettingsPresenter implements SettingsContract.Presenter {
         view.setAvailableThemes(state.availableThemes);
         view.setVolume(state.volume);
         view.setDeveloperMode(state.devMode);
+        view.setEnableMediaSessionCallbacks(state.enableMediaSessionCallbacks);
         view.setUseAnimations(state.useAnimations);
         view.setLog_playlist(state.playlistCount, state.playlistSize);
         view.setLog_modifiedSettings(state.modifiedSettings);

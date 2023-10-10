@@ -487,6 +487,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
         mediaService.setShuffle(settingsRepository.getBoolean(BooleanSetting.SHUFFLE));
         mediaService.setRepeat(settingsRepository.getBoolean(BooleanSetting.REPEAT));
         mediaService.setEqualizerPreset(settingsRepository.getInt(IntegerSetting.EQUALIZER_PRESET_INDEX));
+        mediaService.setEnableMediaSessionControls(settingsRepository.getBoolean(BooleanSetting.ENABLE_MEDIASESSION_CALLBACK));
 
         PlayerState playerState = mediaService.getState().get();
 
@@ -548,6 +549,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
         mediaService.setShuffle(settingsRepository.getBoolean(BooleanSetting.SHUFFLE));
         mediaService.setRepeat(settingsRepository.getBoolean(BooleanSetting.REPEAT));
         mediaService.setEqualizerPreset(settingsRepository.getInt(IntegerSetting.EQUALIZER_PRESET_INDEX));
+        mediaService.setEnableMediaSessionControls(settingsRepository.getBoolean(BooleanSetting.ENABLE_MEDIASESSION_CALLBACK));
 
         PlayerState playerState = mediaService.getState().get();
 
@@ -643,16 +645,24 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                 break;
             default:
                 contentSearch = text;
-                updateVisibleContent();
                 break;
-        }
-        if (uiContentSelector.getPage() != MainPage.SOUNDCLOUD_SEARCH) {
-            updateVisibleContent();
         }
     }
 
     @Override
     public void onSearchTextEditingFinished() {
+        switch(uiContentSelector.getPage()){
+            case SOUNDCLOUD_SEARCH:
+            case YOUTUBE_SEARCH_VIDEOS:
+                break;
+            default:
+                updateVisibleContent();
+                break;
+        }
+    }
+
+    @Override
+    public void onSearchReturn() {
         if (uiContentSelector.getPage() == MainPage.SOUNDCLOUD_SEARCH) {
             String text = appViewModel.searchText.get();
             incrementTasks();

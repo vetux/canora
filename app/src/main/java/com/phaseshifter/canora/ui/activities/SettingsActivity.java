@@ -59,6 +59,7 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
     private final Observable<List<AppTheme>> availableThemes = new Observable<>();
     private final Observable<Float> volume = new Observable<>();
     private final Observable<Boolean> devMode = new Observable<>();
+    private final Observable<Boolean> enableMediaSessionCallback = new Observable<>();
     private final Observable<Boolean> useAnimations = new Observable<>();
     private final Observable<String> scClientID = new Observable<>();
     private final Observable<String> ytApiKey = new Observable<>();
@@ -159,6 +160,9 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
             case R.id.devModeSwitch:
                 presenter.onDeveloperModeChange(isChecked);
                 break;
+            case R.id.mediaSessionSwitch:
+                presenter.onEnableMediaSessionCallbacksChange(isChecked);
+                break;
             case R.id.animationsCheckbox:
                 presenter.onUseAnimationsChange(isChecked);
                 break;
@@ -251,7 +255,6 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
 
     @Override
     public void showMain() {
-        Log.v(LOG_TAG, "showMain");
         TextView title = findViewById(R.id.toolbar_textview_title);
         title.setText(R.string.settings_toolbar_title0settings);
         motionLayoutController.setPage(null);
@@ -284,7 +287,6 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
 
     @Override
     public void showPage(SettingsPage page) {
-        Log.v(LOG_TAG, "showPage " + page);
         TextView title = findViewById(R.id.toolbar_textview_title);
         switch (page) {
             case DISPLAY:
@@ -305,32 +307,33 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
 
     @Override
     public void setActiveTheme(AppTheme theme) {
-        Log.v(LOG_TAG, "setActiveTheme " + theme);
         activeTheme.set(theme);
     }
 
     @Override
     public void setAvailableThemes(List<AppTheme> themes) {
-        Log.v(LOG_TAG, "setAvailableThemes " + themes);
         availableThemes.set(themes);
     }
 
     @Override
     public void setUseAnimations(boolean useAnimations) {
-        Log.v(LOG_TAG, "setUseANimations" + useAnimations);
         this.useAnimations.set(useAnimations);
     }
 
     @Override
     public void setVolume(float v) {
-        Log.v(LOG_TAG, "setVoluem " + v);
         volume.set(v);
     }
 
     @Override
     public void setDeveloperMode(boolean devMode) {
-        Log.v(LOG_TAG, "setDeveloperMode " + devMode);
         this.devMode.set(devMode);
+        pagerAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void setEnableMediaSessionCallbacks(boolean enable) {
+        this.enableMediaSessionCallback.set(enable);
         pagerAdapter.notifyDataSetChanged();
     }
 
@@ -385,9 +388,8 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
 
     @Override
     public void showDialog_warning_devmode(Runnable onEnable, Runnable onCancel) {
-        Log.v(LOG_TAG, "showDialog_warning_devmode " + onEnable + " " + onCancel);
         new AlertDialog.Builder(this, androidx.appcompat.R.style.Base_Theme_AppCompat_Dialog)
-                .setTitle(R.string.settings_dialog_warning_devmode0title)
+                .setTitle(R.string.settings_dialog_warning0title)
                 .setMessage(R.string.settings_dialog_warning_devmode0text)
                 .setPositiveButton(android.R.string.yes, (dialog, which) -> onEnable.run())
                 .setNegativeButton(android.R.string.no, (dialog, which) -> onCancel.run())
@@ -397,7 +399,23 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
                         onCancel.run();
                     }
                 })
+                .create()
+                .show();
+    }
 
+    @Override
+    public void showDialog_warning_mediasession(Runnable onDisable, Runnable onCancel) {
+        new AlertDialog.Builder(this, androidx.appcompat.R.style.Base_Theme_AppCompat_Dialog)
+                .setTitle(R.string.settings_dialog_warning0title)
+                .setMessage(R.string.settings_dialog_warning_mediasession0text)
+                .setPositiveButton(android.R.string.yes, (dialog, which) -> onDisable.run())
+                .setNegativeButton(android.R.string.no, (dialog, which) -> onCancel.run())
+                .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                    @Override
+                    public void onCancel(DialogInterface dialog) {
+                        onCancel.run();
+                    }
+                })
                 .create()
                 .show();
     }
@@ -517,6 +535,10 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
                 devModeSwitch.setChecked(devMode.get());
                 devModeSwitch.setOnCheckedChangeListener(this);
 
+                Switch mediaSessionSwitch = findViewById(R.id.mediaSessionSwitch);
+                mediaSessionSwitch.setChecked(enableMediaSessionCallback.get());
+                mediaSessionSwitch.setOnCheckedChangeListener(this);
+
                 Observer<Boolean> devObs = new Observer<Boolean>() {
                     @Override
                     public void update(Observable<Boolean> o, Boolean arg) {
@@ -524,6 +546,15 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
                     }
                 };
                 devMode.addObserver(devObs);
+
+                Observer<Boolean> mediaSessionObs = new Observer<Boolean>() {
+                    @Override
+                    public void update(Observable<Boolean> observable, Boolean value) {
+                        mediaSessionSwitch.setChecked(value);
+                    }
+                };
+                enableMediaSessionCallback.addObserver(mediaSessionObs);
+
                 break;
             case R.id.settings_tab_system_log:
                 TextView logText = findViewById(R.id.logText);
@@ -644,6 +675,7 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
         availableThemes.removeAllObservers();
         volume.removeAllObservers();
         devMode.removeAllObservers();
+        enableMediaSessionCallback.removeAllObservers();
         useAnimations.removeAllObservers();
         playlistData.removeAllObservers();
         modifiedSettings.removeAllObservers();
