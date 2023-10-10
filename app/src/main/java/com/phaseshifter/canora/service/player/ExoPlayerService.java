@@ -636,9 +636,9 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
                                 int plState;
                                 if (state.getPlaybackState() == com.phaseshifter.canora.service.player.state.PlaybackState.STATE_BUFFERING) {
                                     plState = PlaybackState.STATE_BUFFERING;
-                                } else if (state.isPlaying()){
+                                } else if (state.isPlaying()) {
                                     plState = PlaybackState.STATE_PLAYING;
-                                } else  {
+                                } else {
                                     plState = PlaybackState.STATE_PAUSED;
                                 }
                                 mediaSession.setPlaybackState(getMediaSessionState(plState, state.getPlayerPosition()));
@@ -650,22 +650,47 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
 
                                 MediaMetadata.Builder b = new MediaMetadata.Builder()
                                         .putString(MediaMetadata.METADATA_KEY_TITLE, title)
-                                        .putString(MediaMetadata.METADATA_KEY_ARTIST, artist);
+                                        .putString(MediaMetadata.METADATA_KEY_ARTIST, artist)
+                                        .putLong(MediaMetadata.METADATA_KEY_DURATION, duration);
+
                                 b.putBitmap(MediaMetadata.METADATA_KEY_ART, bitmap)
                                         .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, bitmap);
 
                                 mediaSession.setMetadata(b.build());
+
                                 int plState;
                                 if (state.getPlaybackState() == com.phaseshifter.canora.service.player.state.PlaybackState.STATE_BUFFERING) {
                                     plState = PlaybackState.STATE_BUFFERING;
-                                } else if (state.isPlaying()){
+                                } else if (state.isPlaying()) {
                                     plState = PlaybackState.STATE_PLAYING;
-                                } else  {
+                                } else {
                                     plState = PlaybackState.STATE_PAUSED;
                                 }
                                 mediaSession.setPlaybackState(getMediaSessionState(plState, state.getPlayerPosition()));
                             });
                         });
+            } else {
+                Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.artwork_unset);
+
+                MediaMetadata.Builder b = new MediaMetadata.Builder()
+                        .putString(MediaMetadata.METADATA_KEY_TITLE, title)
+                        .putString(MediaMetadata.METADATA_KEY_ARTIST, artist)
+                        .putLong(MediaMetadata.METADATA_KEY_DURATION, duration);
+
+                b.putBitmap(MediaMetadata.METADATA_KEY_ART, bitmap)
+                        .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, bitmap);
+
+                mediaSession.setMetadata(b.build());
+
+                int plState;
+                if (state.getPlaybackState() == com.phaseshifter.canora.service.player.state.PlaybackState.STATE_BUFFERING) {
+                    plState = PlaybackState.STATE_BUFFERING;
+                } else if (state.isPlaying()) {
+                    plState = PlaybackState.STATE_PLAYING;
+                } else {
+                    plState = PlaybackState.STATE_PAUSED;
+                }
+                mediaSession.setPlaybackState(getMediaSessionState(plState, state.getPlayerPosition()));
             }
         }
     }
