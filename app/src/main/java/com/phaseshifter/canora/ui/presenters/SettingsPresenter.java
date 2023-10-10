@@ -194,10 +194,12 @@ public class SettingsPresenter implements SettingsContract.Presenter {
         if (!enable && state.enableMediaSessionCallbacks) {
             view.showDialog_warning_mediasession(() -> {
                 settingsRepository.putBoolean(BooleanSetting.ENABLE_MEDIASESSION_CALLBACK, false);
+                service.setEnableMediaSessionControls(false);
                 loadApply();
             }, () -> applyState(view, state));
         } else {
             settingsRepository.putBoolean(BooleanSetting.ENABLE_MEDIASESSION_CALLBACK, enable);
+            service.setEnableMediaSessionControls(enable);
             loadApply();
         }
     }
