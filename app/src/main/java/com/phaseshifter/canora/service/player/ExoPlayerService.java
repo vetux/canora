@@ -161,7 +161,7 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
             @Override
             public void onIsPlayingChanged(boolean isPlaying) {
                 Log.v(LOG_TAG, "onIsPlayingChanged " + isPlaying);
-                onStateModified(state.get().isPlaying());
+                onStateModified(isPlaying);
             }
 
             @Override
