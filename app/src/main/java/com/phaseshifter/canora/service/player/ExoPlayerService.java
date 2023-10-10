@@ -323,7 +323,7 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
     @Override
     public void pauseResume() {
         Log.v(LOG_TAG, "pauseResume");
-        if (exoPlayer.isPlaying()) {
+        if (state.get().isPlaying()) {
             pause();
         } else {
             resume();
