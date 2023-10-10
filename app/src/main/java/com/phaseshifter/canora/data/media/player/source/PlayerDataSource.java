@@ -26,4 +26,6 @@ public interface PlayerDataSource {
      * @throws Exception If the MediaSource object could not be instantiated.
      */
     void getExoPlayerSources(Context context, RunnableArg<List<MediaSource>> onReady, RunnableArg<Exception> onException);
+
+    boolean equals(Object other);
 }

@@ -7,7 +7,9 @@ import java.util.Objects;
 
 public class AudioDataComparsion {
     public static boolean isEqual_exclude_UUID(PlayerData a0, PlayerData a1) {
-        if (!a0.getDataSource().equals(a1.getDataSource()))
+        if ((a0 == null || a1 == null))
+            return false;
+        if (!Objects.equals(a0.getDataSource(), a1.getDataSource()))
             return false;
         if (a0.getMetadata().getArtwork() == null) {
             if (a1.getMetadata().getArtwork() != null)

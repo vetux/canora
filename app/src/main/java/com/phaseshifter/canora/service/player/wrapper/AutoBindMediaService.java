@@ -17,6 +17,7 @@ import com.phaseshifter.canora.utils.Observable;
 import com.phaseshifter.canora.utils.Observer;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -44,7 +45,9 @@ public class AutoBindMediaService implements ServiceConnection, MediaPlayerServi
     private final Observer<PlayerState> proxyObserver = new Observer<PlayerState>() {
         @Override
         public void update(Observable<PlayerState> o, PlayerState arg) {
-            stateProxy.set(arg);
+            if (!Objects.equals(stateProxy.get(), arg)) {
+                stateProxy.set(arg);
+            }
         }
     };
 

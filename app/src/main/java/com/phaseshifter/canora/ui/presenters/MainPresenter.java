@@ -17,6 +17,7 @@ import com.phaseshifter.canora.data.settings.FloatSetting;
 import com.phaseshifter.canora.data.settings.IntegerSetting;
 import com.phaseshifter.canora.data.settings.StringSetting;
 import com.phaseshifter.canora.data.theme.AppTheme;
+import com.phaseshifter.canora.model.comparison.AudioDataComparsion;
 import com.phaseshifter.canora.model.editor.AudioMetadataEditor;
 import com.phaseshifter.canora.model.formatting.ListFilter;
 import com.phaseshifter.canora.model.formatting.ListSorter;
@@ -181,6 +182,8 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
         // TODO: Preformat content
         List<PlayerData> formattedTracks = new ArrayList<>();
         List<AudioPlaylist> formattedPlaylists = new ArrayList<>();
+        sortedTracks = new ArrayList<>();
+        sortedPlaylists = new ArrayList<>();
         if (uiContentSelector.isPlaylistView()) {
             switch (uiContentSelector.getPage()) {
                 case PLAYLISTS:
@@ -210,18 +213,35 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                 case TRACKS:
                     sortedTracks = ListSorter.sortAudioData(deviceAudioRepository.getTracks(), sortingOptions);
                     break;
-                case PLAYLISTS:
-                    sortedTracks = ListSorter.sortAudioData(userPlaylistRepository.get(uiContentSelector.getUuid()).getData(), sortingOptions);
+                case PLAYLISTS: {
+                    AudioPlaylist playlist = userPlaylistRepository.get(uiContentSelector.getUuid());
+                    if (playlist != null) {
+                        sortedTracks = ListSorter.sortAudioData(playlist.getData(), sortingOptions);
+                    }
                     break;
-                case ARTISTS:
-                    sortedTracks = ListSorter.sortAudioData(deviceAudioRepository.getArtist(uiContentSelector.getUuid()).getData(), sortingOptions);
+                }
+                case ARTISTS: {
+                    AudioPlaylist playlist = deviceAudioRepository.getArtist(uiContentSelector.getUuid());
+                    if (playlist != null) {
+                        // After a refresh the device audio repository could not contain the playlist anymore.
+                        sortedTracks = ListSorter.sortAudioData(playlist.getData(), sortingOptions);
+                    }
                     break;
-                case ALBUMS:
-                    sortedTracks = ListSorter.sortAudioData(deviceAudioRepository.getAlbum(uiContentSelector.getUuid()).getData(), sortingOptions);
+                }
+                case ALBUMS: {
+                    AudioPlaylist playlist = deviceAudioRepository.getAlbum(uiContentSelector.getUuid());
+                    if (playlist != null) {
+                        sortedTracks = ListSorter.sortAudioData(playlist.getData(), sortingOptions);
+                    }
                     break;
-                case GENRES:
-                    sortedTracks = ListSorter.sortAudioData(deviceAudioRepository.getGenre(uiContentSelector.getUuid()).getData(), sortingOptions);
+                }
+                case GENRES: {
+                    AudioPlaylist playlist = deviceAudioRepository.getGenre(uiContentSelector.getUuid());
+                    if (playlist != null) {
+                        sortedTracks = ListSorter.sortAudioData(playlist.getData(), sortingOptions);
+                    }
                     break;
+                }
                 case SOUNDCLOUD_SEARCH:
                     sortedTracks = scAudioDataRepo.getSearchResults();
                     break;
@@ -290,7 +310,13 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
         PlayerState state = mediaService.getState().get();
         if (state != null) {
             PlayerData track = state.getCurrentTrack();
-            int index = contentViewModel.visibleTracks.get().indexOf(track);
+            int index = -1;
+            for (PlayerData t : contentViewModel.visibleTracks.get()) {
+                if (AudioDataComparsion.isEqual_exclude_UUID(track, t)) {
+                    index = contentViewModel.visibleTracks.get().indexOf(t);
+                    break;
+                }
+            }
             if (track != null
                     && uiContentSelector.equals(playingContentSelector)
                     && index >= 0) {
@@ -517,18 +543,6 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
 
         settingsRepository.putString(StringSetting.SC_CLIENTID, scAudioDataRepo.clientID.get());
 
-        MainPresenterState savedState = new MainPresenterState();
-        savedState.uiIndicator = uiContentSelector;
-        savedState.contentIndicator = playingContentSelector;
-        savedState.info = ytdlViewModel.infoForUrl.get();
-        savedState.downloadingAudio = downloadingAudio;
-        savedState.downloadingVideo = downloadingVideo;
-        savedState.url = ytdlViewModel.url.get();
-        savedState.contentSearch = contentSearch;
-        savedState.scSearch = scSearch;
-        savedState.ytSearch = ytSearch;
-        view.saveState(savedState);
-
         mediaService.getState().removeObserver(this);
     }
 
@@ -570,6 +584,17 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
 
     @Override
     public synchronized void onStop() {
+        MainPresenterState savedState = new MainPresenterState();
+        savedState.uiIndicator = uiContentSelector;
+        savedState.contentIndicator = playingContentSelector;
+        savedState.info = ytdlViewModel.infoForUrl.get();
+        savedState.downloadingAudio = downloadingAudio;
+        savedState.downloadingVideo = downloadingVideo;
+        savedState.url = ytdlViewModel.url.get();
+        savedState.contentSearch = contentSearch;
+        savedState.scSearch = scSearch;
+        savedState.ytSearch = ytSearch;
+        view.saveState(savedState);
     }
 
     @Override
@@ -651,7 +676,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
 
     @Override
     public void onSearchTextEditingFinished() {
-        switch(uiContentSelector.getPage()){
+        switch (uiContentSelector.getPage()) {
             case SOUNDCLOUD_SEARCH:
             case YOUTUBE_SEARCH_VIDEOS:
                 break;

@@ -89,7 +89,7 @@ public class ImageDataSourceUri implements ImageDataSource, Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ImageDataSourceUri that = (ImageDataSourceUri) o;
-        return uriStr.equals(that.uriStr);
+        return Objects.equals(uriStr, that.uriStr);
     }
 
     @Override

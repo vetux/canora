@@ -21,4 +21,6 @@ public interface ImageDataSource {
      * @throws Exception
      */
     InputStream getStream(Context context) throws Exception;
+
+    boolean equals(Object other);
 }

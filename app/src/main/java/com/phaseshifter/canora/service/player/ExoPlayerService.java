@@ -51,8 +51,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-//TODO:Testing: Create Unit Tests for Service.
 //TODO: Implement volume fade
+//TODO: Replace ExoPlayer dependency because ExoPlayer segfaults randomly while playing from local device
 public class ExoPlayerService extends Service implements MediaPlayerService, AudioManager.OnAudioFocusChangeListener {
     private static final String packagenameBroadcasts = "com.phaseshifter.canora.mediaserv";
 

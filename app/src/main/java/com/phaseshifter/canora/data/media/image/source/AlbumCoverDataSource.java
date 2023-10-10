@@ -6,11 +6,15 @@ import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 
+import androidx.annotation.Nullable;
+
+import com.phaseshifter.canora.data.media.image.ImageData;
 import com.phaseshifter.canora.utils.RunnableArg;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -69,5 +73,13 @@ public class AlbumCoverDataSource implements ImageDataSource, Serializable {
         }
 
         return new ByteArrayInputStream(imageData);
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        AlbumCoverDataSource data = (AlbumCoverDataSource) obj;
+        return Objects.equals(trackUri, data.trackUri);
     }
 }
