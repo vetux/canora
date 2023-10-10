@@ -433,7 +433,7 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
 
     @Override
     public void setEnableMediaSessionControls(boolean enable) {
-        if (enable){
+        if (enable) {
             mediaSession.setCallback(new MediaSessionCallback(this));
         } else {
             mediaSession.setCallback(null);
@@ -633,7 +633,15 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
                                             .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, defBitmap);
                                 }
                                 mediaSession.setMetadata(b.build());
-                                mediaSession.setPlaybackState(getMediaSessionState(state.isPlaying(), state.getPlayerPosition()));
+                                int plState;
+                                if (state.getPlaybackState() == com.phaseshifter.canora.service.player.state.PlaybackState.STATE_BUFFERING) {
+                                    plState = PlaybackState.STATE_BUFFERING;
+                                } else if (state.isPlaying()){
+                                    plState = PlaybackState.STATE_PLAYING;
+                                } else  {
+                                    plState = PlaybackState.STATE_PAUSED;
+                                }
+                                mediaSession.setPlaybackState(getMediaSessionState(plState, state.getPlayerPosition()));
                             });
                         },
                         (exception) -> {
@@ -647,16 +655,24 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
                                         .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, bitmap);
 
                                 mediaSession.setMetadata(b.build());
-                                mediaSession.setPlaybackState(getMediaSessionState(state.isPlaying(), state.getPlayerPosition()));
+                                int plState;
+                                if (state.getPlaybackState() == com.phaseshifter.canora.service.player.state.PlaybackState.STATE_BUFFERING) {
+                                    plState = PlaybackState.STATE_BUFFERING;
+                                } else if (state.isPlaying()){
+                                    plState = PlaybackState.STATE_PLAYING;
+                                } else  {
+                                    plState = PlaybackState.STATE_PAUSED;
+                                }
+                                mediaSession.setPlaybackState(getMediaSessionState(plState, state.getPlayerPosition()));
                             });
                         });
             }
         }
     }
 
-    private PlaybackState getMediaSessionState(boolean playing, long pos) {
+    private PlaybackState getMediaSessionState(int state, long pos) {
         return new PlaybackState.Builder()
-                .setState(playing ? PlaybackState.STATE_PLAYING : PlaybackState.STATE_PAUSED, pos, 1f, SystemClock.elapsedRealtime())
+                .setState(state, pos, 1f, SystemClock.elapsedRealtime())
                 .setActions(PlaybackState.ACTION_PLAY
                         | PlaybackState.ACTION_PAUSE
                         | PlaybackState.ACTION_SKIP_TO_NEXT
