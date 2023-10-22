@@ -441,7 +441,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
     @Override
     public void update(Observable<PlayerState> observable, PlayerState value) {
         playerStateViewModel.applyPlayerState(value, getPlaylistForSelector(playingContentSelector, deviceAudioRepository, userPlaylistRepository));
-        view.setShowingVideo(value.isVideo());
+        view.setShowingVideo(value.isVideo() && value.getCurrentTrack() != null);
         view.setVideoSize(value.getWidth(), value.getHeight());
         updateHighlightedIndex();
     }
