@@ -73,8 +73,8 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
 
     private static final int NOTIFICATION_ID = 71829;
     private static final String NOTIFICATION_CHANNEL_ID = "CANORA_0_NOSOUND";
-    private static final String NOTIFICATION_CHANNEL_NAME = "Canora Notifications";
-    private static final String NOTIFICATION_CHANNEL_DESCRIPTION = "Canora Notification Channel";
+    private static final String NOTIFICATION_CHANNEL_NAME = "Canora Player";
+    private static final String NOTIFICATION_CHANNEL_DESCRIPTION = "Show Player Notification with transport controls";
 
     private static final long PREV_THRESHOLD = 3000; // When using previous() if current position is larger than threshold the track is sought to the start instead of playing the previous track.
 
@@ -527,7 +527,7 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
                         (exception) -> {
                             showNotification(state.isPlaying(), track, BitmapUtils.getBitmapForResource(this, R.drawable.artwork_unset));
                         });
-            } else {
+            } else if (track != null) {
                 showNotification(state.isPlaying(), track, BitmapUtils.getBitmapForResource(this, R.drawable.artwork_unset));
             }
         });
