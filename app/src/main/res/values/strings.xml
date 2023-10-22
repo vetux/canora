@@ -217,7 +217,7 @@
     <string name="settings_header0showAnimation">Show animations</string>
     <string name="settings_header0glideAnimations">Glide Animations</string>
     <string name="settings_header0developerMode">Developer Mode</string>
-    <string name="settings_header0mediaSessionCallback">Enable Media Session Callbacks</string>
+    <string name="settings_header0mediaSessionCallback">Media Session Callbacks</string>
     <string name="settings_text0playlistLog">%1$d Playlist/s using %2$.3f mb</string>
     <string name="settings_text0settingsLog">%1$d modified settings</string>
     <string name="settings_button0resetSettings">Reset Settings</string>
