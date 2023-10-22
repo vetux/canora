@@ -128,8 +128,6 @@ public class PlayerDataArrayAdapter extends ArrayAdapter<PlayerData> implements 
         GlideApp.with(context).clear(viewHolder.cover);
         if (imageData != null) {
             GlideApp.with(context)
-                    .setDefaultRequestOptions(RequestOptions
-                            .diskCacheStrategyOf(DiskCacheStrategy.NONE))
                     .load(imageData)
                     .centerCrop()
                     .transition(DrawableTransitionOptions.withCrossFade())

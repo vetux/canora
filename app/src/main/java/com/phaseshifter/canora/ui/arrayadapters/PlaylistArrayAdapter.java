@@ -132,9 +132,8 @@ public class PlaylistArrayAdapter extends ArrayAdapter<AudioPlaylist> implements
         GlideApp.with(C).clear(viewHolder.plImg);
         if (imageData != null) {
             GlideApp.with(C)
-                    .setDefaultRequestOptions(RequestOptions
-                            .diskCacheStrategyOf(DiskCacheStrategy.NONE))
                     .load(imageData)
+                    .centerCrop()
                     .placeholder(defaultArt)
                     .transition(DrawableTransitionOptions.withCrossFade())
                     .into(viewHolder.plImg);
