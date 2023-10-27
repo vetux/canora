@@ -88,7 +88,7 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
         presenter = new SettingsPresenter(this,
                 new SettingsRepository(this),
                 new ThemeRepository(),
-                ((MainApplication) getApplication()).getAudioPlaylistRepository(),
+                ((MainApplication) getApplication()).getPlaylistRepository(),
                 service,
                 audioManager,
                 this,

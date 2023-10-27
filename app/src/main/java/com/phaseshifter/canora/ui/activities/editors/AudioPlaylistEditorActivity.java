@@ -15,10 +15,10 @@ import androidx.annotation.Nullable;
 import com.phaseshifter.canora.R;
 import com.phaseshifter.canora.application.MainApplication;
 import com.phaseshifter.canora.data.media.image.ImageData;
-import com.phaseshifter.canora.data.media.image.metadata.ImageMetadataMemory;
+import com.phaseshifter.canora.data.media.image.ImageMetadata;
 import com.phaseshifter.canora.data.media.image.source.ImageDataSourceByteArray;
-import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
-import com.phaseshifter.canora.data.media.playlist.metadata.PlaylistMetadataMemory;
+import com.phaseshifter.canora.data.media.playlist.Playlist;
+import com.phaseshifter.canora.data.media.playlist.PlaylistMetadata;
 import com.phaseshifter.canora.data.theme.AppTheme;
 
 import java.io.ByteArrayOutputStream;
@@ -28,16 +28,16 @@ import java.util.UUID;
 public class AudioPlaylistEditorActivity extends Activity {
     public static class ActivityBundle {
         public final AppTheme theme;
-        public final AudioPlaylist data;
+        public final Playlist data;
 
-        public ActivityBundle(AppTheme theme, AudioPlaylist data) {
+        public ActivityBundle(AppTheme theme, Playlist data) {
             this.theme = theme;
             this.data = data;
         }
     }
 
-    public static final String BUNDLE_INPUT = "AudioPlaylistEditorActivity_IN";
-    public static final String BUNDLE_OUTPUT = "AudioPlaylistEditorActivity_OUT";
+    public static final String BUNDLE_INPUT = "PlaylistEditorActivity_IN";
+    public static final String BUNDLE_OUTPUT = "PlaylistEditorActivity_OUT";
 
     public static final int RESULTCODE_EDIT = 0;
     public static final int RESULTCODE_DELETE = 1;
@@ -52,7 +52,7 @@ public class AudioPlaylistEditorActivity extends Activity {
 
     private ActivityBundle bundle;
 
-    private AudioPlaylist editingPlaylist;
+    private Playlist editingPlaylist;
 
     private byte[] selectedArtwork = null;
 
@@ -106,17 +106,17 @@ public class AudioPlaylistEditorActivity extends Activity {
         finish();
     }
 
-    public AudioPlaylist getUpdatedPlaylist() {
+    public Playlist getUpdatedPlaylist() {
         EditText tex = findViewById(R.id.titleedit);
-        PlaylistMetadataMemory metadata = new PlaylistMetadataMemory(editingPlaylist.getMetadata());
+        PlaylistMetadata metadata = editingPlaylist.getMetadata();
         metadata.setTitle(tex.getText().toString());
         if (selectedArtwork != null) {
             ImageDataSourceByteArray imageSource = new ImageDataSourceByteArray(selectedArtwork);
-            metadata.setArtwork(new ImageData(new ImageMetadataMemory(UUID.randomUUID()), imageSource));
+            metadata.setArtwork(new ImageData(new ImageMetadata(UUID.randomUUID(),  0, 0), imageSource));
         } else {
             metadata.setArtwork(null);
         }
-        return new AudioPlaylist(metadata, editingPlaylist.getData());
+        return new Playlist(metadata, editingPlaylist.getTracks());
     }
 
     private void setupLayout() {

@@ -3,7 +3,7 @@ package com.phaseshifter.canora.model.editor;
 import android.app.RecoverableSecurityException;
 import android.net.Uri;
 import com.phaseshifter.canora.data.media.player.PlayerData;
-import com.phaseshifter.canora.data.media.player.metadata.PlayerMetadata;
+import com.phaseshifter.canora.data.media.player.PlayerMetadata;
 
 import java.io.File;
 import java.io.IOException;

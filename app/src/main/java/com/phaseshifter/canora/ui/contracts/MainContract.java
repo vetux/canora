@@ -4,7 +4,7 @@ import android.net.Uri;
 import android.view.SurfaceView;
 
 import com.phaseshifter.canora.data.media.player.PlayerData;
-import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
+import com.phaseshifter.canora.data.media.playlist.Playlist;
 import com.phaseshifter.canora.data.theme.AppTheme;
 import com.phaseshifter.canora.model.editor.AudioMetadataMask;
 import com.phaseshifter.canora.ui.data.constants.NavigationItem;
@@ -40,9 +40,9 @@ public interface MainContract {
                              RunnableArg<OptionsMenu.Action> onAction,
                              Runnable onCancel);
 
-        void showAddSelectionMenu(List<AudioPlaylist> existingPlaylists,
+        void showAddSelectionMenu(List<Playlist> existingPlaylists,
                                   Runnable onAddToNew,
-                                  RunnableArg<AudioPlaylist> onAddToPlaylist);
+                                  RunnableArg<Playlist> onAddToPlaylist);
 
         void showMessage(String text);
 
@@ -60,18 +60,18 @@ public interface MainContract {
                                        RunnableArg<String> onCreate,
                                        Runnable onCancel);
 
-        void showDialog_DeletePlaylists(List<AudioPlaylist> playlists,
+        void showDialog_DeletePlaylists(List<Playlist> playlists,
                                         Runnable onAccept,
                                         Runnable onCancel);
 
-        void showDialog_DeleteTracksFromPlaylist(AudioPlaylist playlist,
+        void showDialog_DeleteTracksFromPlaylist(Playlist playlist,
                                                  List<PlayerData> tracks,
                                                  Runnable onAccept,
                                                  Runnable onCancel);
 
         void startEditor(PlayerData data, AudioMetadataMask mask, AppTheme theme);
 
-        void startEditor(AudioPlaylist data, AppTheme theme);
+        void startEditor(Playlist data, AppTheme theme);
 
         void startSettings();
 
@@ -169,7 +169,7 @@ public interface MainContract {
 
         void onEditorResult(PlayerData data, boolean error, boolean canceled, boolean deleted);
 
-        void onEditorResult(AudioPlaylist data, boolean error, boolean canceled, boolean deleted);
+        void onEditorResult(Playlist data, boolean error, boolean canceled, boolean deleted);
 
         void onTransportControlChange(boolean controlMax);
 

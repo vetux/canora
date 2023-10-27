@@ -21,7 +21,7 @@ import java.util.concurrent.Executors;
 public class AlbumCoverDataSource implements ImageDataSource, Serializable {
     private static final long serialVersionUID = 1;
 
-    private final String trackUri;
+    public final String trackUri;
 
     private transient boolean imageLoaded = false;
     private transient byte[] imageData = null;

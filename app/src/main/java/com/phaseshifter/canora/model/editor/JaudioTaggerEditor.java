@@ -7,7 +7,7 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import android.util.Log;
 import com.phaseshifter.canora.data.media.player.PlayerData;
-import com.phaseshifter.canora.data.media.player.metadata.PlayerMetadata;
+import com.phaseshifter.canora.data.media.player.PlayerMetadata;
 import com.phaseshifter.canora.data.media.player.source.PlayerDataSourceUri;
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;

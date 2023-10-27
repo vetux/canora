@@ -16,7 +16,7 @@ import java.util.concurrent.Executors;
 public class ImageDataSourceByteArray implements ImageDataSource, Serializable {
     private static final long serialVersionUID = 1;
 
-    private final byte[] imageData;
+    public final byte[] imageData;
 
     private static ExecutorService pool = Executors.newSingleThreadExecutor();
 

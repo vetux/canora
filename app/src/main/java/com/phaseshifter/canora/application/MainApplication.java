@@ -168,7 +168,7 @@ public class MainApplication extends Application {
         return audioDataRepo;
     }
 
-    public UserPlaylistRepository getAudioPlaylistRepository() {
+    public UserPlaylistRepository getPlaylistRepository() {
         return audioPlaylistRepository;
     }
 
@@ -181,7 +181,7 @@ public class MainApplication extends Application {
     }
 
     public String getPlaylistPath() {
-        return getFilesDir().getAbsolutePath() + "/playlists/";
+        return getFilesDir().getAbsolutePath() + "/playlists.json";
     }
 
     public String getCrashLogsDir()  {

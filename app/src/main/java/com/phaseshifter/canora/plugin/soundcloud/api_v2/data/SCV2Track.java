@@ -9,12 +9,12 @@ public abstract class SCV2Track extends SCTrack {
     private static final long serialVersionUID = 1;
 
     public static class MediaTranscoding implements Serializable {
-        private final String url;
-        private final String preset;
-        private final String duration;
-        private final String protocol;
-        private final String mimeType;
-        private final String quality;
+        public String url;
+        public String preset;
+        public String duration;
+        public String protocol;
+        public String mimeType;
+        public String quality;
 
         public MediaTranscoding(String url, String preset, String duration, String protocol, String mimeType, String quality) {
             this.url = url;
@@ -29,24 +29,48 @@ public abstract class SCV2Track extends SCTrack {
             return url;
         }
 
+        public void setUrl(String url) {
+            this.url = url;
+        }
+
         public String getPreset() {
             return preset;
+        }
+
+        public void setPreset(String preset) {
+            this.preset = preset;
         }
 
         public String getDuration() {
             return duration;
         }
 
+        public void setDuration(String duration) {
+            this.duration = duration;
+        }
+
         public String getProtocol() {
             return protocol;
+        }
+
+        public void setProtocol(String protocol) {
+            this.protocol = protocol;
         }
 
         public String getMimeType() {
             return mimeType;
         }
 
+        public void setMimeType(String mimeType) {
+            this.mimeType = mimeType;
+        }
+
         public String getQuality() {
             return quality;
+        }
+
+        public void setQuality(String quality) {
+            this.quality = quality;
         }
     }
 

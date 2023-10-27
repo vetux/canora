@@ -3,9 +3,9 @@ package com.phaseshifter.canora.model.repo;
 import android.util.Log;
 
 import com.phaseshifter.canora.data.media.player.PlayerData;
-import com.phaseshifter.canora.data.media.player.metadata.PlayerMetadataMemory;
-import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
-import com.phaseshifter.canora.data.media.playlist.metadata.PlaylistMetadataMemory;
+import com.phaseshifter.canora.data.media.player.PlayerMetadata;
+import com.phaseshifter.canora.data.media.playlist.Playlist;
+import com.phaseshifter.canora.data.media.playlist.PlaylistMetadata;
 import com.phaseshifter.canora.model.comparison.AudioDataComparsion;
 import com.phaseshifter.canora.model.comparison.AudioPlaylistComparison;
 import com.phaseshifter.canora.model.provider.IContentProvider;
@@ -24,15 +24,15 @@ public class DeviceAudioRepository {
     private final IContentProvider contentProvider;
 
     private List<PlayerData> tracks;
-    private List<AudioPlaylist> artists;
-    private List<AudioPlaylist> albums;
-    private List<AudioPlaylist> genres;
+    private List<Playlist> artists;
+    private List<Playlist> albums;
+    private List<Playlist> genres;
 
     public DeviceAudioRepository(IContentProvider contentProvider,
                                  List<PlayerData> tracks,
-                                 List<AudioPlaylist> artists,
-                                 List<AudioPlaylist> albums,
-                                 List<AudioPlaylist> genres) {
+                                 List<Playlist> artists,
+                                 List<Playlist> albums,
+                                 List<Playlist> genres) {
         this.contentProvider = contentProvider;
         this.tracks = tracks;
         this.artists = artists;
@@ -52,13 +52,13 @@ public class DeviceAudioRepository {
     public void refresh() {
         Log.v(LOG_TAG, "refresh");
         List<PlayerData> tracks = contentProvider.getTracks();
-        List<AudioPlaylist> artists = contentProvider.getArtists(tracks);
-        List<AudioPlaylist> albums = contentProvider.getAlbums(tracks);
-        List<AudioPlaylist> genres = contentProvider.getGenres();
+        List<Playlist> artists = contentProvider.getArtists(tracks);
+        List<Playlist> albums = contentProvider.getAlbums(tracks);
+        List<Playlist> genres = contentProvider.getGenres();
         this.tracks = updateAudioData(this.tracks, tracks);
-        this.artists = updateAudioPlaylists(this.artists, artists);
-        this.albums = updateAudioPlaylists(this.albums, albums);
-        this.genres = updateAudioPlaylists(this.genres, genres);
+        this.artists = updatePlaylists(this.artists, artists);
+        this.albums = updatePlaylists(this.albums, albums);
+        this.genres = updatePlaylists(this.genres, genres);
         Log.v(LOG_TAG, "refresh complete");
     }
 
@@ -67,14 +67,14 @@ public class DeviceAudioRepository {
         return tracks;
     }
 
-    public List<AudioPlaylist> getArtists() {
+    public List<Playlist> getArtists() {
         Log.v(LOG_TAG, "getArtists");
         return artists;
     }
 
-    public AudioPlaylist getArtist(UUID id) {
+    public Playlist getArtist(UUID id) {
         Log.v(LOG_TAG, "getArtist " + id);
-        for (AudioPlaylist pl : artists) {
+        for (Playlist pl : artists) {
             if (pl.getMetadata().getId().equals(id)) {
                 return pl;
             }
@@ -82,14 +82,14 @@ public class DeviceAudioRepository {
         return null;
     }
 
-    public List<AudioPlaylist> getAlbums() {
+    public List<Playlist> getAlbums() {
         Log.v(LOG_TAG, "getAlbums");
         return albums;
     }
 
-    public AudioPlaylist getAlbum(UUID id) {
+    public Playlist getAlbum(UUID id) {
         Log.v(LOG_TAG, "getAlbum " + id);
-        for (AudioPlaylist pl : albums) {
+        for (Playlist pl : albums) {
             if (pl.getMetadata().getId().equals(id)) {
                 return pl;
             }
@@ -97,14 +97,14 @@ public class DeviceAudioRepository {
         return null;
     }
 
-    public List<AudioPlaylist> getGenres() {
+    public List<Playlist> getGenres() {
         Log.v(LOG_TAG, "getGenres");
         return genres;
     }
 
-    public AudioPlaylist getGenre(UUID id) {
+    public Playlist getGenre(UUID id) {
         Log.v(LOG_TAG, "getGenre " + id);
-        for (AudioPlaylist pl : genres) {
+        for (Playlist pl : genres) {
             if (pl.getMetadata().getId().equals(id)) {
                 return pl;
             }
@@ -126,7 +126,7 @@ public class DeviceAudioRepository {
             boolean foundOld = false;
             for (PlayerData oldTrack : oldData) {
                 if (AudioDataComparsion.isEqual_exclude_UUID(track, oldTrack)) {
-                    PlayerMetadataMemory patchedMetadata = new PlayerMetadataMemory(track.getMetadata());
+                    PlayerMetadata patchedMetadata = track.getMetadata();
                     patchedMetadata.setId(oldTrack.getMetadata().getId());
                     ret.add(new PlayerData(patchedMetadata, track.getDataSource()));
                     foundOld = true;
@@ -139,15 +139,15 @@ public class DeviceAudioRepository {
         return ret;
     }
 
-    private List<AudioPlaylist> updateAudioPlaylists(List<AudioPlaylist> oldData, List<AudioPlaylist> newData) {
-        List<AudioPlaylist> ret = new ArrayList<>();
-        for (AudioPlaylist playlist : newData) {
+    private List<Playlist> updatePlaylists(List<Playlist> oldData, List<Playlist> newData) {
+        List<Playlist> ret = new ArrayList<>();
+        for (Playlist playlist : newData) {
             boolean foundOld = false;
-            for (AudioPlaylist oldPlaylist : oldData) {
+            for (Playlist oldPlaylist : oldData) {
                 if (AudioPlaylistComparison.isEqualPermissive(playlist, oldPlaylist)) {
-                    PlaylistMetadataMemory patchedMetadata = new PlaylistMetadataMemory(playlist.getMetadata());
+                    PlaylistMetadata patchedMetadata = playlist.getMetadata();
                     patchedMetadata.setId(oldPlaylist.getMetadata().getId());
-                    ret.add(new AudioPlaylist(patchedMetadata, updateAudioData(oldPlaylist.getData(), playlist.getData())));
+                    ret.add(new Playlist(patchedMetadata, updateAudioData(oldPlaylist.getTracks(), playlist.getTracks())));
                     foundOld = true;
                     break;
                 }

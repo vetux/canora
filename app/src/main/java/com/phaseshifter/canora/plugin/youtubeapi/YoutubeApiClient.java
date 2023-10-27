@@ -2,12 +2,12 @@ package com.phaseshifter.canora.plugin.youtubeapi;
 
 import android.net.Uri;
 
+import com.phaseshifter.canora.data.media.image.ImageMetadata;
 import com.phaseshifter.canora.data.media.player.PlayerData;
-import com.phaseshifter.canora.data.media.player.metadata.PlayerMetadataMemory;
 import com.phaseshifter.canora.data.media.image.ImageData;
-import com.phaseshifter.canora.data.media.image.metadata.ImageMetadataMemory;
 import com.phaseshifter.canora.data.media.image.source.ImageDataSourceUri;
-import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
+import com.phaseshifter.canora.data.media.player.PlayerMetadata;
+import com.phaseshifter.canora.data.media.playlist.Playlist;
 import com.phaseshifter.canora.net.http.HttpClient;
 import com.phaseshifter.canora.net.http.HttpClientBuilder;
 import com.phaseshifter.canora.net.http.HttpMethod;
@@ -56,7 +56,7 @@ public class YoutubeApiClient {
         return createVideoResponse(client.doRequest(createVideoRequest(key, videos)));
     }
 
-    public AudioPlaylist getAudioPlaylist(String key, YoutubePlaylist playlist) {
+    public Playlist getPlaylist(String key, YoutubePlaylist playlist) {
         throw new RuntimeException("Not Implemented");
     }
 
@@ -91,13 +91,13 @@ public class YoutubeApiClient {
             JSONObject contentDetails = video.getJSONObject("contentDetails");
             JSONObject thumbnail = snippet.getJSONObject("thumbnails").getJSONObject("default");
             String uri = ENDPOINT_YOUTUBE + "?v=" + video.get("id");
-            PlayerMetadataMemory metadata = new PlayerMetadataMemory();
+            PlayerMetadata metadata = new PlayerMetadata();
             metadata.setId(UUID.randomUUID());
             metadata.setTitle(snippet.getString("title"));
             metadata.setArtist(snippet.getString("channelTitle"));
             Duration duration = Duration.parse(contentDetails.getString("duration"));
-            metadata.setLength(duration.getSeconds() * 1000);
-            metadata.setArtwork(new ImageData(new ImageMetadataMemory(UUID.randomUUID()), new ImageDataSourceUri(Uri.parse(thumbnail.getString("url")))));
+            metadata.setDuration(duration.getSeconds() * 1000);
+            metadata.setArtwork(new ImageData(new ImageMetadata(UUID.randomUUID()), new ImageDataSourceUri(Uri.parse(thumbnail.getString("url")))));
             ret.add(new PlayerData(metadata, new AudioDataSourceYtdl(uri)));
         }
         return ret;

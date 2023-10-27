@@ -1,7 +1,7 @@
 package com.phaseshifter.canora.ui.viewmodels;
 
 import com.phaseshifter.canora.data.media.player.PlayerData;
-import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
+import com.phaseshifter.canora.data.media.playlist.Playlist;
 import com.phaseshifter.canora.utils.Observable;
 
 import java.util.ArrayList;
@@ -15,7 +15,7 @@ public class ContentViewModel {
     public final Observable<Integer> visibleTracksHighlightedIndex = new Observable<>(null);
     public final Observable<HashSet<Integer>> contentTracksSelection = new Observable<>(new HashSet<>());
 
-    public final Observable<List<AudioPlaylist>> visiblePlaylists = new Observable<>(new ArrayList<>());
+    public final Observable<List<Playlist>> visiblePlaylists = new Observable<>(new ArrayList<>());
     public final Observable<Integer> contentPlaylistHighlight = new Observable<>(null);
     public final Observable<HashSet<Integer>> contentPlaylistsSelection = new Observable<>(new HashSet<>());
 

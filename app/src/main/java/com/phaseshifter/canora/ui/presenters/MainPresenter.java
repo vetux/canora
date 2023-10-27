@@ -7,11 +7,11 @@ import android.util.Log;
 import com.phaseshifter.canora.R;
 import com.phaseshifter.canora.application.MainApplication;
 import com.phaseshifter.canora.data.media.player.PlayerData;
-import com.phaseshifter.canora.data.media.player.metadata.PlayerMetadataMemory;
+import com.phaseshifter.canora.data.media.player.PlayerMetadata;
 import com.phaseshifter.canora.data.media.player.source.PlayerDataSource;
 import com.phaseshifter.canora.data.media.player.source.PlayerDataSourceUri;
-import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
-import com.phaseshifter.canora.data.media.playlist.metadata.PlaylistMetadataMemory;
+import com.phaseshifter.canora.data.media.playlist.Playlist;
+import com.phaseshifter.canora.data.media.playlist.PlaylistMetadata;
 import com.phaseshifter.canora.data.settings.BooleanSetting;
 import com.phaseshifter.canora.data.settings.FloatSetting;
 import com.phaseshifter.canora.data.settings.IntegerSetting;
@@ -105,7 +105,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
     private HashSet<UUID> selection = new HashSet<>();
 
     private List<PlayerData> sortedTracks = new ArrayList<>();
-    private List<AudioPlaylist> sortedPlaylists = new ArrayList<>();
+    private List<Playlist> sortedPlaylists = new ArrayList<>();
 
     private boolean downloadingAudio = false;
     private boolean downloadingVideo = false;
@@ -181,29 +181,29 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
     private void updateVisibleContent() {
         // TODO: Preformat content
         List<PlayerData> formattedTracks = new ArrayList<>();
-        List<AudioPlaylist> formattedPlaylists = new ArrayList<>();
+        List<Playlist> formattedPlaylists = new ArrayList<>();
         sortedTracks = new ArrayList<>();
         sortedPlaylists = new ArrayList<>();
         if (uiContentSelector.isPlaylistView()) {
             switch (uiContentSelector.getPage()) {
                 case PLAYLISTS:
-                    sortedPlaylists = ListSorter.sortAudioPlaylist(userPlaylistRepository.getAll(), sortingOptions);
+                    sortedPlaylists = ListSorter.sortPlaylist(userPlaylistRepository.getAll(), sortingOptions);
                     break;
                 case ARTISTS:
-                    sortedPlaylists = ListSorter.sortAudioPlaylist(deviceAudioRepository.getArtists(), sortingOptions);
+                    sortedPlaylists = ListSorter.sortPlaylist(deviceAudioRepository.getArtists(), sortingOptions);
                     break;
                 case ALBUMS:
-                    sortedPlaylists = ListSorter.sortAudioPlaylist(deviceAudioRepository.getAlbums(), sortingOptions);
+                    sortedPlaylists = ListSorter.sortPlaylist(deviceAudioRepository.getAlbums(), sortingOptions);
                     break;
                 case GENRES:
-                    sortedPlaylists = ListSorter.sortAudioPlaylist(deviceAudioRepository.getGenres(), sortingOptions);
+                    sortedPlaylists = ListSorter.sortPlaylist(deviceAudioRepository.getGenres(), sortingOptions);
                     break;
                 case SOUNDCLOUD_CHARTS:
-                    sortedPlaylists = ListSorter.sortAudioPlaylist(scAudioDataRepo.getChartsPlaylists(), sortingOptions);
+                    sortedPlaylists = ListSorter.sortPlaylist(scAudioDataRepo.getChartsPlaylists(), sortingOptions);
                     break;
             }
             if (appViewModel.isSearching.get()) {
-                formattedPlaylists = ListFilter.filterAudioPlaylist(sortedPlaylists, new FilterOptions(filterBy, appViewModel.searchText.get()));
+                formattedPlaylists = ListFilter.filterPlaylist(sortedPlaylists, new FilterOptions(filterBy, appViewModel.searchText.get()));
             } else {
                 formattedPlaylists = sortedPlaylists;
             }
@@ -214,31 +214,31 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                     sortedTracks = ListSorter.sortAudioData(deviceAudioRepository.getTracks(), sortingOptions);
                     break;
                 case PLAYLISTS: {
-                    AudioPlaylist playlist = userPlaylistRepository.get(uiContentSelector.getUuid());
+                    Playlist playlist = userPlaylistRepository.get(uiContentSelector.getUuid());
                     if (playlist != null) {
-                        sortedTracks = ListSorter.sortAudioData(playlist.getData(), sortingOptions);
+                        sortedTracks = ListSorter.sortAudioData(playlist.getTracks(), sortingOptions);
                     }
                     break;
                 }
                 case ARTISTS: {
-                    AudioPlaylist playlist = deviceAudioRepository.getArtist(uiContentSelector.getUuid());
+                    Playlist playlist = deviceAudioRepository.getArtist(uiContentSelector.getUuid());
                     if (playlist != null) {
                         // After a refresh the device audio repository could not contain the playlist anymore.
-                        sortedTracks = ListSorter.sortAudioData(playlist.getData(), sortingOptions);
+                        sortedTracks = ListSorter.sortAudioData(playlist.getTracks(), sortingOptions);
                     }
                     break;
                 }
                 case ALBUMS: {
-                    AudioPlaylist playlist = deviceAudioRepository.getAlbum(uiContentSelector.getUuid());
+                    Playlist playlist = deviceAudioRepository.getAlbum(uiContentSelector.getUuid());
                     if (playlist != null) {
-                        sortedTracks = ListSorter.sortAudioData(playlist.getData(), sortingOptions);
+                        sortedTracks = ListSorter.sortAudioData(playlist.getTracks(), sortingOptions);
                     }
                     break;
                 }
                 case GENRES: {
-                    AudioPlaylist playlist = deviceAudioRepository.getGenre(uiContentSelector.getUuid());
+                    Playlist playlist = deviceAudioRepository.getGenre(uiContentSelector.getUuid());
                     if (playlist != null) {
-                        sortedTracks = ListSorter.sortAudioData(playlist.getData(), sortingOptions);
+                        sortedTracks = ListSorter.sortAudioData(playlist.getTracks(), sortingOptions);
                     }
                     break;
                 }
@@ -246,7 +246,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                     sortedTracks = scAudioDataRepo.getSearchResults();
                     break;
                 case SOUNDCLOUD_CHARTS:
-                    sortedTracks = scAudioDataRepo.getChartsPlaylist(uiContentSelector.getUuid()).getData();
+                    sortedTracks = scAudioDataRepo.getChartsPlaylist(uiContentSelector.getUuid()).getTracks();
                     break;
                 case YOUTUBE_SEARCH_VIDEOS:
                     sortedTracks = ytRepo.results.get();
@@ -839,7 +839,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
 
     @Override
     public void onPlaylistContentClick(int index) {
-        List<AudioPlaylist> processedData = contentViewModel.visiblePlaylists.get();
+        List<Playlist> processedData = contentViewModel.visiblePlaylists.get();
 
         //Assertions
         if (processedData == null
@@ -961,7 +961,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
     }
 
     @Override
-    public void onEditorResult(AudioPlaylist data, boolean error, boolean canceled, boolean delete) {
+    public void onEditorResult(Playlist data, boolean error, boolean canceled, boolean delete) {
         Log.v(LOG_TAG, "onEditorResult: " + data + " " + error + " " + canceled + " " + delete);
         if (data == null)
             return;
@@ -1140,11 +1140,11 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
     @Override
     public void onAddToPlaylistClick() {
         DownloadInfo info = ytdlViewModel.infoForUrl.get();
-        PlayerMetadataMemory trackMetadata = new PlayerMetadataMemory();
+        PlayerMetadata trackMetadata = new PlayerMetadata();
         trackMetadata.setId(UUID.randomUUID());
         trackMetadata.setTitle(info.title);
         trackMetadata.setArtist(info.user);
-        trackMetadata.setLength(info.duration * 1000L);
+        trackMetadata.setDuration(info.duration * 1000L);
         PlayerDataSource trackSource = new AudioDataSourceYtdl(ytdlViewModel.url.get());
         PlayerData track = new PlayerData(trackMetadata, trackSource);
         List<PlayerData> tracks = new ArrayList<>();
@@ -1152,15 +1152,14 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
         view.showAddSelectionMenu(userPlaylistRepository.getAll(),
                 () -> {
                     view.showDialog_CreatePlaylist(tracks, (name) -> {
-                        PlaylistMetadataMemory metadata = new PlaylistMetadataMemory(UUID.randomUUID(), name, null);
-                        AudioPlaylist playlist = new AudioPlaylist(metadata, tracks);
+                        PlaylistMetadata metadata = new PlaylistMetadata(UUID.randomUUID(), name, null);
+                        Playlist playlist = new Playlist(metadata, tracks);
                         userPlaylistRepository.add(playlist);
                     }, () -> {
                     });
                 }, (playlist) -> {
-                    AudioPlaylist targetCopy = new AudioPlaylist(playlist);
-                    targetCopy.getData().add(track);
-                    userPlaylistRepository.replace(playlist.getMetadata().getId(), targetCopy);
+                    playlist.getTracks().add(track);
+                    userPlaylistRepository.replace(playlist.getMetadata().getId(), playlist);
                 });
     }
 
@@ -1242,7 +1241,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
     private HashSet<Integer> getSelectedPlaylistIndices() {
         HashSet<Integer> indices = new HashSet<>();
         for (UUID id : selection) {
-            List<AudioPlaylist> list = contentViewModel.visiblePlaylists.get();
+            List<Playlist> list = contentViewModel.visiblePlaylists.get();
             for (int i = 0; i < list.size(); i++) {
                 if (list.get(i).getMetadata().getId().equals(id)) {
                     indices.add(i);
@@ -1257,7 +1256,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
         switch (action) {
             case SELECT:
                 if (uiContentSelector.isPlaylistView()) {
-                    AudioPlaylist clickedPlaylist = contentViewModel.visiblePlaylists.get().get(index);
+                    Playlist clickedPlaylist = contentViewModel.visiblePlaylists.get().get(index);
                     if (selection.contains(clickedPlaylist.getMetadata().getId()))
                         selection.remove(clickedPlaylist.getMetadata().getId());
                     else
@@ -1284,8 +1283,8 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                 break;
             case DELETE:
                 if (uiContentSelector.isPlaylistView()) {
-                    AudioPlaylist playlistToDelete = contentViewModel.visiblePlaylists.get().get(index);
-                    List<AudioPlaylist> playlistsToDelete = new ArrayList<>();
+                    Playlist playlistToDelete = contentViewModel.visiblePlaylists.get().get(index);
+                    List<Playlist> playlistsToDelete = new ArrayList<>();
                     playlistsToDelete.add(playlistToDelete);
                     view.showDialog_DeletePlaylists(playlistsToDelete, () -> {
                                 userPlaylistRepository.remove(playlistToDelete.getMetadata().getId());
@@ -1295,17 +1294,17 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                             () -> {
                             });
                 } else {
-                    AudioPlaylist currentPlaylist = MainSelector.getPlaylistForSelector(uiContentSelector, deviceAudioRepository, userPlaylistRepository);
+                    Playlist currentPlaylist = MainSelector.getPlaylistForSelector(uiContentSelector, deviceAudioRepository, userPlaylistRepository);
                     if (currentPlaylist == null)
                         throw new AssertionError();
                     List<PlayerData> tracks = contentViewModel.visibleTracks.get();
                     List<PlayerData> tracksToDelete = new ArrayList<>();
                     tracksToDelete.add(tracks.get(index));
                     view.showDialog_DeleteTracksFromPlaylist(currentPlaylist, tracksToDelete, () -> {
-                        List<PlayerData> cleanTracks = currentPlaylist.getData();
+                        List<PlayerData> cleanTracks = currentPlaylist.getTracks();
                         for (PlayerData delTrack : tracksToDelete)
                             cleanTracks.remove(delTrack);
-                        AudioPlaylist clean = new AudioPlaylist(currentPlaylist.getMetadata(), cleanTracks);
+                        Playlist clean = new Playlist(currentPlaylist.getMetadata(), cleanTracks);
                         userPlaylistRepository.replace(currentPlaylist.getMetadata().getId(), clean);
                         updateVisibleContent();
                         view.showMessage("Deleted tracks from playlist");
@@ -1363,13 +1362,13 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                         });
                 break;
             case ADD_SELECTION:
-                view.showAddSelectionMenu(ListSorter.sortAudioPlaylist(userPlaylistRepository.getAll(), sortingOptions),
+                view.showAddSelectionMenu(ListSorter.sortPlaylist(userPlaylistRepository.getAll(), sortingOptions),
                         () -> {
                             List<PlayerData> selectedData = new ArrayList<>();
                             if (uiContentSelector.isPlaylistView()) {
-                                for (AudioPlaylist playlist : sortedPlaylists) {
+                                for (Playlist playlist : sortedPlaylists) {
                                     if (selection.contains(playlist.getMetadata().getId()))
-                                        selectedData.addAll(playlist.getData());
+                                        selectedData.addAll(playlist.getTracks());
                                 }
                             } else {
                                 for (PlayerData track : sortedTracks) {
@@ -1378,11 +1377,11 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                                 }
                             }
                             view.showDialog_CreatePlaylist(selectedData, (title) -> {
-                                        PlaylistMetadataMemory metadata = new PlaylistMetadataMemory(null,
+                                        PlaylistMetadata metadata = new PlaylistMetadata(null,
                                                 title,
                                                 null
                                         );
-                                        AudioPlaylist playlist = new AudioPlaylist(metadata, selectedData);
+                                        Playlist playlist = new Playlist(metadata, selectedData);
                                         userPlaylistRepository.add(playlist);
                                         appViewModel.isSelecting.set(false);
                                         updateVisibleContent();
@@ -1394,9 +1393,9 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                         (targetPlaylist) -> {
                             List<PlayerData> selectedData = new ArrayList<>();
                             if (uiContentSelector.isPlaylistView()) {
-                                for (AudioPlaylist playlist : sortedPlaylists) {
+                                for (Playlist playlist : sortedPlaylists) {
                                     if (selection.contains(playlist.getMetadata().getId()))
-                                        selectedData.addAll(playlist.getData());
+                                        selectedData.addAll(playlist.getTracks());
                                 }
                             } else {
                                 for (PlayerData track : sortedTracks) {
@@ -1405,10 +1404,9 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                                 }
                             }
 
-                            AudioPlaylist targetCopy = new AudioPlaylist(targetPlaylist);
-                            targetCopy.getData().addAll(selectedData);
+                            targetPlaylist.getTracks().addAll(selectedData);
 
-                            userPlaylistRepository.replace(targetPlaylist.getMetadata().getId(), targetCopy);
+                            userPlaylistRepository.replace(targetPlaylist.getMetadata().getId(), targetPlaylist);
 
                             appViewModel.isSelecting.set(false);
                             updateVisibleContent();
@@ -1428,7 +1426,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                 break;
             case SELECT_ALL:
                 if (uiContentSelector.isPlaylistView()) {
-                    for (AudioPlaylist playlist : sortedPlaylists) {
+                    for (Playlist playlist : sortedPlaylists) {
                         selection.add(playlist.getMetadata().getId());
                     }
                     contentViewModel.contentPlaylistsSelection.set(getSelectedPlaylistIndices());
@@ -1444,21 +1442,21 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                 contentViewModel.contentTracksSelection.notifyObservers();
                 break;
             case EDIT_PLAYLIST:
-                AudioPlaylist playlist = getPlaylistForSelector(uiContentSelector, deviceAudioRepository, userPlaylistRepository);
+                Playlist playlist = getPlaylistForSelector(uiContentSelector, deviceAudioRepository, userPlaylistRepository);
                 view.startEditor(playlist, theme);
                 break;
             case DELETE:
                 if (appViewModel.isSelecting.get()) {
                     if (uiContentSelector.isPlaylistView()) {
-                        List<AudioPlaylist> playlistsToDelete = new ArrayList<>();
-                        for (AudioPlaylist pl : sortedPlaylists) {
+                        List<Playlist> playlistsToDelete = new ArrayList<>();
+                        for (Playlist pl : sortedPlaylists) {
                             if (selection.contains(pl.getMetadata().getId()))
                                 playlistsToDelete.add(pl);
                         }
                         appViewModel.isSelecting.set(false);
                         view.showDialog_DeletePlaylists(playlistsToDelete, () -> {
                             boolean resetUiIndicator = false;
-                            for (AudioPlaylist pl : playlistsToDelete) {
+                            for (Playlist pl : playlistsToDelete) {
                                 if (playingContentSelector != null
                                         && playingContentSelector.getPage() == MainPage.PLAYLISTS
                                         && Objects.equals(playingContentSelector.getUuid(), pl.getMetadata().getId()))
@@ -1473,20 +1471,20 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                         }, () -> {
                         });
                     } else {
-                        AudioPlaylist currentPlaylist = getPlaylistForSelector(uiContentSelector, deviceAudioRepository, userPlaylistRepository);
+                        Playlist currentPlaylist = getPlaylistForSelector(uiContentSelector, deviceAudioRepository, userPlaylistRepository);
                         if (currentPlaylist != null) {
                             List<PlayerData> tracksToDelete = new ArrayList<>();
-                            for (PlayerData track : currentPlaylist.getData()) {
+                            for (PlayerData track : currentPlaylist.getTracks()) {
                                 if (selection.contains(track.getMetadata().getId())) {
                                     tracksToDelete.add(track);
                                 }
                             }
                             appViewModel.isSelecting.set(false);
                             view.showDialog_DeleteTracksFromPlaylist(currentPlaylist, tracksToDelete, () -> {
-                                List<PlayerData> cleanTracks = currentPlaylist.getData();
+                                List<PlayerData> cleanTracks = currentPlaylist.getTracks();
                                 for (PlayerData delTrack : tracksToDelete)
                                     cleanTracks.remove(delTrack);
-                                AudioPlaylist clean = new AudioPlaylist(currentPlaylist.getMetadata(), cleanTracks);
+                                Playlist clean = new Playlist(currentPlaylist.getMetadata(), cleanTracks);
                                 userPlaylistRepository.replace(currentPlaylist.getMetadata().getId(), clean);
                                 updateVisibleContent();
                                 view.showMessage("Deleted tracks from playlist");
@@ -1495,9 +1493,9 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                         }
                     }
                 } else {
-                    AudioPlaylist playlistToDelete = getPlaylistForSelector(uiContentSelector, deviceAudioRepository, userPlaylistRepository);
+                    Playlist playlistToDelete = getPlaylistForSelector(uiContentSelector, deviceAudioRepository, userPlaylistRepository);
 
-                    List<AudioPlaylist> data = new ArrayList<>();
+                    List<Playlist> data = new ArrayList<>();
                     data.add(playlistToDelete);
                     view.showDialog_DeletePlaylists(data, () -> {
                         userPlaylistRepository.remove(playlistToDelete.getMetadata().getId());

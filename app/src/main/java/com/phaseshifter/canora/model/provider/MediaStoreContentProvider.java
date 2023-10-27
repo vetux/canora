@@ -9,15 +9,14 @@ import android.util.Log;
 
 import androidx.core.util.Pair;
 
+import com.phaseshifter.canora.data.media.image.ImageMetadata;
 import com.phaseshifter.canora.data.media.player.PlayerData;
-import com.phaseshifter.canora.data.media.player.metadata.PlayerMetadataMemory;
+import com.phaseshifter.canora.data.media.player.PlayerMetadata;
 import com.phaseshifter.canora.data.media.player.source.PlayerDataSourceUri;
 import com.phaseshifter.canora.data.media.image.ImageData;
-import com.phaseshifter.canora.data.media.image.metadata.ImageMetadataMemory;
 import com.phaseshifter.canora.data.media.image.source.AlbumCoverDataSource;
-import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
-import com.phaseshifter.canora.data.media.playlist.metadata.PlaylistMetadata;
-import com.phaseshifter.canora.data.media.playlist.metadata.PlaylistMetadataMemory;
+import com.phaseshifter.canora.data.media.playlist.Playlist;
+import com.phaseshifter.canora.data.media.playlist.PlaylistMetadata;
 import com.phaseshifter.canora.utils.android.ContentUriFactory;
 
 import java.util.*;
@@ -80,7 +79,7 @@ public class MediaStoreContentProvider implements IContentProvider {
                     String durationStr = mediaCursor.getString(indexDuration);
                     long duration = durationStr == null ? 0 : Long.parseLong(durationStr);
 
-                    PlayerMetadataMemory metadata = new PlayerMetadataMemory(
+                    PlayerMetadata metadata = new PlayerMetadata(
                             genUUID,
                             mediaCursor.getString(indexTitle),
                             mediaCursor.getString(indexArtist),
@@ -103,7 +102,7 @@ public class MediaStoreContentProvider implements IContentProvider {
     }
 
     @Override
-    public List<AudioPlaylist> getAlbums(List<PlayerData> cache) {
+    public List<Playlist> getAlbums(List<PlayerData> cache) {
         Log.v(LOG_TAG, "Get Albums");
         if (cache == null)
             throw new IllegalArgumentException();
@@ -125,7 +124,7 @@ public class MediaStoreContentProvider implements IContentProvider {
     }
 
     @Override
-    public List<AudioPlaylist> getArtists(List<PlayerData> cache) {
+    public List<Playlist> getArtists(List<PlayerData> cache) {
         Log.v(LOG_TAG, "Get Artists");
         if (cache == null)
             throw new IllegalArgumentException();
@@ -150,9 +149,9 @@ public class MediaStoreContentProvider implements IContentProvider {
      * For Each genre there is two MediaStore queries made. As there should only be a limited amount of possible genres this should not have a big impact on performance.
      */
     @Override
-    public List<AudioPlaylist> getGenres() {
+    public List<Playlist> getGenres() {
         Log.v(LOG_TAG, "Get Genres");
-        List<AudioPlaylist> ret = new ArrayList<>();
+        List<Playlist> ret = new ArrayList<>();
         Uri genresURI = MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI;
         String[] columns = {MediaStore.Audio.Genres._ID, MediaStore.Audio.Genres.NAME};
         Cursor cursor = C.getContentResolver().query(genresURI, columns, null, null, null);
@@ -171,8 +170,8 @@ public class MediaStoreContentProvider implements IContentProvider {
                     if (usedUUIDS.contains(genUUID))
                         throw new RuntimeException("UUID Collision!!!");
                     usedUUIDS.add(genUUID);
-                    PlaylistMetadata metadata = new PlaylistMetadataMemory(genUUID, genre.second, null);
-                    ret.add(new AudioPlaylist(metadata, getTracksOfGenreID(genre.first)));
+                    PlaylistMetadata metadata = new PlaylistMetadata(genUUID, genre.second, null);
+                    ret.add(new Playlist(metadata, getTracksOfGenreID(genre.first)));
                 }
             }
         }
@@ -221,7 +220,7 @@ public class MediaStoreContentProvider implements IContentProvider {
 
                 ImageData image = getTrackArtwork(trackUri);
 
-                PlayerMetadataMemory metadata = new PlayerMetadataMemory(
+                PlayerMetadata metadata = new PlayerMetadata(
                         genUUID,
                         mediaCursor.getString(indexTitle),
                         mediaCursor.getString(indexArtist),
@@ -239,9 +238,9 @@ public class MediaStoreContentProvider implements IContentProvider {
         return ret;
     }
 
-    private List<AudioPlaylist> getPlaylists(HashMap<String, List<PlayerData>> data) {
+    private List<Playlist> getPlaylists(HashMap<String, List<PlayerData>> data) {
         List<UUID> usedUUIDS = new ArrayList<>();
-        List<AudioPlaylist> ret = new ArrayList<>();
+        List<Playlist> ret = new ArrayList<>();
         for (Map.Entry<String, List<PlayerData>> entry : data.entrySet()) {
             String playlistTitle = entry.getKey();
             List<PlayerData> playlistTracks = entry.getValue();
@@ -254,20 +253,20 @@ public class MediaStoreContentProvider implements IContentProvider {
                 try {
                     ImageData trackArtwork = playlistTracks.get(0).getMetadata().getArtwork();
                     if (trackArtwork != null) {
-                        playlistArtwork = new ImageData(new ImageMetadataMemory(UUID.randomUUID()), trackArtwork.getDataSource());
+                        playlistArtwork = new ImageData(new ImageMetadata(UUID.randomUUID(), 0, 0), trackArtwork.getDataSource());
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                PlaylistMetadata metadata = new PlaylistMetadataMemory(playlistID, playlistTitle, playlistArtwork);
-                ret.add(new AudioPlaylist(metadata, playlistTracks));
+                PlaylistMetadata metadata = new PlaylistMetadata(playlistID, playlistTitle, playlistArtwork);
+                ret.add(new Playlist(metadata, playlistTracks));
             }
         }
         return ret;
     }
 
     private ImageData getTrackArtwork(Uri trackUri) {
-        ImageMetadataMemory imageMetadata = new ImageMetadataMemory(UUID.randomUUID());
+        ImageMetadata imageMetadata = new ImageMetadata(UUID.randomUUID(), 0, 0);
         AlbumCoverDataSource imageSource = new AlbumCoverDataSource(trackUri.toString());
         return new ImageData(imageMetadata, imageSource);
     }

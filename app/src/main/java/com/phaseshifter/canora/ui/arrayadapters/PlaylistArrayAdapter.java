@@ -14,14 +14,11 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.phaseshifter.canora.R;
 import com.phaseshifter.canora.data.media.image.ImageData;
-import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
+import com.phaseshifter.canora.data.media.playlist.Playlist;
 import com.phaseshifter.canora.ui.utils.glide.GlideApp;
 import com.phaseshifter.canora.ui.widgets.CustomImageView;
 import com.phaseshifter.canora.utils.Pair;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
-import com.bumptech.glide.request.RequestOptions;
-import com.bumptech.glide.request.target.Target;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -29,9 +26,9 @@ import java.util.List;
 
 import static com.phaseshifter.canora.utils.android.AttributeConversion.getColorForAtt;
 
-public class PlaylistArrayAdapter extends ArrayAdapter<AudioPlaylist> implements SectionIndexer {
+public class PlaylistArrayAdapter extends ArrayAdapter<Playlist> implements SectionIndexer {
     private final Context C;
-    private final List<AudioPlaylist> contentRef;
+    private final List<Playlist> contentRef;
     private final HashSet<Integer> selection;
 
     private final Drawable defaultArt;
@@ -61,7 +58,7 @@ public class PlaylistArrayAdapter extends ArrayAdapter<AudioPlaylist> implements
         }
     }
 
-    public PlaylistArrayAdapter(Context c, List<AudioPlaylist> cont) {
+    public PlaylistArrayAdapter(Context c, List<Playlist> cont) {
         super(c, 0, cont);
         contentRef = cont;
         C = c;
@@ -90,7 +87,7 @@ public class PlaylistArrayAdapter extends ArrayAdapter<AudioPlaylist> implements
         return selection;
     }
 
-    public List<AudioPlaylist> getContentRef() {
+    public List<Playlist> getContentRef() {
         return contentRef;
     }
 
@@ -118,9 +115,9 @@ public class PlaylistArrayAdapter extends ArrayAdapter<AudioPlaylist> implements
             viewHolder = (ViewHolder) convertView.getTag();
         }
 
-        AudioPlaylist playlist = contentRef.get(position);
+        Playlist playlist = contentRef.get(position);
         viewHolder.subTitle.setText(playlist.getMetadata().getTitle());
-        viewHolder.subCount.setText(C.getString(R.string.arrayadapter_audioplaylist_header0numberOfTracks, playlist.getData().size()));
+        viewHolder.subCount.setText(C.getString(R.string.arrayadapter_audioplaylist_header0numberOfTracks, playlist.getTracks().size()));
         if (isSelecting) {
             viewHolder.box.setVisibility(View.VISIBLE);
             viewHolder.box.setChecked(selection.contains(position));
@@ -163,7 +160,7 @@ public class PlaylistArrayAdapter extends ArrayAdapter<AudioPlaylist> implements
         sectionToPosition.clear();
         sectionChars.clear();
         if (contentRef.size() > 0) {
-            AudioPlaylist playlist = contentRef.get(0);
+            Playlist playlist = contentRef.get(0);
             String title = playlist.getMetadata().getTitle();
             String c = "";
             if (title != null)
@@ -173,7 +170,7 @@ public class PlaylistArrayAdapter extends ArrayAdapter<AudioPlaylist> implements
             sectionChars.add(c);
         }
         for (int i = 1; i < contentRef.size(); i++) {
-            AudioPlaylist playlist = contentRef.get(i);
+            Playlist playlist = contentRef.get(i);
             String c = ("" + playlist.getMetadata().getTitle().charAt(0)).toUpperCase();
             int sectionIndex = positionToSection.get(positionToSection.size() - 1).second;
             if (sectionChars.contains(c)) {

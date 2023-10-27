@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ImageDataSourceUri implements ImageDataSource, Serializable {
     private static final long serialVersionUID = 1;
 
-    private String uriStr;
+    public final String uriStr;
 
     private static ExecutorService pool = Executors.newSingleThreadExecutor();
 

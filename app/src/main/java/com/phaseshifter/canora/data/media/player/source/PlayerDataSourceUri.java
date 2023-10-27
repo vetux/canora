@@ -27,7 +27,7 @@ import java.util.Objects;
 public class PlayerDataSourceUri implements PlayerDataSource, Serializable {
     private static final long serialVersionUID = 1;
 
-    private String uriStr;
+    public String uriStr;
 
     public PlayerDataSourceUri(Uri uri) {
         this.uriStr = uri.toString();

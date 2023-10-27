@@ -2,14 +2,14 @@ package com.phaseshifter.canora.model.repo;
 
 import android.net.Uri;
 
+import com.phaseshifter.canora.data.media.image.ImageMetadata;
 import com.phaseshifter.canora.data.media.player.PlayerData;
-import com.phaseshifter.canora.data.media.player.metadata.PlayerMetadataMemory;
+import com.phaseshifter.canora.data.media.player.PlayerMetadata;
+import com.phaseshifter.canora.data.media.playlist.Playlist;
+import com.phaseshifter.canora.data.media.playlist.PlaylistMetadata;
 import com.phaseshifter.canora.plugin.soundcloud.AudioDataSourceSC;
 import com.phaseshifter.canora.data.media.image.ImageData;
-import com.phaseshifter.canora.data.media.image.metadata.ImageMetadataMemory;
 import com.phaseshifter.canora.data.media.image.source.ImageDataSourceUri;
-import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
-import com.phaseshifter.canora.data.media.playlist.metadata.PlaylistMetadataMemory;
 import com.phaseshifter.canora.plugin.soundcloud.api.data.SCGenre;
 import com.phaseshifter.canora.plugin.soundcloud.api.exceptions.SCConnectionException;
 import com.phaseshifter.canora.plugin.soundcloud.api.exceptions.SCParsingException;
@@ -39,7 +39,7 @@ public class SoundCloudAudioRepository {
     private final HashMap<SCGenre, Integer> genreIndexMapping = new HashMap<>();
     private final HashMap<Integer, SCGenre> indexGenreMapping = new HashMap<>();
 
-    private final ArrayList<AudioPlaylist> charts = new ArrayList<>();
+    private final ArrayList<Playlist> charts = new ArrayList<>();
 
     private String searchText;
     private int searchPage;
@@ -59,7 +59,7 @@ public class SoundCloudAudioRepository {
             indexGenreMapping.put(i, genre);
             genreIndexMapping.put(genre, i);
             i++;
-            charts.add(new AudioPlaylist(new PlaylistMetadataMemory(UUID.randomUUID(),
+            charts.add(new Playlist(new PlaylistMetadata(UUID.randomUUID(),
                     genre.parameterValue.substring("soundcloud:genres:".length()),
                     null), new ArrayList<>()));
         }
@@ -140,7 +140,7 @@ public class SoundCloudAudioRepository {
         SCGenre genre = indexGenreMapping.get(currentGenre);
         assert genre != null;
 
-        AudioPlaylist pl = charts.get(currentGenre);
+        Playlist pl = charts.get(currentGenre);
 
         int page = 0;
         if (chartPages.containsKey(genre)) {
@@ -167,7 +167,7 @@ public class SoundCloudAudioRepository {
             if (c == null) {
                 chartsLimitReached = true;
             } else {
-                pl.getData().addAll(getTracks(c));
+                pl.getTracks().addAll(getTracks(c));
 
                 if (chartPages.containsKey(genre)) {
                     page++;
@@ -180,7 +180,7 @@ public class SoundCloudAudioRepository {
 
     public int getChartsIndex(UUID uuid) {
         int i = 0;
-        for (AudioPlaylist pl : charts) {
+        for (Playlist pl : charts) {
             if (pl.getMetadata().getId().equals(uuid)) {
                 return i;
             }
@@ -193,11 +193,11 @@ public class SoundCloudAudioRepository {
         return searchResults;
     }
 
-    public List<AudioPlaylist> getChartsPlaylists() {
+    public List<Playlist> getChartsPlaylists() {
         return charts;
     }
 
-    public AudioPlaylist getChartsPlaylist(UUID uuid) {
+    public Playlist getChartsPlaylist(UUID uuid) {
         return charts.get(getChartsIndex(uuid));
     }
 
@@ -223,22 +223,22 @@ public class SoundCloudAudioRepository {
 
     private PlayerData getAudioData(SCV2Track track) {
         if (track.getPublisher_metadata() == null) {
-            return new PlayerData(new PlayerMetadataMemory(UUID.randomUUID(),
+            return new PlayerData(new PlayerMetadata(UUID.randomUUID(),
                     track.getTitle(),
                     track.getUser().getId(),
                     "<unknown>",
                     new String[0],
                     Long.parseLong(track.getDuration()),
-                    new ImageData(new ImageMetadataMemory(UUID.randomUUID()), new ImageDataSourceUri(Uri.parse(track.getArtwork_url())))),
+                    new ImageData(new ImageMetadata(UUID.randomUUID(), 0 ,0), new ImageDataSourceUri(Uri.parse(track.getArtwork_url())))),
                     new AudioDataSourceSC(track.getCodings()));
         } else {
-            return new PlayerData(new PlayerMetadataMemory(UUID.randomUUID(),
+            return new PlayerData(new PlayerMetadata(UUID.randomUUID(),
                     track.getTitle(),
                     track.getPublisher_metadata().getArtist(),
                     track.getPublisher_metadata().getAlbum_title(),
                     new String[0],
                     Long.parseLong(track.getDuration()),
-                    new ImageData(new ImageMetadataMemory(UUID.randomUUID()), new ImageDataSourceUri(Uri.parse(track.getArtwork_url())))),
+                    new ImageData(new ImageMetadata(UUID.randomUUID(), 0, 0), new ImageDataSourceUri(Uri.parse(track.getArtwork_url())))),
                     new AudioDataSourceSC(track.getCodings()));
         }
     }

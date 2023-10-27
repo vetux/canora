@@ -3,7 +3,7 @@ package com.phaseshifter.canora.model.formatting;
 import android.util.Log;
 
 import com.phaseshifter.canora.data.media.player.PlayerData;
-import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
+import com.phaseshifter.canora.data.media.playlist.Playlist;
 import com.phaseshifter.canora.ui.data.formatting.FilterOptions;
 
 import java.util.ArrayList;
@@ -83,14 +83,14 @@ public class ListFilter {
         }
     }
 
-    public static List<AudioPlaylist> filterAudioPlaylist(List<AudioPlaylist> content, FilterOptions def) {
+    public static List<Playlist> filterPlaylist(List<Playlist> content, FilterOptions def) {
         if (content == null)
             return null;
-        Log.v(LOG_TAG, "filterAudioPlaylist");
-        List<AudioPlaylist> ret = new ArrayList<>();
+        Log.v(LOG_TAG, "filterPlaylist");
+        List<Playlist> ret = new ArrayList<>();
         if (def.filterFor.length() > 0) {
             Log.v(LOG_TAG, "CONTENT SIZE BEFORE FILTER " + content.size());
-            for (AudioPlaylist f : content) {
+            for (Playlist f : content) {
                 if (f.getMetadata().getTitle() != null && f.getMetadata().getTitle().toLowerCase().contains(def.filterFor.toLowerCase())) {
                     ret.add(f);
                 }

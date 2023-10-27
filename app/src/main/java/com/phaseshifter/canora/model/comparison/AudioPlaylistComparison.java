@@ -1,7 +1,7 @@
 package com.phaseshifter.canora.model.comparison;
 
 import com.phaseshifter.canora.data.media.player.PlayerData;
-import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
+import com.phaseshifter.canora.data.media.playlist.Playlist;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,12 +18,12 @@ public class AudioPlaylistComparison {
      * @param pl1 pl1
      * @return true if the playlists are equal by the above specified rules.
      */
-    public static boolean isEqualPermissive(AudioPlaylist pl0, AudioPlaylist pl1) {
+    public static boolean isEqualPermissive(Playlist pl0, Playlist pl1) {
         if (!isEqual_exclude_UUID_Tracks(pl0, pl1))
             return false;
         List<PlayerData> unique = new ArrayList<>();
         List<Integer> occurences = new ArrayList<>();
-        for (PlayerData track : pl0.getData()) {
+        for (PlayerData track : pl0.getTracks()) {
             int index = unique.indexOf(track);
             if (index != -1) {
                 if (occurences.size() <= index)
@@ -38,7 +38,7 @@ public class AudioPlaylistComparison {
         }
         List<PlayerData> uniquePl = new ArrayList<>();
         List<Integer> occurencesPl = new ArrayList<>();
-        for (PlayerData track : pl1.getData()) {
+        for (PlayerData track : pl1.getTracks()) {
             int index = uniquePl.indexOf(track);
             if (index != -1) {
                 if (occurencesPl.size() <= index)
@@ -73,7 +73,7 @@ public class AudioPlaylistComparison {
         return matchFlag;
     }
 
-    public static boolean isEqual_exclude_UUID_Tracks(AudioPlaylist pl0, AudioPlaylist pl1) {
+    public static boolean isEqual_exclude_UUID_Tracks(Playlist pl0, Playlist pl1) {
         if (pl0 == pl1) return true;
         if (pl0 == null || pl1 == null)
             return false;

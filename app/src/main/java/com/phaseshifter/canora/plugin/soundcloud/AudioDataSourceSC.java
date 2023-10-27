@@ -43,10 +43,14 @@ public class AudioDataSourceSC implements PlayerDataSource, Serializable {
     public String getUrls() {
         StringBuilder ret = new StringBuilder();
         for (SCV2Track.MediaTranscoding coding : codings) {
-            ret.append(coding.getUrl());
+            ret.append(coding.url);
             ret.append(", ");
         }
         return ret.toString();
+    }
+
+    public List<SCV2Track.MediaTranscoding> getCodings(){
+        return codings;
     }
 
     private SCV2Client getClient() {

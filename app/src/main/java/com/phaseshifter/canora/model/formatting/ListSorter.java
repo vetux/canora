@@ -2,7 +2,7 @@ package com.phaseshifter.canora.model.formatting;
 
 import android.util.Log;
 import com.phaseshifter.canora.data.media.player.PlayerData;
-import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
+import com.phaseshifter.canora.data.media.playlist.Playlist;
 import com.phaseshifter.canora.ui.data.formatting.SortingOptions;
 
 import java.util.ArrayList;
@@ -81,11 +81,11 @@ public class ListSorter {
         return ret;
     }
 
-    public static List<AudioPlaylist> sortAudioPlaylist(List<AudioPlaylist> input, SortingOptions def) {
+    public static List<Playlist> sortPlaylist(List<Playlist> input, SortingOptions def) {
         if (input == null)
             return null;
-        Log.v(LOG_TAG, "sortAudioPlaylist");
-        List<AudioPlaylist> ret = new ArrayList<>(input);
+        Log.v(LOG_TAG, "sortPlaylist");
+        List<Playlist> ret = new ArrayList<>(input);
         switch (def.sortby) {
             default:
                 switch (def.sortdir) {
@@ -124,16 +124,16 @@ public class ListSorter {
         return ret.toString();
     }
 
-    private static class PLTitleComparatorABC implements Comparator<AudioPlaylist> {
+    private static class PLTitleComparatorABC implements Comparator<Playlist> {
         @Override
-        public int compare(AudioPlaylist o1, AudioPlaylist o2) {
+        public int compare(Playlist o1, Playlist o2) {
             return o1.getMetadata().getTitle().toLowerCase().compareTo(o2.getMetadata().getTitle().toLowerCase());
         }
     }
 
-    private static class PLTitleComparator012 implements Comparator<AudioPlaylist> {
+    private static class PLTitleComparator012 implements Comparator<Playlist> {
         @Override
-        public int compare(AudioPlaylist o1, AudioPlaylist o2) {
+        public int compare(Playlist o1, Playlist o2) {
             return extractIntegerFromString(o1.getMetadata().getTitle()) - extractIntegerFromString(o2.getMetadata().getTitle());
         }
     }

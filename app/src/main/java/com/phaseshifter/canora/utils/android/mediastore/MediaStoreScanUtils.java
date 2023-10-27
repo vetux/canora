@@ -4,10 +4,11 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.net.Uri;
 import android.provider.MediaStore;
-import com.phaseshifter.canora.data.media.player.metadata.PlayerMetadataMemory;
+
+import com.phaseshifter.canora.data.media.player.PlayerMetadata;
 
 public class MediaStoreScanUtils {
-    public static void updateAudioUri(ContentResolver contentResolver, Uri file, PlayerMetadataMemory data) {
+    public static void updateAudioUri(ContentResolver contentResolver, Uri file, PlayerMetadata data) {
         ContentValues values = new ContentValues();
         values.put(MediaStore.Audio.AudioColumns.TITLE, data.getTitle());
         values.put(MediaStore.Audio.AudioColumns.ARTIST, data.getArtist());

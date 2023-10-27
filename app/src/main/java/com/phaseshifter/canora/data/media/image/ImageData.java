@@ -1,16 +1,18 @@
 package com.phaseshifter.canora.data.media.image;
 
-import com.phaseshifter.canora.data.media.MediaData;
-import com.phaseshifter.canora.data.media.image.metadata.ImageMetadata;
 import com.phaseshifter.canora.data.media.image.source.ImageDataSource;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public final class ImageData extends MediaData {
+public final class ImageData implements Serializable {
     private static final long serialVersionUID = 1;
 
-    private final ImageMetadata metadata;
-    private final ImageDataSource dataSource;
+    private ImageMetadata metadata;
+    private ImageDataSource dataSource;
+
+    public ImageData() {
+    }
 
     public ImageData(ImageMetadata metadata, ImageDataSource dataSource) {
         if (metadata == null
@@ -24,8 +26,16 @@ public final class ImageData extends MediaData {
         return metadata;
     }
 
+    public void setMetadata(ImageMetadata metadata) {
+        this.metadata = metadata;
+    }
+
     public ImageDataSource getDataSource() {
         return dataSource;
+    }
+
+    public void setDataSource(ImageDataSource dataSource) {
+        this.dataSource = dataSource;
     }
 
     @Override

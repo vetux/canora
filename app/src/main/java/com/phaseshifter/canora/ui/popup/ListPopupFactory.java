@@ -10,7 +10,7 @@ import android.widget.AdapterView;
 import android.widget.ListPopupWindow;
 
 import com.phaseshifter.canora.R;
-import com.phaseshifter.canora.data.media.playlist.AudioPlaylist;
+import com.phaseshifter.canora.data.media.playlist.Playlist;
 import com.phaseshifter.canora.ui.menu.ContextMenu;
 import com.phaseshifter.canora.ui.menu.OptionsMenu;
 import com.phaseshifter.canora.utils.RunnableArg;
@@ -106,14 +106,14 @@ public class ListPopupFactory {
                                                        int offsetX,
                                                        int offsetY,
                                                        int marginDP,
-                                                       List<AudioPlaylist> playlists,
+                                                       List<Playlist> playlists,
                                                        Runnable onAddToNew,
-                                                       RunnableArg<AudioPlaylist> onAddToPlaylist) {
+                                                       RunnableArg<Playlist> onAddToPlaylist) {
         List<ListPopupItem> popupItems = new ArrayList<>();
 
         popupItems.add(new ListPopupItem(context.getString(R.string.main_popup_addto_item0newPlaylist)));
 
-        for (AudioPlaylist playlist : playlists) {
+        for (Playlist playlist : playlists) {
             popupItems.add(new ListPopupItem(playlist.getMetadata().getTitle()));
         }
 

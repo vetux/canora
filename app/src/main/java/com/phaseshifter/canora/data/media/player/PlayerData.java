@@ -1,16 +1,18 @@
 package com.phaseshifter.canora.data.media.player;
 
-import com.phaseshifter.canora.data.media.MediaData;
-import com.phaseshifter.canora.data.media.player.metadata.PlayerMetadata;
 import com.phaseshifter.canora.data.media.player.source.PlayerDataSource;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public final class PlayerData extends MediaData {
+public final class PlayerData implements Serializable {
     private static final long serialVersionUID = 1;
 
-    private final PlayerMetadata metadata;
-    private final PlayerDataSource dataSource;
+    private PlayerMetadata metadata;
+    private PlayerDataSource dataSource;
+
+    public PlayerData() {
+    }
 
     public PlayerData(PlayerMetadata metadata, PlayerDataSource dataSource) {
         if (metadata == null
@@ -28,8 +30,16 @@ public final class PlayerData extends MediaData {
         return metadata;
     }
 
+    public void setMetadata(PlayerMetadata metadata) {
+        this.metadata = metadata;
+    }
+
     public PlayerDataSource getDataSource() {
         return dataSource;
+    }
+
+    public void setDataSource(PlayerDataSource dataSource) {
+        this.dataSource = dataSource;
     }
 
     @Override
