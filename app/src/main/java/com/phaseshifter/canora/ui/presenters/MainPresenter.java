@@ -271,6 +271,9 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
         updateNotFoundText();
 
         updateHighlightedIndex();
+
+        contentViewModel.contentTracksSelection.set(getSelectedTrackIndices());
+        contentViewModel.contentPlaylistsSelection.set(getSelectedPlaylistIndices());
     }
 
     private void updateNotFoundText() {
@@ -994,6 +997,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                 view.setTransportControlMax(false);
                 appViewModel.isSearching.set(false);
                 appViewModel.isSelecting.set(false);
+                selection.clear();
                 uiContentSelector = new ContentSelector(MainPage.TRACKS, null);
                 setViewModelContentSelector(uiContentSelector);
                 updateVisibleContent();
@@ -1003,6 +1007,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                 view.setTransportControlMax(false);
                 appViewModel.isSearching.set(false);
                 appViewModel.isSelecting.set(false);
+                selection.clear();
                 uiContentSelector = new ContentSelector(MainPage.PLAYLISTS, null);
                 setViewModelContentSelector(uiContentSelector);
                 updateVisibleContent();
@@ -1012,6 +1017,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                 view.setTransportControlMax(false);
                 appViewModel.isSearching.set(false);
                 appViewModel.isSelecting.set(false);
+                selection.clear();
                 uiContentSelector = new ContentSelector(MainPage.ALBUMS, null);
                 setViewModelContentSelector(uiContentSelector);
                 updateVisibleContent();
@@ -1021,6 +1027,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                 view.setTransportControlMax(false);
                 appViewModel.isSearching.set(false);
                 appViewModel.isSelecting.set(false);
+                selection.clear();
                 uiContentSelector = new ContentSelector(MainPage.ARTISTS, null);
                 setViewModelContentSelector(uiContentSelector);
                 updateVisibleContent();
@@ -1029,6 +1036,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                 view.setNavigationMax(false);
                 view.setTransportControlMax(false);
                 appViewModel.isSelecting.set(false);
+                selection.clear();
                 uiContentSelector = new ContentSelector(MainPage.GENRES, null);
                 setViewModelContentSelector(uiContentSelector);
                 updateVisibleContent();
@@ -1038,6 +1046,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                 view.setTransportControlMax(false);
                 appViewModel.isSearching.set(true);
                 appViewModel.isSelecting.set(false);
+                selection.clear();
                 uiContentSelector = new ContentSelector(MainPage.SOUNDCLOUD_SEARCH, null);
                 setViewModelContentSelector(uiContentSelector);
                 updateVisibleContent();
@@ -1047,6 +1056,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                 view.setTransportControlMax(false);
                 appViewModel.isSearching.set(false);
                 appViewModel.isSelecting.set(false);
+                selection.clear();
                 uiContentSelector = new ContentSelector(MainPage.SOUNDCLOUD_CHARTS, null);
                 setViewModelContentSelector(uiContentSelector);
                 updateVisibleContent();
@@ -1056,6 +1066,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                 view.setTransportControlMax(false);
                 appViewModel.isSearching.set(true);
                 appViewModel.isSelecting.set(false);
+                selection.clear();
                 uiContentSelector = new ContentSelector(MainPage.YOUTUBE_SEARCH_VIDEOS, null);
                 setViewModelContentSelector(uiContentSelector);
                 updateVisibleContent();
@@ -1065,6 +1076,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                 view.setTransportControlMax(false);
                 appViewModel.isSearching.set(false);
                 appViewModel.isSelecting.set(false);
+                selection.clear();
                 uiContentSelector = new ContentSelector(MainPage.YOUTUBE_DL, null);
                 setViewModelContentSelector(uiContentSelector);
                 updateVisibleContent();

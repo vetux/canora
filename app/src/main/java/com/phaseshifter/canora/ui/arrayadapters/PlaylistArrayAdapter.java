@@ -69,7 +69,6 @@ public class PlaylistArrayAdapter extends ArrayAdapter<Playlist> implements Sect
 
     public void setSelectionMode(Boolean enable) {
         isSelecting = enable;
-        selection.clear();
     }
 
     public boolean getSelectionMode() {

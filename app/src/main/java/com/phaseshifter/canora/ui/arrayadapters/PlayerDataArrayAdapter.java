@@ -71,7 +71,6 @@ public class PlayerDataArrayAdapter extends ArrayAdapter<PlayerData> implements 
 
     public void setSelectionMode(Boolean enable) {
         isSelecting = enable;
-        selection.clear();
     }
 
     public boolean getSelectionMode() {
