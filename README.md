@@ -28,11 +28,6 @@ A lightweight fast and customizable music playback and streaming experience for 
 - Create Playlists with tracks from any source
 - Explore SoundCloud and YouTube content
 
-## Playlist Notes
-Currently playlists are serialized using java serialization which causes the serialized data 
-to often be incompatible with the app when updating. This will be replaced in the future with a stable custom file format.
-Until then please don't become too attached to created playlists as they may disappear with future app updates.
-
 ## Credits
 - yausername - [youtubedl-android](https://github.com/yausername/youtubedl-android)
 - Google - [ExoPlayer](https://github.com/google/ExoPlayer)
