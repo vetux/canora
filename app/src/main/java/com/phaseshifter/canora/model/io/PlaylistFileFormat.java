@@ -216,7 +216,7 @@ public class PlaylistFileFormat {
         ObjectNode ret = mapper.createObjectNode();
         ret.put("version", VERSION);
         ret.set("playlists", arrayNode);
-        return mapper.writeValueAsString(arrayNode);
+        return mapper.writeValueAsString(ret);
     }
 
     public static List<Playlist> deserialize(String txt) throws JsonProcessingException {
