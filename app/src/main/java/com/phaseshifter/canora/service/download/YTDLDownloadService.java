@@ -145,7 +145,7 @@ public class YTDLDownloadService extends Service implements DownloadService {
             request.addOption("--audio-format", "mp3");
             request.addOption("--output", tempFile);
             try {
-                ytdl.execute(request, (progress, etaInSeconds, line) -> {
+                ytdl.execute(request, null, (progress, etaInSeconds, line) -> {
                     if (progress > download.progress)
                         download.progress = progress;
                     download.etaInSeconds = etaInSeconds;
@@ -153,6 +153,7 @@ public class YTDLDownloadService extends Service implements DownloadService {
                     new Handler(getMainLooper()).post(() -> {
                         updateNotification(id, download);
                     });
+                    return null;
                 });
                 new Handler(getMainLooper()).post(() -> {
                     updateNotification(id, download);
@@ -247,7 +248,7 @@ public class YTDLDownloadService extends Service implements DownloadService {
             request.addOption("--no-playlist");
 
             try {
-                ytdl.execute(request, (progress, etaInSeconds, line) -> {
+                ytdl.execute(request, null, (progress, etaInSeconds, line) -> {
                     if (progress > download.progress)
                         download.progress = progress;
                     download.etaInSeconds = etaInSeconds;
@@ -255,6 +256,7 @@ public class YTDLDownloadService extends Service implements DownloadService {
                     new Handler(getMainLooper()).post(() -> {
                         updateNotification(id, download);
                     });
+                    return null;
                 });
                 new Handler(getMainLooper()).post(() -> {
                     updateNotification(id, download);
