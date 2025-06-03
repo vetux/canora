@@ -143,7 +143,7 @@ public class MainApplication extends Application {
             try {
                 YoutubeDL.getInstance().init(this);
                 FFmpeg.getInstance().init(this);
-                YoutubeDL.getInstance().updateYoutubeDL(this);
+                YoutubeDL.getInstance().updateYoutubeDL(this, new YoutubeDL.UpdateChannel("https://api.github.com/repos/yt-dlp/yt-dlp/releases/latest"));
                 Log.v(LOG_TAG, "YoutubeDL Version:" + YoutubeDL.getInstance().version(this));
             } catch (Exception e) {
                 Log.e(LOG_TAG, e.getMessage());
