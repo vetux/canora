@@ -141,40 +141,32 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.toolbar_button_nav:
-                onBackPressed();
-                break;
-            case R.id.buttonSettingsReset:
-                presenter.resetSettings();
-                break;
-            case R.id.logExportBtn:
-                presenter.onExportCrashLogs();
-                break;
+        int id = v.getId();
+        if (id == R.id.toolbar_button_nav) {
+            onBackPressed();
+        } else if (id == R.id.buttonSettingsReset) {
+            presenter.resetSettings();
+        } else if (id == R.id.logExportBtn) {
+            presenter.onExportCrashLogs();
         }
     }
 
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        switch (buttonView.getId()) {
-            case R.id.devModeSwitch:
-                presenter.onDeveloperModeChange(isChecked);
-                break;
-            case R.id.mediaSessionSwitch:
-                presenter.onEnableMediaSessionCallbacksChange(isChecked);
-                break;
-            case R.id.animationsCheckbox:
-                presenter.onUseAnimationsChange(isChecked);
-                break;
+        int id = buttonView.getId();
+        if (id == R.id.devModeSwitch) {
+            presenter.onDeveloperModeChange(isChecked);
+        } else if (id == R.id.mediaSessionSwitch) {
+            presenter.onEnableMediaSessionCallbacksChange(isChecked);
+        } else if (id == R.id.animationsCheckbox) {
+            presenter.onUseAnimationsChange(isChecked);
         }
     }
 
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-        switch (seekBar.getId()) {
-            case R.id.volBar:
-                presenter.onVolumeChange((float) progress / seekBar.getMax());
-                break;
+        if (seekBar.getId() == R.id.volBar) {
+            presenter.onVolumeChange((float) progress / seekBar.getMax());
         }
     }
 
@@ -188,11 +180,9 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        switch (parent.getId()) {
-            case R.id.themeGridViewSelection:
-                ThemeArrayAdapter adapter = (ThemeArrayAdapter) parent.getAdapter();
-                presenter.onThemeSelected(adapter.getContentRef().get(position));
-                break;
+        if (parent.getId() == R.id.themeGridViewSelection) {
+            ThemeArrayAdapter adapter = (ThemeArrayAdapter) parent.getAdapter();
+            presenter.onThemeSelected(adapter.getContentRef().get(position));
         }
     }
 
@@ -452,221 +442,212 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
     //STOP View Interface
 
     public void setupTab(ViewGroup tab) {
-        switch (tab.getId()) {
-            case R.id.settings_tab_audio_equalizer:
-                ViewGroup container = tab.findViewById(R.id.container_equalizer);
-                Spinner spinner = tab.findViewById(R.id.equalizerSpinner);
-                ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.spinner_item_preset, equalizerPresets.get());
-                spinner.setAdapter(adapter);
-                equalizerPresets.addObserver((obs, v) -> {
-                    ArrayAdapter<String> adapt = new ArrayAdapter<>(this, R.layout.spinner_item_preset, v);
-                    spinner.setAdapter(adapt);
-                });
-                spinner.setSelection(equalizerPreset.get());
-                equalizerPreset.addObserver((obs, v) -> {
-                    spinner.setSelection(v);
-                });
-                spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                    @Override
-                    public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-                        presenter.onEqualizerPresetChange(position);
-                    }
-
-                    @Override
-                    public void onNothingSelected(AdapterView<?> parentView) {
-                        // ¯\_(ツ)_/¯
-                    }
-
-                });
-                break;
-            case R.id.settings_tab_audio_general:
-                SeekBar seekBar = tab.findViewById(R.id.volBar);
-                seekBar.setOnSeekBarChangeListener(this);
-                seekBar.setProgress((int) (seekBar.getMax() * volume.get()));
-                Observer<Float> volumeObserver = new Observer<Float>() {
-                    @Override
-                    public void update(Observable<Float> o, Float arg) {
-                        seekBar.setProgress((int) (seekBar.getMax() * (Float) arg));
-                    }
-                };
-                volume.addObserver(volumeObserver);
-                break;
-            case R.id.settings_tab_display_theme:
-                GridView themeGridView = tab.findViewById(R.id.themeGridViewSelection);
-                themeGridView.setOnItemClickListener(this);
-                List<AppTheme> allThemes = new ArrayList<>(availableThemes.get());
-                ThemeArrayAdapter themeArrayAdapter = new ThemeArrayAdapter(this, allThemes);
-                themeArrayAdapter.setHighlightedItem(allThemes.indexOf(activeTheme.get()));
-                themeGridView.setAdapter(themeArrayAdapter);
-                Observer<List<AppTheme>> availableThemesObserver = new Observer<List<AppTheme>>() {
-                    @Override
-                    public void update(Observable<List<AppTheme>> o, List<AppTheme> arg) {
-                        themeArrayAdapter.getContentRef().clear();
-                        themeArrayAdapter.getContentRef().addAll((List<AppTheme>) arg);
-                        themeArrayAdapter.notifyDataSetChanged();
-                    }
-                };
-                Observer<AppTheme> activeThemeObserver = new Observer<AppTheme>() {
-                    @Override
-                    public void update(Observable<AppTheme> o, AppTheme arg) {
-                        themeArrayAdapter.setHighlightedItem(themeArrayAdapter.getContentRef().indexOf(arg));
-                    }
-                };
-                availableThemes.addObserver(availableThemesObserver);
-                activeTheme.addObserver(activeThemeObserver);
-                break;
-            case R.id.settings_tab_display_misc:
-                CheckBox animationsCheckbox = findViewById(R.id.animationsCheckbox);
-                animationsCheckbox.setChecked(useAnimations.get());
-                animationsCheckbox.setOnCheckedChangeListener(this);
-                Observer<Boolean> animobs = new Observer<Boolean>() {
-                    @Override
-                    public void update(Observable<Boolean> o, Boolean arg) {
-                        animationsCheckbox.setChecked(arg);
-                    }
-                };
-                useAnimations.addObserver(animobs);
-                break;
-            case R.id.settings_tab_system_general:
-                Button resetButton = findViewById(R.id.buttonSettingsReset);
-                resetButton.setOnClickListener(this);
-
-                Switch devModeSwitch = findViewById(R.id.devModeSwitch);
-                devModeSwitch.setChecked(devMode.get());
-                devModeSwitch.setOnCheckedChangeListener(this);
-
-                Switch mediaSessionSwitch = findViewById(R.id.mediaSessionSwitch);
-                mediaSessionSwitch.setChecked(enableMediaSessionCallback.get());
-                mediaSessionSwitch.setOnCheckedChangeListener(this);
-
-                Observer<Boolean> devObs = new Observer<Boolean>() {
-                    @Override
-                    public void update(Observable<Boolean> o, Boolean arg) {
-                        devModeSwitch.setChecked(arg);
-                    }
-                };
-                devMode.addObserver(devObs);
-
-                Observer<Boolean> mediaSessionObs = new Observer<Boolean>() {
-                    @Override
-                    public void update(Observable<Boolean> observable, Boolean value) {
-                        mediaSessionSwitch.setChecked(value);
-                    }
-                };
-                enableMediaSessionCallback.addObserver(mediaSessionObs);
-
-                break;
-            case R.id.settings_tab_system_log:
-                TextView logText = findViewById(R.id.logText);
-                int playlists = playlistData.get().first;
-                long playlistBytes = playlistData.get().second;
-                StringBuilder text = new StringBuilder(getString(R.string.settings_text0playlistLog, playlists, ((float) playlistBytes / 1000 / 1000)) + "\n\n");
-                List<Pair<String, Object>> settings = modifiedSettings.get();
-                if (settings != null) {
-                    for (Pair<String, Object> setting : settings) {
-                        text.append(setting.first).append(" = ").append(setting.second).append("\n");
-                    }
+        int id = tab.getId();
+        if (id == R.id.settings_tab_audio_equalizer) {
+            ViewGroup container = tab.findViewById(R.id.container_equalizer);
+            Spinner spinner = tab.findViewById(R.id.equalizerSpinner);
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.spinner_item_preset, equalizerPresets.get());
+            spinner.setAdapter(adapter);
+            equalizerPresets.addObserver((obs, v) -> {
+                ArrayAdapter<String> adapt = new ArrayAdapter<>(this, R.layout.spinner_item_preset, v);
+                spinner.setAdapter(adapt);
+            });
+            spinner.setSelection(equalizerPreset.get());
+            equalizerPreset.addObserver((obs, v) -> {
+                spinner.setSelection(v);
+            });
+            spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                    presenter.onEqualizerPresetChange(position);
                 }
-                logText.setText(text.toString());
-                Observer<Pair<Integer, Long>> playlistObserver = new Observer<Pair<Integer, Long>>() {
-                    @Override
-                    public void update(Observable<Pair<Integer, Long>> o, Pair<Integer, Long> arg) {
-                        int playlists = arg.first;
-                        long playlistBytes = arg.second;
-                        StringBuilder text = new StringBuilder(getString(R.string.settings_text0playlistLog, playlists, ((float) playlistBytes / 1000 / 1000)) + "\n\n");
-                        List<Pair<String, Object>> settings = modifiedSettings.get();
-                        if (settings != null) {
-                            for (Pair<String, Object> setting : settings) {
-                                text.append(setting.first).append(" = ").append(setting.second).append("\n");
-                            }
-                        }
-                        logText.setText(text.toString());
-                    }
-                };
-                Observer<List<Pair<String, Object>>> settingsObserver = new Observer<List<Pair<String, Object>>>() {
-                    @Override
-                    public void update(Observable<List<Pair<String, Object>>> o, List<Pair<String, Object>> arg) {
-                        int playlists = playlistData.get().first;
-                        long playlistBytes = playlistData.get().second;
-                        StringBuilder text = new StringBuilder(getString(R.string.settings_text0playlistLog, playlists, ((float) playlistBytes / 1000 / 1000)) + "\n\n");
-                        for (Pair<String, Object> setting : arg) {
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parentView) {
+                    // ¯\_(ツ)_/¯
+                }
+
+            });
+        } else if (id == R.id.settings_tab_audio_general) {
+            SeekBar seekBar = tab.findViewById(R.id.volBar);
+            seekBar.setOnSeekBarChangeListener(this);
+            seekBar.setProgress((int) (seekBar.getMax() * volume.get()));
+            Observer<Float> volumeObserver = new Observer<Float>() {
+                @Override
+                public void update(Observable<Float> o, Float arg) {
+                    seekBar.setProgress((int) (seekBar.getMax() * (Float) arg));
+                }
+            };
+            volume.addObserver(volumeObserver);
+        } else if (id == R.id.settings_tab_display_theme) {
+            GridView themeGridView = tab.findViewById(R.id.themeGridViewSelection);
+            themeGridView.setOnItemClickListener(this);
+            List<AppTheme> allThemes = new ArrayList<>(availableThemes.get());
+            ThemeArrayAdapter themeArrayAdapter = new ThemeArrayAdapter(this, allThemes);
+            themeArrayAdapter.setHighlightedItem(allThemes.indexOf(activeTheme.get()));
+            themeGridView.setAdapter(themeArrayAdapter);
+            Observer<List<AppTheme>> availableThemesObserver = new Observer<List<AppTheme>>() {
+                @Override
+                public void update(Observable<List<AppTheme>> o, List<AppTheme> arg) {
+                    themeArrayAdapter.getContentRef().clear();
+                    themeArrayAdapter.getContentRef().addAll((List<AppTheme>) arg);
+                    themeArrayAdapter.notifyDataSetChanged();
+                }
+            };
+            Observer<AppTheme> activeThemeObserver = new Observer<AppTheme>() {
+                @Override
+                public void update(Observable<AppTheme> o, AppTheme arg) {
+                    themeArrayAdapter.setHighlightedItem(themeArrayAdapter.getContentRef().indexOf(arg));
+                }
+            };
+            availableThemes.addObserver(availableThemesObserver);
+            activeTheme.addObserver(activeThemeObserver);
+        } else if (id == R.id.settings_tab_display_misc) {
+            CheckBox animationsCheckbox = findViewById(R.id.animationsCheckbox);
+            animationsCheckbox.setChecked(useAnimations.get());
+            animationsCheckbox.setOnCheckedChangeListener(this);
+            Observer<Boolean> animobs = new Observer<Boolean>() {
+                @Override
+                public void update(Observable<Boolean> o, Boolean arg) {
+                    animationsCheckbox.setChecked(arg);
+                }
+            };
+            useAnimations.addObserver(animobs);
+        } else if (id == R.id.settings_tab_system_general) {
+            Button resetButton = findViewById(R.id.buttonSettingsReset);
+            resetButton.setOnClickListener(this);
+
+            Switch devModeSwitch = findViewById(R.id.devModeSwitch);
+            devModeSwitch.setChecked(devMode.get());
+            devModeSwitch.setOnCheckedChangeListener(this);
+
+            Switch mediaSessionSwitch = findViewById(R.id.mediaSessionSwitch);
+            mediaSessionSwitch.setChecked(enableMediaSessionCallback.get());
+            mediaSessionSwitch.setOnCheckedChangeListener(this);
+
+            Observer<Boolean> devObs = new Observer<Boolean>() {
+                @Override
+                public void update(Observable<Boolean> o, Boolean arg) {
+                    devModeSwitch.setChecked(arg);
+                }
+            };
+            devMode.addObserver(devObs);
+
+            Observer<Boolean> mediaSessionObs = new Observer<Boolean>() {
+                @Override
+                public void update(Observable<Boolean> observable, Boolean value) {
+                    mediaSessionSwitch.setChecked(value);
+                }
+            };
+            enableMediaSessionCallback.addObserver(mediaSessionObs);
+        } else if (id == R.id.settings_tab_system_log) {
+            TextView logText = findViewById(R.id.logText);
+            int playlists = playlistData.get().first;
+            long playlistBytes = playlistData.get().second;
+            StringBuilder text = new StringBuilder(getString(R.string.settings_text0playlistLog, playlists, ((float) playlistBytes / 1000 / 1000)) + "\n\n");
+            List<Pair<String, Object>> settings = modifiedSettings.get();
+            if (settings != null) {
+                for (Pair<String, Object> setting : settings) {
+                    text.append(setting.first).append(" = ").append(setting.second).append("\n");
+                }
+            }
+            logText.setText(text.toString());
+            Observer<Pair<Integer, Long>> playlistObserver = new Observer<Pair<Integer, Long>>() {
+                @Override
+                public void update(Observable<Pair<Integer, Long>> o, Pair<Integer, Long> arg) {
+                    int playlists = arg.first;
+                    long playlistBytes = arg.second;
+                    StringBuilder text = new StringBuilder(getString(R.string.settings_text0playlistLog, playlists, ((float) playlistBytes / 1000 / 1000)) + "\n\n");
+                    List<Pair<String, Object>> settings = modifiedSettings.get();
+                    if (settings != null) {
+                        for (Pair<String, Object> setting : settings) {
                             text.append(setting.first).append(" = ").append(setting.second).append("\n");
                         }
-                        logText.setText(text.toString());
                     }
-                };
-                playlistData.addObserver(playlistObserver);
-                modifiedSettings.addObserver(settingsObserver);
-
-                TextView logCrashText = findViewById(R.id.logText_crashlogs);
-
-                logCrashText.setText(getString(R.string.settings_crashlog_count, crashLogCount.get()));
-
-                crashLogCount.addObserver(new Observer<Integer>() {
-                    @Override
-                    public void update(Observable<Integer> observable, Integer value) {
-                        logCrashText.setText(getString(R.string.settings_crashlog_count, value));
+                    logText.setText(text.toString());
+                }
+            };
+            Observer<List<Pair<String, Object>>> settingsObserver = new Observer<List<Pair<String, Object>>>() {
+                @Override
+                public void update(Observable<List<Pair<String, Object>>> o, List<Pair<String, Object>> arg) {
+                    int playlists = playlistData.get().first;
+                    long playlistBytes = playlistData.get().second;
+                    StringBuilder text = new StringBuilder(getString(R.string.settings_text0playlistLog, playlists, ((float) playlistBytes / 1000 / 1000)) + "\n\n");
+                    for (Pair<String, Object> setting : arg) {
+                        text.append(setting.first).append(" = ").append(setting.second).append("\n");
                     }
-                });
+                    logText.setText(text.toString());
+                }
+            };
+            playlistData.addObserver(playlistObserver);
+            modifiedSettings.addObserver(settingsObserver);
 
-                Button logExportBtn = findViewById(R.id.logExportBtn);
-                logExportBtn.setOnClickListener(this);
-                break;
-            case R.id.settings_tab_system_soundcloud:
-                EditText scText = findViewById(R.id.edittext_soundcloudid);
-                scText.addTextChangedListener(new TextWatcher() {
-                    @Override
-                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            TextView logCrashText = findViewById(R.id.logText_crashlogs);
 
-                    }
+            logCrashText.setText(getString(R.string.settings_crashlog_count, crashLogCount.get()));
 
-                    @Override
-                    public void onTextChanged(CharSequence s, int start, int before, int count) {
+            crashLogCount.addObserver(new Observer<Integer>() {
+                @Override
+                public void update(Observable<Integer> observable, Integer value) {
+                    logCrashText.setText(getString(R.string.settings_crashlog_count, value));
+                }
+            });
 
-                    }
+            Button logExportBtn = findViewById(R.id.logExportBtn);
+            logExportBtn.setOnClickListener(this);
+        } else if (id == R.id.settings_tab_system_soundcloud) {
+            EditText scText = findViewById(R.id.edittext_soundcloudid);
+            scText.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
-                    @Override
-                    public void afterTextChanged(Editable s) {
-                        presenter.onSoundCloudClientIDChange(s.toString());
-                    }
-                });
-                scText.setText(scClientID.get());
-                scClientID.addObserver(new Observer<String>() {
-                    @Override
-                    public void update(Observable<String> observable, String value) {
-                        scText.setText(value);
-                    }
-                });
-                break;
-            case R.id.settings_tab_system_youtubeapi:
-                EditText ytText = findViewById(R.id.edittext_youtubekey);
-                ytText.addTextChangedListener(new TextWatcher() {
-                    @Override
-                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                }
 
-                    }
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
 
-                    @Override
-                    public void onTextChanged(CharSequence s, int start, int before, int count) {
+                }
 
-                    }
+                @Override
+                public void afterTextChanged(Editable s) {
+                    presenter.onSoundCloudClientIDChange(s.toString());
+                }
+            });
+            scText.setText(scClientID.get());
+            scClientID.addObserver(new Observer<String>() {
+                @Override
+                public void update(Observable<String> observable, String value) {
+                    scText.setText(value);
+                }
+            });
+        } else if (id == R.id.settings_tab_system_youtubeapi) {
+            EditText ytText = findViewById(R.id.edittext_youtubekey);
+            ytText.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
-                    @Override
-                    public void afterTextChanged(Editable s) {
-                        presenter.onYoutubeApiKeyChange(s.toString());
-                    }
-                });
-                ytText.setText(ytApiKey.get());
-                ytApiKey.addObserver(new Observer<String>() {
-                    @Override
-                    public void update(Observable<String> observable, String value) {
-                        ytText.setText(value);
-                    }
-                });
-            case R.id.settings_tab_system_mediastore:
-                break;
-            default:
-                throw new RuntimeException("Unrecognized ID: " + tab.getId() + " " + getResources().getResourceName(tab.getId()));
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+                    presenter.onYoutubeApiKeyChange(s.toString());
+                }
+            });
+            ytText.setText(ytApiKey.get());
+            ytApiKey.addObserver(new Observer<String>() {
+                @Override
+                public void update(Observable<String> observable, String value) {
+                    ytText.setText(value);
+                }
+            });
+        } else if (id == R.id.settings_tab_system_mediastore) {
+        } else {
+            throw new RuntimeException("Unrecognized ID: " + tab.getId() + " " + getResources().getResourceName(tab.getId()));
         }
     }
 
