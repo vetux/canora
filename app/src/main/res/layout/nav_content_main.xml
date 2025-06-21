@@ -259,7 +259,7 @@
         android:background="@drawable/nav_button_background">
 
         <ImageView
-            android:id="@+id/imageView28"
+            android:id="@+id/imageView28125215125"
             android:layout_width="@dimen/nav_content_item_height"
             android:layout_height="@dimen/nav_content_item_height"
             android:layout_marginStart="20dp"
@@ -272,7 +272,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/textView29"
+            android:id="@+id/textView216229"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_centerHorizontal="true"
@@ -286,7 +286,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/imageView28"
+            app:layout_constraintStart_toEndOf="@+id/imageView28125215125"
             app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -297,7 +297,7 @@
         android:background="@drawable/nav_button_background">
 
         <ImageView
-            android:id="@+id/imageView28"
+            android:id="@+id/imageView21251258"
             android:layout_width="@dimen/nav_content_item_height"
             android:layout_height="@dimen/nav_content_item_height"
             android:layout_marginStart="20dp"
@@ -310,7 +310,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/textView29"
+            android:id="@+id/textView29216261"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_centerHorizontal="true"
@@ -324,7 +324,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/imageView28"
+            app:layout_constraintStart_toEndOf="@+id/imageView21251258"
             app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -346,7 +346,7 @@
             app:layout_constraintStart_toStartOf="parent" />
 
         <TextView
-            android:id="@+id/textView17"
+            android:id="@+id/textView1261261627"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center_vertical"
@@ -362,7 +362,7 @@
         android:background="@drawable/nav_button_background">
 
         <ImageView
-            android:id="@+id/imageView16"
+            android:id="@+id/imageView11266122616"
             android:layout_width="@dimen/nav_content_item_height"
             android:layout_height="@dimen/nav_content_item_height"
             android:layout_marginStart="20dp"
@@ -375,7 +375,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/textView18"
+            android:id="@+id/textView18621612"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_centerHorizontal="true"
@@ -389,7 +389,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/imageView16"
+            app:layout_constraintStart_toEndOf="@+id/imageView11266122616"
             app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -438,7 +438,7 @@
         android:layout_marginBottom="5dp">
 
         <ImageView
-            android:id="@+id/imageView26"
+            android:id="@+id/imageView22616216126"
             android:layout_width="60dp"
             android:layout_height="45dp"
             android:layout_marginEnd="10dp"
@@ -447,7 +447,7 @@
             app:layout_constraintStart_toStartOf="parent" />
 
         <TextView
-            android:id="@+id/textView17"
+            android:id="@+id/textView16216126127"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center_vertical"
@@ -463,7 +463,7 @@
         android:background="@drawable/nav_button_background">
 
         <ImageView
-            android:id="@+id/imageView28"
+            android:id="@+id/imageView22616126218"
             android:layout_width="@dimen/nav_content_item_height"
             android:layout_height="@dimen/nav_content_item_height"
             android:layout_marginStart="20dp"
@@ -476,7 +476,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/textView29"
+            android:id="@+id/textView2261612169"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_centerHorizontal="true"
@@ -490,7 +490,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/imageView28"
+            app:layout_constraintStart_toEndOf="@+id/imageView22616126218"
             app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
