@@ -631,7 +631,7 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
         if (track != null) {
             final String title;
             String artist = track.getMetadata().getArtist();
-            if (track.getDataSource().isStream() && currentMetadata != null && currentMetadata.title != null) {
+            if (track.getDataSource().isStream() && currentMetadata != null && currentMetadata.title != null && currentMetadata.title.length() > 0) {
                 title = String.valueOf(currentMetadata.title);
             } else {
                 title = track.getMetadata().getTitle();
@@ -791,11 +791,11 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
     private LoadTask currentTask = null;
 
     private void createPlayer(PlayerData next) {
+        currentMetadata = null;
+
         exoPlayer.stop();
         exoPlayer.seekTo(0);
         exoPlayer.setPlayWhenReady(state.get().isPlaying());
-
-        currentMetadata = null;
 
         LoadTask task = new LoadTask();
 

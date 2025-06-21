@@ -35,7 +35,8 @@ public class PlayerStateViewModel {
         } else {
             if (state.getCurrentTrack().getDataSource().isStream()
                     && state.getCurrentMetadata() != null
-                    && state.getCurrentMetadata().title != null) {
+                    && state.getCurrentMetadata().title != null
+                    && state.getCurrentMetadata().title.length() > 0) {
                 trackTitle.setIfNotEqual(String.valueOf(state.getCurrentMetadata().title));
             } else {
                 trackTitle.setIfNotEqual(state.getCurrentTrack().getMetadata().getTitle());

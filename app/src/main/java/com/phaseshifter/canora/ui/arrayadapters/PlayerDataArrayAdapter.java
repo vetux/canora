@@ -1,5 +1,8 @@
 package com.phaseshifter.canora.ui.arrayadapters;
 
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
@@ -121,7 +124,12 @@ public class PlayerDataArrayAdapter extends ArrayAdapter<PlayerData> implements 
         //Set values
         viewHolder.title.setText(track.getMetadata().getTitle());
         viewHolder.artist.setText(track.getMetadata().getArtist());
-        viewHolder.length.setText(Miscellaneous.digitize(track.getMetadata().getDuration()));
+        if (track.getMetadata().getDuration() > 0) {
+            viewHolder.length.setVisibility(VISIBLE);
+            viewHolder.length.setText(Miscellaneous.digitize(track.getMetadata().getDuration()));
+        } else {
+            viewHolder.length.setVisibility(GONE);
+        }
 
         ImageData imageData = track.getMetadata().getArtwork();
         GlideApp.with(context).clear(viewHolder.cover);
@@ -139,15 +147,15 @@ public class PlayerDataArrayAdapter extends ArrayAdapter<PlayerData> implements 
         }
 
         if (isSelecting) {
-            viewHolder.box.setVisibility(View.VISIBLE);
+            viewHolder.box.setVisibility(VISIBLE);
             viewHolder.box.setChecked(selection.contains(position));
         } else {
-            viewHolder.box.setVisibility(View.GONE);
+            viewHolder.box.setVisibility(GONE);
         }
 
         if (playingIndex != null && playingIndex.equals(position)) {
             //Highlight
-            viewHolder.highlight.setVisibility(View.VISIBLE);
+            viewHolder.highlight.setVisibility(VISIBLE);
             viewHolder.highlight.setColorFilter(AttributeConversion.getColorForAtt(R.attr.colorSecondary, context)); //API 21 COMPAT
         } else {
             viewHolder.highlight.setVisibility(View.INVISIBLE);
