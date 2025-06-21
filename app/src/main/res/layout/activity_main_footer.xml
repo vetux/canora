@@ -148,7 +148,7 @@
             android:id="@+id/control_button_play"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:background="@drawable/ripple_imagebutton_square"
+            android:background="@android:color/transparent"
             android:padding="2dp"
             android:scaleType="fitXY"
             android:src="@drawable/play_arrow"
