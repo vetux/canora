@@ -7,6 +7,7 @@ import android.graphics.ImageDecoder;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
+import android.webkit.URLUtil;
 
 import com.phaseshifter.canora.utils.RunnableArg;
 
@@ -46,8 +47,7 @@ public class ImageDataSourceUri implements ImageDataSource, Serializable {
         if (uri == null) {
             onError.run(new NullPointerException("Null URI for url " + uriStr));
         } else {
-            if (uri.getScheme().equals("https")
-                    || uri.getScheme().equals("http")) {
+            if (URLUtil.isNetworkUrl(uri.toString())) {
                 pool.submit(() -> {
                     Bitmap bitmap = null;
                     try {

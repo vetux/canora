@@ -28,11 +28,11 @@ import com.phaseshifter.canora.service.player.state.PlayerState;
 import com.phaseshifter.canora.service.player.wrapper.AutoBindMediaService;
 import com.phaseshifter.canora.ui.contracts.MainContract;
 import com.phaseshifter.canora.ui.data.DownloadInfo;
-import com.phaseshifter.canora.ui.data.MainPage;
+import com.phaseshifter.canora.ui.selectors.MainPage;
 import com.phaseshifter.canora.ui.data.constants.NavigationItem;
 import com.phaseshifter.canora.ui.data.formatting.FilterOptions;
 import com.phaseshifter.canora.ui.data.formatting.SortingOptions;
-import com.phaseshifter.canora.ui.data.misc.ContentSelector;
+import com.phaseshifter.canora.ui.selectors.ContentSelector;
 import com.phaseshifter.canora.ui.menu.ContextMenu;
 import com.phaseshifter.canora.ui.menu.OptionsMenu;
 import com.phaseshifter.canora.ui.selectors.MainSelector;
@@ -67,6 +67,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
     private final ThemeRepository themeRepository;
     private final SoundCloudAudioRepository scAudioDataRepo;
     private final YoutubeSearchRepository ytRepo;
+    private final WebRadioRepository radioRepository;
 
     private final AutoBindMediaService mediaService;
     private final AutoBindDownloadService downloadService;
@@ -119,6 +120,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
     private String contentSearch = "";
     private String scSearch = "";
     private String ytSearch = "";
+    private String radioSearch = "";
 
     private boolean resumeSeek = false;
 
@@ -131,6 +133,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                          ThemeRepository themeRepository,
                          SoundCloudAudioRepository scAudioDataRepo,
                          YoutubeSearchRepository ytRepo,
+                         WebRadioRepository radioRepository,
                          AudioMetadataEditor metadataEditor,
                          Executor mainThread,
                          AppViewModel appViewModel,
@@ -147,6 +150,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
         this.themeRepository = themeRepository;
         this.scAudioDataRepo = scAudioDataRepo;
         this.ytRepo = ytRepo;
+        this.radioRepository = radioRepository;
         this.metadataEditor = metadataEditor;
         this.mainThread = mainThread;
         this.appViewModel = appViewModel;
@@ -251,6 +255,12 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                 case YOUTUBE_SEARCH_VIDEOS:
                     sortedTracks = ytRepo.results.get();
                     break;
+                case RADIO_WEB_CHARTS:
+                    sortedTracks = radioRepository.getCharts();
+                    break;
+                case RADIO_WEB_SEARCH:
+                    sortedTracks = radioRepository.getResults();
+                    break;
             }
             switch (uiContentSelector.getPage()) {
                 case SOUNDCLOUD_SEARCH:
@@ -278,7 +288,9 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
 
     private void updateNotFoundText() {
         if (uiContentSelector.getPage() == MainPage.YOUTUBE_SEARCH_VIDEOS
-                || uiContentSelector.getPage() == MainPage.SOUNDCLOUD_SEARCH) {
+                || uiContentSelector.getPage() == MainPage.SOUNDCLOUD_SEARCH
+                || uiContentSelector.getPage() == MainPage.RADIO_WEB_SEARCH
+                || uiContentSelector.getPage() == MainPage.RADIO_WEB_CHARTS) {
             if (contentViewModel.visibleTracks.get().isEmpty()) {
                 if (appViewModel.isContentLoading.get()) {
                     appViewModel.notFoundText.set(context.getString(R.string.main_notfound0loading));
@@ -413,6 +425,10 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                 case YOUTUBE_DL:
                     contentViewModel.contentName.set(view.getStringResource(R.string.main_toolbar_title0youtube_dl));
                     break;
+                case RADIO_WEB_CHARTS:
+                case RADIO_WEB_SEARCH:
+                    contentViewModel.contentName.set(view.getStringResource(R.string.main_toolbar_title0radio));
+                    break;
             }
         }
         String savedSearch = appViewModel.searchText.get();
@@ -426,6 +442,8 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
             case YOUTUBE_SEARCH_VIDEOS:
                 appViewModel.searchText.set(ytSearch);
                 break;
+            case RADIO_WEB_SEARCH:
+                appViewModel.searchText.set(radioSearch);
         }
         switch (appViewModel.contentSelector.get().getPage()) {
             default:
@@ -436,6 +454,9 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                 break;
             case YOUTUBE_SEARCH_VIDEOS:
                 ytSearch = savedSearch;
+                break;
+            case RADIO_WEB_SEARCH:
+                radioSearch = savedSearch;
                 break;
         }
         appViewModel.contentSelector.set(selector);
@@ -671,6 +692,9 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
             case YOUTUBE_SEARCH_VIDEOS:
                 ytSearch = text;
                 break;
+            case RADIO_WEB_SEARCH:
+                radioSearch = text;
+                break;
             default:
                 contentSearch = text;
                 break;
@@ -682,6 +706,7 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
         switch (uiContentSelector.getPage()) {
             case SOUNDCLOUD_SEARCH:
             case YOUTUBE_SEARCH_VIDEOS:
+            case RADIO_WEB_SEARCH:
                 break;
             default:
                 updateVisibleContent();
@@ -709,6 +734,15 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                         decrementTasks();
                         view.showWarning(context.getString(R.string.main_connection_failed, e.getMessage()));
                     });
+            updateNotFoundText();
+        } else if (uiContentSelector.getPage() == MainPage.RADIO_WEB_SEARCH) {
+            String text = appViewModel.searchText.get();
+            incrementTasks();
+            presExec.submit(() -> {
+                radioRepository.updateSearch(text);
+                decrementTasks();
+                mainThread.execute(this::updateVisibleContent);
+            });
             updateNotFoundText();
         }
     }
@@ -1038,6 +1072,32 @@ public class MainPresenter implements MainContract.Presenter, Observer<PlayerSta
                 appViewModel.isSelecting.set(false);
                 selection.clear();
                 uiContentSelector = new ContentSelector(MainPage.GENRES, null);
+                setViewModelContentSelector(uiContentSelector);
+                updateVisibleContent();
+                break;
+            case RADIO_CHARTS:
+                view.setNavigationMax(false);
+                view.setTransportControlMax(false);
+                appViewModel.isSearching.set(false);
+                appViewModel.isSelecting.set(false);
+                selection.clear();
+                uiContentSelector = new ContentSelector(MainPage.RADIO_WEB_CHARTS, null);
+                setViewModelContentSelector(uiContentSelector);
+                incrementTasks();
+                presExec.submit(() -> {
+                    radioRepository.updateCharts();
+                    decrementTasks();
+                    mainThread.execute(this::updateVisibleContent);
+                });
+                updateVisibleContent();
+                break;
+            case RADIO_SEARCH:
+                view.setNavigationMax(false);
+                view.setTransportControlMax(false);
+                appViewModel.isSearching.set(true);
+                appViewModel.isSelecting.set(false);
+                selection.clear();
+                uiContentSelector = new ContentSelector(MainPage.RADIO_WEB_SEARCH, null);
                 setViewModelContentSelector(uiContentSelector);
                 updateVisibleContent();
                 break;

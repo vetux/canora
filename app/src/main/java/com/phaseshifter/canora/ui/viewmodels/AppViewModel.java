@@ -8,9 +8,8 @@ import com.phaseshifter.canora.R;
 import com.phaseshifter.canora.model.repo.DeviceAudioRepository;
 import com.phaseshifter.canora.model.repo.SoundCloudAudioRepository;
 import com.phaseshifter.canora.model.repo.UserPlaylistRepository;
-import com.phaseshifter.canora.ui.data.MainPage;
-import com.phaseshifter.canora.ui.data.constants.NavigationItem;
-import com.phaseshifter.canora.ui.data.misc.ContentSelector;
+import com.phaseshifter.canora.ui.selectors.MainPage;
+import com.phaseshifter.canora.ui.selectors.ContentSelector;
 import com.phaseshifter.canora.utils.Observable;
 
 public class AppViewModel {
@@ -58,6 +57,9 @@ public class AppViewModel {
                 return context.getString(R.string.main_toolbar_title0albums);
             case GENRES:
                 return context.getString(R.string.main_toolbar_title0genres);
+            case RADIO_WEB_SEARCH:
+            case RADIO_WEB_CHARTS:
+                return context.getString(R.string.main_toolbar_title0radio);
             case SOUNDCLOUD_SEARCH:
             case SOUNDCLOUD_CHARTS:
                 return context.getString(R.string.main_toolbar_title0sc);

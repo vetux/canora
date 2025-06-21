@@ -1,4 +1,4 @@
-package com.phaseshifter.canora.ui.data;
+package com.phaseshifter.canora.ui.selectors;
 
 public enum MainPage {
     TRACKS,
@@ -9,5 +9,7 @@ public enum MainPage {
     SOUNDCLOUD_SEARCH,
     SOUNDCLOUD_CHARTS,
     YOUTUBE_SEARCH_VIDEOS,
-    YOUTUBE_DL
+    YOUTUBE_DL,
+    RADIO_WEB_CHARTS,
+    RADIO_WEB_SEARCH,
 }

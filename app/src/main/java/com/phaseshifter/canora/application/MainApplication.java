@@ -11,6 +11,7 @@ import com.phaseshifter.canora.model.provider.MediaStoreContentProvider;
 import com.phaseshifter.canora.model.repo.DeviceAudioRepository;
 import com.phaseshifter.canora.model.repo.UserPlaylistRepository;
 import com.phaseshifter.canora.model.repo.SoundCloudAudioRepository;
+import com.phaseshifter.canora.model.repo.WebRadioRepository;
 import com.phaseshifter.canora.model.repo.YoutubeSearchRepository;
 import com.phaseshifter.canora.plugin.youtubeapi.YoutubeApiClient;
 import com.phaseshifter.canora.utils.android.ContentUriFactory;
@@ -30,6 +31,7 @@ public class MainApplication extends Application {
     private UserPlaylistRepository audioPlaylistRepository;
     private SoundCloudAudioRepository scAudioDataRepo;
     private YoutubeSearchRepository ytRepo;
+    private WebRadioRepository radioRepository;
 
     //Store objects passed between activities here as intent bundles cant hold more than 1MB
     private final HashMap<String, Object> bundle = new HashMap<>();
@@ -138,6 +140,7 @@ public class MainApplication extends Application {
         audioPlaylistRepository = new UserPlaylistRepository(new File(getPlaylistPath()));
         scAudioDataRepo = new SoundCloudAudioRepository();
         ytRepo = new YoutubeSearchRepository(new YoutubeApiClient());
+        radioRepository = new WebRadioRepository();
 
         ytDlLoaderThread = new Thread(() -> {
             try {
@@ -178,6 +181,10 @@ public class MainApplication extends Application {
 
     public YoutubeSearchRepository getYtRepo() {
         return ytRepo;
+    }
+
+    public WebRadioRepository getWebRadioRepository() {
+        return radioRepository;
     }
 
     public String getPlaylistPath() {

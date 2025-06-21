@@ -6,9 +6,7 @@ import com.phaseshifter.canora.model.formatting.ListSorter;
 import com.phaseshifter.canora.model.repo.DeviceAudioRepository;
 import com.phaseshifter.canora.model.repo.SoundCloudAudioRepository;
 import com.phaseshifter.canora.model.repo.UserPlaylistRepository;
-import com.phaseshifter.canora.ui.data.MainPage;
 import com.phaseshifter.canora.ui.data.formatting.SortingOptions;
-import com.phaseshifter.canora.ui.data.misc.ContentSelector;
 
 import java.util.List;
 

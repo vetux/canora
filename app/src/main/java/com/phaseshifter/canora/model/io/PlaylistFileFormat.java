@@ -1,6 +1,7 @@
 package com.phaseshifter.canora.model.io;
 
 import android.net.Uri;
+import android.provider.MediaStore;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -23,6 +24,7 @@ import com.phaseshifter.canora.data.media.playlist.Playlist;
 import com.phaseshifter.canora.data.media.playlist.PlaylistMetadata;
 import com.phaseshifter.canora.plugin.soundcloud.AudioDataSourceSC;
 import com.phaseshifter.canora.plugin.soundcloud.api_v2.data.SCV2Track;
+import com.phaseshifter.canora.plugin.webradio.AudioDataSourceWebRadio;
 import com.phaseshifter.canora.plugin.ytdl.AudioDataSourceYtdl;
 
 import java.io.File;
@@ -128,6 +130,11 @@ public class PlaylistFileFormat {
             AudioDataSourceYtdl fTrack = (AudioDataSourceYtdl) playerSource;
             playerSourceNode.put("url", fTrack.getUrl());
             ret.put("type", 3);
+        } else if (playerSource instanceof AudioDataSourceWebRadio){
+            AudioDataSourceWebRadio fTrack = (AudioDataSourceWebRadio) playerSource;
+            playerSourceNode.put("url", fTrack.getURL());
+            playerSourceNode.put("hls", fTrack.getHLS());
+            ret.put("type", 4);
         }
 
         ret.set("source", playerSourceNode);
@@ -160,6 +167,8 @@ public class PlaylistFileFormat {
             case 3:
                 source = new AudioDataSourceYtdl(sourceNode.get("url").asText());
                 break;
+            case 4:
+                source = new AudioDataSourceWebRadio(sourceNode.get("url").asText(), sourceNode.get("hls").asBoolean());
         }
 
         return new PlayerData(metadata, source);

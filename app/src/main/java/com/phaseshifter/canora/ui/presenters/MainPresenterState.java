@@ -1,7 +1,7 @@
 package com.phaseshifter.canora.ui.presenters;
 
 import com.phaseshifter.canora.ui.data.DownloadInfo;
-import com.phaseshifter.canora.ui.data.misc.ContentSelector;
+import com.phaseshifter.canora.ui.selectors.ContentSelector;
 
 import java.io.Serializable;
 

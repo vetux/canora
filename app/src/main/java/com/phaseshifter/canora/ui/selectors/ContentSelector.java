@@ -1,6 +1,4 @@
-package com.phaseshifter.canora.ui.data.misc;
-
-import com.phaseshifter.canora.ui.data.MainPage;
+package com.phaseshifter.canora.ui.selectors;
 
 import java.io.Serializable;
 import java.util.UUID;
@@ -35,6 +33,8 @@ public class ContentSelector implements Serializable {
                 && page != MainPage.SOUNDCLOUD_SEARCH
                 && page != MainPage.YOUTUBE_SEARCH_VIDEOS
                 && page != MainPage.YOUTUBE_DL
+                && page != MainPage.RADIO_WEB_SEARCH
+                && page != MainPage.RADIO_WEB_CHARTS
                 && uuid == null;
     }
 

@@ -23,7 +23,8 @@
         android:label="@string/special0app_name"
         android:roundIcon="@mipmap/ic_launcher_adaptive"
         android:supportsRtl="true"
-        android:theme="@style/Default" >
+        android:theme="@style/Default"
+        android:usesCleartextTraffic="true">
         <activity
             android:name=".ui.activities.MainActivity"
             android:exported="true"

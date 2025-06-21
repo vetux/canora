@@ -27,6 +27,7 @@
     <string name="main_toolbar_title0sc">SoundCloud</string>
     <string name="main_toolbar_title0youtube">YouTube</string>
     <string name="main_toolbar_title0youtube_dl">YouTubeDL</string>
+    <string name="main_toolbar_title0radio">Web Radio</string>
 
     <string name="main_toolbar_title0subplaylist">Playlists / %1$s</string>
     <string name="main_toolbar_title0subalbum">Albums / %1$s</string>
@@ -129,6 +130,10 @@
     <string name="main_navigation_item_title0youtube_search_videos">Search Videos</string>
     <string name="main_navigation_item_title0youtube_search_playlists">Search Playlists</string>
     <string name="main_navigation_item_title0youtube_dl">YouTubeDL</string>
+
+    <string name="main_navigation_header0radio">Web Radio</string>
+    <string name="main_navigation_item_title0radio_charts">Most Popular</string>
+    <string name="main_navigation_item_title0radio_search">Search</string>
 
     <string name="main_navigation_item_title0search">Search</string>
     <string name="main_navigation_item_title0charts">Charts</string>

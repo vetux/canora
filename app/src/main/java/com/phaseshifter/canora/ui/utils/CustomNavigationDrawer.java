@@ -4,7 +4,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.phaseshifter.canora.R;
-import com.phaseshifter.canora.ui.data.MainPage;
+import com.phaseshifter.canora.ui.selectors.MainPage;
 
 public class CustomNavigationDrawer {
     private final ViewGroup root;
@@ -56,6 +56,12 @@ public class CustomNavigationDrawer {
                 break;
             case YOUTUBE_SEARCH_VIDEOS:
                 root.findViewById(R.id.nav_button_youtube_search).setSelected(true);
+                break;
+            case RADIO_WEB_SEARCH:
+                root.findViewById(R.id.nav_button_radio_search).setSelected(true);
+                break;
+            case RADIO_WEB_CHARTS:
+                root.findViewById(R.id.nav_button_radio_charts).setSelected(true);
                 break;
         }
     }
