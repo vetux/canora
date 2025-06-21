@@ -69,8 +69,8 @@ public class WebRadioRepository {
         PlayerMetadata metadata = new PlayerMetadata();
         metadata.id = UUID.randomUUID();
         metadata.title = s.getName();
-        metadata.artist = "";
-        metadata.album = "";
+        metadata.artist = s.getName();
+        metadata.album = s.getName();
         metadata.genres = new String[0];
         if (!s.getFavicon().isEmpty()) {
             metadata.artwork = new ImageData(new ImageMetadata(UUID.randomUUID()), new ImageDataSourceUri(Uri.parse(s.getFavicon())));

@@ -16,6 +16,14 @@ public interface PlayerDataSource {
     }
 
     /**
+     *
+     * @return Wheter or not this source represents a continuous online stream (For example online radio or live stream)
+     */
+    default boolean isStream() {
+        return false;
+    }
+
+    /**
      * Creates a new MediaSource object based on the underlying data source.
      * The passed context could be abstracted into the AudioDataSource implementations,
      * but for this the AudioDataSource objects would have to be constructed with a persistent context (Separate "MediaBrowserService" or application),

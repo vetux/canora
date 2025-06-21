@@ -109,6 +109,8 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
     private Equalizer equalizer;
     private int equalizerPreset = -1;
 
+    private com.google.android.exoplayer2.MediaMetadata currentMetadata;
+
     //Binder
     private final IBinder mBinder = new LocalBinder();
 
@@ -202,6 +204,13 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
                 equalizer = new Equalizer(100, audioSessionId);
                 equalizer.setEnabled(equalizerEnabled);
                 equalizer.usePreset((short) equalizerPreset);
+            }
+
+            @Override
+            public void onMediaMetadataChanged(com.google.android.exoplayer2.MediaMetadata mediaMetadata) {
+                currentMetadata = mediaMetadata;
+                onStateModified(state.get().isPlaying());
+                Player.Listener.super.onMediaMetadataChanged(mediaMetadata);
             }
         });
         exoPlayer.setVolume(volume);
@@ -500,7 +509,8 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
                 currentTask != null && !currentTask.completed,
                 equalizerPreset,
                 isPlayingVideo(),
-                format == null ? 0 : format.width, format == null ? 0 : format.height);
+                format == null ? 0 : format.width, format == null ? 0 : format.height,
+                currentMetadata);
 
         runOnMainThread(() -> {
             boolean changed = !Objects.equals(this.state.get(), newState);
@@ -562,9 +572,15 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
                     .setShowActionsInCompactView(0, 1, 2));
 
             if (track != null) {
-                notificationBuilder
-                        .setContentTitle(track.getMetadata().getTitle())
-                        .setContentText(track.getMetadata().getArtist());
+                if (track.getDataSource().isStream() && currentMetadata != null && currentMetadata.title != null) {
+                    notificationBuilder
+                            .setContentTitle(currentMetadata.title)
+                            .setContentText(track.getMetadata().getArtist());
+                } else {
+                    notificationBuilder
+                            .setContentTitle(track.getMetadata().getTitle())
+                            .setContentText(track.getMetadata().getArtist());
+                }
             } else {
                 notificationBuilder
                         .setContentTitle("")
@@ -613,8 +629,13 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
         PlayerData track = state.getCurrentTrack();
 
         if (track != null) {
-            final String title = track.getMetadata().getTitle();
-            final String artist = track.getMetadata().getArtist();
+            final String title;
+            String artist = track.getMetadata().getArtist();
+            if (track.getDataSource().isStream() && currentMetadata != null && currentMetadata.title != null) {
+                title = String.valueOf(currentMetadata.title);
+            } else {
+                title = track.getMetadata().getTitle();
+            }
             final long duration = track.getMetadata().getDuration();
             if (track.getMetadata().getArtwork() != null) {
                 track.getMetadata().getArtwork().getDataSource().getBitmap(this, (bitmap) -> {
@@ -773,6 +794,8 @@ public class ExoPlayerService extends Service implements MediaPlayerService, Aud
         exoPlayer.stop();
         exoPlayer.seekTo(0);
         exoPlayer.setPlayWhenReady(state.get().isPlaying());
+
+        currentMetadata = null;
 
         LoadTask task = new LoadTask();
 

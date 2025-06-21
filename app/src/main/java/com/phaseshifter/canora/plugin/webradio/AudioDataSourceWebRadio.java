@@ -56,6 +56,11 @@ public class AudioDataSourceWebRadio implements PlayerDataSource, Serializable {
     }
 
     @Override
+    public boolean isStream() {
+        return true;
+    }
+
+    @Override
     public void getExoPlayerSources(Context context, RunnableArg<List<MediaSource>> onReady, RunnableArg<Exception> onException) {
         List<MediaSource> ret = new ArrayList<>();
         DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(context, "clank");

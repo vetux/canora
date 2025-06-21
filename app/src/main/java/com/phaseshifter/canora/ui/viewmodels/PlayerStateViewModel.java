@@ -33,7 +33,13 @@ public class PlayerStateViewModel {
             trackArtwork.setIfNotEqual(null);
             trackLength.setIfNotEqual(0L);
         } else {
-            trackTitle.setIfNotEqual(state.getCurrentTrack().getMetadata().getTitle());
+            if (state.getCurrentTrack().getDataSource().isStream()
+                    && state.getCurrentMetadata() != null
+                    && state.getCurrentMetadata().title != null) {
+                trackTitle.setIfNotEqual(String.valueOf(state.getCurrentMetadata().title));
+            } else {
+                trackTitle.setIfNotEqual(state.getCurrentTrack().getMetadata().getTitle());
+            }
             trackArtist.setIfNotEqual(state.getCurrentTrack().getMetadata().getArtist());
             if (state.getCurrentTrack().getMetadata().getArtwork() == null
                     && playingPlaylist != null) {

@@ -1,5 +1,6 @@
 package com.phaseshifter.canora.service.player.state;
 
+import com.google.android.exoplayer2.MediaMetadata;
 import com.phaseshifter.canora.data.media.player.PlayerData;
 import com.phaseshifter.canora.service.player.playback.PlaybackController;
 import com.google.android.exoplayer2.ExoPlayer;
@@ -19,8 +20,9 @@ public class PlayerState implements Serializable {
     private boolean video;
     private int width;
     private int height;
+    private com.google.android.exoplayer2.MediaMetadata currentMetadata;
 
-    public PlayerState(PlayerData currentTrack, PlaybackState playbackState, boolean isPlaying, boolean isRepeating, boolean isShuffling, long playerPosition, float volume, int equalizerPreset, boolean isVideo, int width, int height) {
+    public PlayerState(PlayerData currentTrack, PlaybackState playbackState, boolean isPlaying, boolean isRepeating, boolean isShuffling, long playerPosition, float volume, int equalizerPreset, boolean isVideo, int width, int height, com.google.android.exoplayer2.MediaMetadata currentMetadata) {
         this.currentTrack = currentTrack;
         this.playbackState = playbackState;
         this.playing = isPlaying;
@@ -32,9 +34,10 @@ public class PlayerState implements Serializable {
         this.video = isVideo;
         this.width = width;
         this.height = height;
+        this.currentMetadata = currentMetadata;
     }
 
-    public PlayerState(PlaybackController playbackController, ExoPlayer player, boolean isPlaying, float volume, boolean loadingTrack, int equalizerPreset, boolean isVideo, int width, int height) {
+    public PlayerState(PlaybackController playbackController, ExoPlayer player, boolean isPlaying, float volume, boolean loadingTrack, int equalizerPreset, boolean isVideo, int width, int height, com.google.android.exoplayer2.MediaMetadata currentMetadata) {
         this(
                 playbackController.getCurrentTrack(),
                 loadingTrack ? PlaybackState.STATE_BUFFERING : PlaybackState.fromInt(player.getPlaybackState()),
@@ -46,16 +49,17 @@ public class PlayerState implements Serializable {
                 equalizerPreset,
                 isVideo,
                 width,
-                height
+                height,
+                currentMetadata
         );
     }
 
     public PlayerState(PlayerState copy) {
-        this(copy.currentTrack, copy.playbackState, copy.playing, copy.repeating, copy.shuffling, copy.playerPosition, copy.volume, copy.equalizerPreset, copy.video, copy.width, copy.height);
+        this(copy.currentTrack, copy.playbackState, copy.playing, copy.repeating, copy.shuffling, copy.playerPosition, copy.volume, copy.equalizerPreset, copy.video, copy.width, copy.height, copy.currentMetadata);
     }
 
     public PlayerState() {
-        this(null, null, false, false, false, 0, 0, 0, false, 0, 0);
+        this(null, null, false, false, false, 0, 0, 0, false, 0, 0, null);
     }
 
     public PlayerData getCurrentTrack() {
@@ -146,6 +150,14 @@ public class PlayerState implements Serializable {
         height = value;
     }
 
+    public MediaMetadata getCurrentMetadata() {
+        return currentMetadata;
+    }
+
+    public void setCurrentMetadata(MediaMetadata currentMetadata) {
+        this.currentMetadata = currentMetadata;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -158,12 +170,13 @@ public class PlayerState implements Serializable {
                 Float.compare(that.volume, volume) == 0 &&
                 Objects.equals(currentTrack, that.currentTrack) &&
                 playbackState == that.playbackState
-                && equalizerPreset == that.equalizerPreset;
+                && equalizerPreset == that.equalizerPreset
+                && currentMetadata == that.currentMetadata;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(currentTrack, playbackState, playing, repeating, shuffling, playerPosition, volume, equalizerPreset);
+        return Objects.hash(currentTrack, playbackState, playing, repeating, shuffling, playerPosition, volume, equalizerPreset, currentMetadata);
     }
 
     @Override
